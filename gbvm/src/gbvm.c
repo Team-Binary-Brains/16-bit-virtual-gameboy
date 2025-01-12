@@ -1,6 +1,6 @@
 #include "gbvm.h"
 
-const char* error_as_cstr(Error error)
+const char* errorAsCstr(Error error)
 {
     switch (error) {
     case ERR_OK:
@@ -21,166 +21,140 @@ const char* error_as_cstr(Error error)
         assert(0 && "error_as_cstr : Unreachable");
     }
 }
-const char* inst_type_as_cstr(Inst_Type type)
+
+const char* OpcodeAsCstr(Opcode type)
 {
     switch (type) {
-    case INST_PSH:
-        return "INST_PSH";
-    case INST_NOP:
-        return "INST_NOP";
-    case INST_POP:
-        return "INST_POP";
-    case INST_ADD:
-        return "INST_ADD";
-    case INST_SUB:
-        return "INST_SUB";
-    case INST_MUL:
-        return "INST_MUL";
-    case INST_DIV:
-        return "INST_DIV";
-    case INST_JMP:
-        return "INST_JMP";
-    case INST_JNZ:
-        return "INST_JNZ";
-    case INST_EQL:
-        return "INST_EQL";
-    case INST_HLT:
-        return "INST_HLT";
-    case INST_DUP:
-        return "INST_DUP";
+    case PSH:
+        return "PSH";
+    case NOP:
+        return "NOP";
+    case POP:
+        return "POP";
+    case ADD:
+        return "ADD";
+    case SUB:
+        return "SUB";
+    case MUL:
+        return "MUL";
+    case DIV:
+        return "DIV";
+    case JMP:
+        return "JMP";
+    case JNZ:
+        return "JNZ";
+    case EQL:
+        return "EQL";
+    case HLT:
+        return "HLT";
+    case DUP:
+        return "DUP";
     default:
-        assert(0 && "inst_type_as_cstr : Unreachable");
+        assert(0 && "Opcode_as_cstr : Unreachable");
     }
 }
-Error vm_execute_inst(Vm* vm)
+
+Error executeInst(Vm* vm)
 {
-    if (vm->IP < 0 || vm->IP >= vm->program_size) {
+    if (vm->cpu.registers.IP < 0 || vm->cpu.registers.IP >= vm->prog.program_size) {
         return ERR_ILLEGAL_INST_ACCESS;
     }
-    Inst inst = vm->program[vm->IP];
+    Instruction inst = vm->prog.program[vm->cpu.registers.IP];
     switch (inst.type) {
-    case INST_PSH:
-        if (vm->stack_size >= VM_STACK_CAPACITY) {
-            return ERR_STACK_OVERFLOW;
-        }
-        vm->stack[vm->stack_size++] = inst.operand;
-        vm->IP += 1;
+    case PSH:
+        __psh(vm->mem, inst.operand);
+        vm->cpu.registers.IP += 1;
         break;
 
-    case INST_ADD:
-        if (vm->stack_size < 2) {
-            return ERR_STACK_UNDERFLOW;
-        }
-        vm->stack[vm->stack_size - 2] += vm->stack[vm->stack_size - 1];
-        vm->stack_size -= 1;
-        vm->IP += 1;
+    case ADD:
+        __add(vm->mem);
+        vm->cpu.registers.IP += 1;
         break;
 
-    case INST_SUB:
-        if (vm->stack_size < 2) {
-            return ERR_STACK_UNDERFLOW;
-        }
-        vm->stack[vm->stack_size - 2] -= vm->stack[vm->stack_size - 1];
-        vm->stack_size -= 1;
-        vm->IP += 1;
+    case SUB:
+        __sub(vm->mem);
+        vm->cpu.registers.IP += 1;
         break;
 
-    case INST_MUL:
-        if (vm->stack_size < 2) {
-            return ERR_STACK_UNDERFLOW;
-        }
-        vm->stack[vm->stack_size - 2] *= vm->stack[vm->stack_size - 1];
-        vm->stack_size -= 1;
-        vm->IP += 1;
+    case MUL:
+        __mul(vm->mem);
+        vm->cpu.registers.IP += 1;
         break;
 
-    case INST_DIV:
-        if (vm->stack_size < 2) {
+    case DIV:
+        __div(vm->mem);
+        vm->cpu.registers.IP += 1;
+        break;
+    case JMP:
+        vm->cpu.registers.IP = inst.operand;
+        break;
+    case EQL:
+        __eql(vm->mem);
+        vm->cpu.registers.IP += 1;
+        break;
+    case JNZ:
+        if (vm->mem.stack_size < 1) {
             return ERR_STACK_UNDERFLOW;
         }
-        if (vm->stack[vm->stack_size - 1] == 0) {
-            return ERR_DIV_BY_ZERO;
-        }
-        vm->stack[vm->stack_size - 2] /= vm->stack[vm->stack_size - 1];
-        vm->stack_size -= 1;
-        vm->IP += 1;
-        break;
-    case INST_JMP:
-        vm->IP = inst.operand;
-        break;
-    case INST_EQL:
-        if (vm->stack_size < 2) {
-            return ERR_STACK_UNDERFLOW;
-        }
-        vm->stack[vm->stack_size - 2] = vm->stack[vm->stack_size - 1] == vm->stack[vm->stack_size - 2];
-        vm->stack_size -= 1;
-        vm->IP += 1;
-        break;
-    case INST_JNZ:
-        if (vm->stack_size < 1) {
-            return ERR_STACK_UNDERFLOW;
-        }
-        if (vm->stack[vm->stack_size - 1]) {
-            vm->stack_size -= 1;
-            vm->IP = inst.operand;
+        if (vm->mem.stack[vm->mem.stack_size - 1]) {
+            vm->mem.stack_size -= 1;
+            vm->cpu.registers.IP = inst.operand;
         } else {
-            vm->IP += 1;
+            vm->cpu.registers.IP += 1;
         }
         break;
 
-    case INST_HLT:
+    case HLT:
         vm->halt = 1;
         break;
 
-    case INST_POP:
-        if (vm->stack_size < 1) {
-            return ERR_STACK_UNDERFLOW;
-        }
-        printf("%ld\n", vm->stack[vm->stack_size - 1]);
-        vm->stack_size -= 1;
-        vm->IP += 1;
+    case POP:
+        __pop(vm->mem);
+        vm->cpu.registers.IP += 1;
         break;
-    case INST_DUP:
-        if (vm->stack_size >= VM_STACK_CAPACITY) {
+    case DUP:
+        if (vm->mem.stack_size >= STACK_CAPACITY) {
             return ERR_STACK_OVERFLOW;
         }
-        if (vm->stack_size - inst.operand < 0) {
+        if (vm->mem.stack_size - inst.operand < 0) {
             return ERR_STACK_UNDERFLOW;
         }
         if (inst.operand < 0) {
             return ERR_ILLEGAL_OPERAND;
         }
-        vm->stack[vm->stack_size] = vm->stack[vm->stack_size - (inst.operand)];
-        vm->stack_size += 1;
-        vm->IP += 1;
+        vm->mem.stack[vm->mem.stack_size] = vm->mem.stack[vm->mem.stack_size - (inst.operand)];
+        vm->mem.stack_size += 1;
+        vm->cpu.registers.IP += 1;
         break;
-    case INST_NOP:
-        vm->IP += 1;
+    case NOP:
+        vm->cpu.registers.IP += 1;
         break;
     default:
         return ERR_ILLEGAL_INST;
     }
     return ERR_OK;
 }
-void vm_load_program_from_memory(Vm* vm, Inst* program, size_t program_size)
+
+void loadProgram(Vm* vm, Program prog)
 {
-    assert(program_size < VM_PROGRAM_CAPACITY);
-    memcpy(vm->program, program, sizeof(program[0]) * program_size);
-    vm->program_size = program_size;
+    assert(prog.program_size < PROGRAM_CAPACITY);
+    memcpy(vm->prog.program, prog.program, prog.instruction_count * prog.program_size);
+    vm->prog.program_size = prog.program_size;
 }
-void vm_dump_stack(FILE* stream, const Vm* vm)
+
+void dumpStack(FILE* stream, const Vm* vm)
 {
     fprintf(stream, "Stack : \n");
-    if (vm->stack_size > 0) {
-        for (Quad_Word i = 0; i < vm->stack_size; ++i) {
-            fprintf(stream, "  %ld\n", vm->stack[i]);
+    if (vm->mem.stack_size > 0) {
+        for (Word i = 0; i < vm->mem.stack_size; ++i) {
+            fprintf(stream, "  %d\n", vm->mem.stack[i]);
         }
     } else {
         fprintf(stream, " [Empty]\n");
     }
 }
-void vm_save_program_to_file(Inst* program, size_t program_size,
-    const char* file_path)
+
+void assembleInstructions(Program prog, const char* file_path)
 {
     FILE* f = fopen(file_path, "wb");
     if (!f) {
@@ -188,7 +162,7 @@ void vm_save_program_to_file(Inst* program, size_t program_size,
             strerror(errno));
         exit(1);
     }
-    fwrite(program, sizeof(program[0]), program_size, f);
+    fwrite(prog.program, prog.program_size, prog.instruction_count, f);
     if (ferror(f)) {
         fprintf(stderr, "ERROR : can't write to file %s : %s\n", file_path,
             strerror(errno));
@@ -196,7 +170,8 @@ void vm_save_program_to_file(Inst* program, size_t program_size,
     }
     fclose(f);
 }
-void vm_load_program_from_file(Vm* vm, const char* file_path)
+
+void loadBytecode(Vm* vm, const char* file_path)
 {
     FILE* f = fopen(file_path, "rb");
     if (!f) {
@@ -216,15 +191,15 @@ void vm_load_program_from_file(Vm* vm, const char* file_path)
             strerror(errno));
         exit(1);
     }
-    assert(m % sizeof(vm->program[0]) == 0);
-    assert((size_t)m <= VM_PROGRAM_CAPACITY * sizeof(vm->program[0]));
+    assert(m % sizeof(vm->prog.program[0]) == 0);
+    assert((size_t)m <= PROGRAM_CAPACITY * sizeof(vm->prog.program[0]));
 
     if (fseek(f, 0, SEEK_SET) < 0) {
         fprintf(stderr, "ERROR : can't read from file %s : %s\n", file_path,
             strerror(errno));
         exit(1);
     }
-    vm->program_size = fread(vm->program, sizeof(vm->program[0]), m / sizeof(vm->program[0]), f);
+    vm->prog.program_size = fread(vm->prog.program, sizeof(vm->prog.program[0]), m / sizeof(vm->prog.program[0]), f);
     if (ferror(f)) {
         fprintf(stderr, "ERROR : can't write to file %s : %s\n", file_path,
             strerror(errno));
@@ -234,8 +209,7 @@ void vm_load_program_from_file(Vm* vm, const char* file_path)
     fclose(f);
 }
 
-size_t vm_translate_asm(char* src, size_t src_size, Inst* program,
-    size_t program_capacity)
+size_t translate_asm(char* src, size_t src_size, Program prog)
 {
     while (src_size > 0) {
         char* end = memchr(src, '\n', src_size);

@@ -10,24 +10,38 @@ char* srcCode = "PSH 0\n"
                 "JMP 2\n"
                 "HLT\n";
 
+Instruction ins[] = {
+    MAKE_INST_ARG(PSH, 0),
+    MAKE_INST_ARG(PSH, 1),
+    MAKE_INST_ARG(DUP, 2),
+    MAKE_INST_ARG(DUP, 2),
+    MAKE_INST(ADD),
+    MAKE_INST_ARG(JMP, 2),
+    MAKE_INST(HLT),
+};
 int main()
 {
-    // vm_save_program_to_file(program, sizeof(program), "./fibonacci.pbl");
-    // vm_load_program_from_memory(&vm, program, ARRAY_SIZE(program));
-    vm_load_program_from_file(&vm, "./prog/fibonacci.pbl");
+    Program prog;
+    memcpy(prog.program, ins, sizeof(ins));
+    prog.instruction_count = ARRAY_SIZE(ins);
+    prog.program_size = sizeof(ins[0]);
 
-    // vm.program_size = vm_translate_asm(srcCode, strlen(srcCode), vm.program, VM_PROGRAM_CAPACITY);
+    assembleInstructions(prog, "./prog/fibonacci.pbl");
+    // loadProgram(&vm, prog);
+    loadBytecode(&vm, "./prog/fibonacci.pbl");
 
-    vm_dump_stack(stdout, &vm);
-    for (int i = 0; i < VM_EXECUTION_LIMIT && !vm.halt; i++) {
-        // printf("%s\n", inst_type_as_cstr(vm.program[vm.IP].type));
-        Error error = vm_execute_inst(&vm);
+    // vm.program_size = translate_asm(srcCode, strlen(srcCode), vm.program, PROGRAM_CAPACITY);
+
+    dumpStack(stdout, &vm);
+    for (int i = 0; i < EXECUTION_LIMIT && !vm.halt; i++) {
+        // printf("%s\n", opcodeAsCstr(vm.program[vm.IP].type));
+        Error error = executeInst(&vm);
 
         if (error != ERR_OK) {
-            fprintf(stderr, "Error : %s\n", error_as_cstr(error));
+            fprintf(stderr, "Error : %s\n", errorAsCstr(error));
             exit(1);
         }
     }
-    vm_dump_stack(stdout, &vm);
+    dumpStack(stdout, &vm);
     return 0;
 }
