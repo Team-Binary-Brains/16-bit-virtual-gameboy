@@ -22,20 +22,20 @@ Instruction ins[] = {
 int main()
 {
     Program prog;
-    memcpy(prog.program, ins, sizeof(ins));
-    prog.instruction_count = ARRAY_SIZE(ins);
-    prog.program_size = sizeof(ins[0]);
+    memcpy(prog.instructions, ins, sizeof(ins));
+    prog.instruction_count = sizeof(ins) / sizeof(ins[0]);
+    prog.instruction_size = sizeof(ins[0]);
 
     assembleInstructions(prog, "./prog/fibonacci.pbl");
     // loadProgram(&vm, prog);
     loadBytecode(&vm, "./prog/fibonacci.pbl");
 
-    // vm.program_size = translate_asm(srcCode, strlen(srcCode), vm.program, PROGRAM_CAPACITY);
+    // loadProgram(&vm, translate_asm(srcCode, strlen(srcCode)));
 
     dumpStack(stdout, &vm);
-    for (int i = 0; i < EXECUTION_LIMIT && !vm.halt; i++) {
-        // printf("%s\n", opcodeAsCstr(vm.program[vm.IP].type));
-        Error error = executeInst(&vm);
+    for (int i = 0; i < EXECUTION_LIMIT && !vm.cpu.halt; i++) {
+        printf("%s\n", opcodeAsCstr(prog.instructions[vm.cpu.registers.IP].type));
+        Error error = executeInst(&(vm.prog), &(vm.mem), &(vm.cpu));
 
         if (error != ERR_OK) {
             fprintf(stderr, "Error : %s\n", errorAsCstr(error));
