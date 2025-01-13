@@ -3,6 +3,7 @@
 void loadProgram(Vm* vm, Program prog)
 {
     assert(prog.instruction_size < PROGRAM_CAPACITY);
+
     memcpy(vm->prog.instructions, prog.instructions, prog.instruction_count * prog.instruction_size);
     vm->prog.instruction_size = prog.instruction_size;
     vm->prog.instruction_count = prog.instruction_count;
@@ -20,82 +21,122 @@ void dumpStack(FILE* stream, const Vm* vm)
     }
 }
 
-void assembleInstructions(Program prog, const char* file_path)
+FILE* openFileWithCheck(const char* filePath, const char* mode)
 {
-    FILE* f = fopen(file_path, "wb");
+    FILE* f = fopen(filePath, mode);
+
     if (!f) {
-        fprintf(stderr, "ERROR : can't open file %s : %s\n", file_path,
-            strerror(errno));
-        exit(1);
+        fileErrorDispWithExit("can't open file", filePath);
     }
-    fwrite(prog.instructions, prog.instruction_size, prog.instruction_count, f);
-    if (ferror(f)) {
-        fprintf(stderr, "ERROR : can't write to file %s : %s\n", file_path,
-            strerror(errno));
-        exit(1);
-    }
-    fclose(f);
+    return f;
 }
 
-void loadBytecode(Vm* vm, const char* file_path)
+void closeFileWithCheck(const char* filePath, FILE* file)
 {
-    FILE* f = fopen(file_path, "rb");
-    if (!f) {
-        fprintf(stderr, "ERROR : can't open file %s : %s\n", file_path,
-            strerror(errno));
-        exit(1);
+    if (ferror(file)) {
+        fileErrorDispWithExit("can't write to file", filePath);
     }
 
+    fclose(file);
+}
+
+void assembleInstructionsIntoBinary(Program prog, const char* filePath)
+{
+    FILE* f = openFileWithCheck(filePath, "wb");
+
+    fwrite(prog.instructions, prog.instruction_size, prog.instruction_count, f);
+
+    closeFileWithCheck(filePath, f);
+}
+
+Program loadBytecodeIntoProgram(const char* filePath)
+{
+    FILE* f = openFileWithCheck(filePath, "rb");
+    Program prog;
     if (fseek(f, 0, SEEK_END) < 0) {
-        fprintf(stderr, "ERROR : can't read from file %s : %s\n", file_path,
-            strerror(errno));
-        exit(1);
+        fileErrorDispWithExit("can't read from file", filePath);
     }
-    long m = ftell(f);
+
+    Word m = ftell(f);
+
     if (m < 0) {
-        fprintf(stderr, "ERROR : can't read from file %s : %s\n", file_path,
-            strerror(errno));
-        exit(1);
+        fileErrorDispWithExit("can't read from file", filePath);
     }
-    assert(m % sizeof(vm->prog.instructions[0]) == 0);
-    assert((size_t)m <= PROGRAM_CAPACITY * sizeof(vm->prog.instructions[0]));
+
+    prog.instruction_size = sizeof(prog.instructions[0]);
+    assert(m % prog.instruction_size == 0);
+    prog.instruction_count = m / prog.instruction_size;
+    assert(prog.instruction_count <= PROGRAM_CAPACITY);
 
     if (fseek(f, 0, SEEK_SET) < 0) {
-        fprintf(stderr, "ERROR : can't read from file %s : %s\n", file_path,
-            strerror(errno));
-        exit(1);
-    }
-    vm->prog.instruction_size = fread(vm->prog.instructions, sizeof(vm->prog.instructions[0]), m / sizeof(vm->prog.instructions[0]), f);
-    if (ferror(f)) {
-        fprintf(stderr, "ERROR : can't write to file %s : %s\n", file_path,
-            strerror(errno));
-        exit(1);
+        fileErrorDispWithExit("can't read from file", filePath);
     }
 
-    fclose(f);
+    prog.instruction_size = fread(prog.instructions, prog.instruction_size, prog.instruction_count, f);
+
+    closeFileWithCheck(filePath, f);
+
+    return prog;
 }
-/*
+
 Instruction processLine(String line)
 {
-    String line = ltrim(line);
-    Opcode op = cstrAsOpcode(splitStr(line, ' '));
-    if (op > PSH) {
-        String line = ltrim(line);
-        Word operand = cstrToWord(splitStr(line, ' '));
-        return MAKE_INST_ARG(op, operand);
+    line = trim(line);
+    Opcode op = strAsOpcode(splitStr(&line, ' '));
+    if (op < PSH) {
+        return (Instruction) { .type = op };
     }
-    return MAKE_INST(op);
+    line = ltrim(line);
+    Word operand = strToWord(splitStr(&line, ' '));
+    // printf("Operand :%d\n", operand);
+    return (Instruction) { .type = op, .operand = operand };
 }
+
 Program translate_asm(String src)
 {
-    Instruction ins[src.parts] = { 0 };
-    size_t cnt = src.parts;
-    while (cnt > 0) {
+    Instruction ins[src.parts];
+    Program prog;
+    prog.instruction_count = 0;
+    while (src.parts > 0) {
         String line = splitStr(&src, '\n');
-        processLine(String line);
-        Instruction ins[src.parts - cnt] = processLine(line);
+        // printf("Line : %.*s\n", (int)(line.parts), line.data);
+        ins[prog.instruction_count++] = processLine(line);
     }
 
-    return;
+    memcpy(prog.instructions, ins, sizeof(ins));
+    prog.instruction_size = sizeof(ins[0]);
+    return prog;
 }
-*/
+
+String loadFileIntoProgramString(const char* filePath)
+{
+    FILE* f = openFileWithCheck(filePath, "r");
+    if (fseek(f, 0, SEEK_END) < 0) {
+        fileErrorDispWithExit("can't read from file", filePath);
+    }
+
+    Word m = ftell(f);
+
+    if (m < 0) {
+        fileErrorDispWithExit("can't read from file", filePath);
+    }
+
+    char* buffer = malloc(m);
+
+    if (buffer == NULL) {
+        fileErrorDispWithExit("can't allocate memory for file", filePath);
+    }
+
+    if (fseek(f, 0, SEEK_SET) < 0) {
+        fileErrorDispWithExit("can't read from file", filePath);
+    }
+
+    size_t n = fread(buffer, 1, m, f);
+
+    closeFileWithCheck(filePath, f);
+
+    return (String) {
+        .parts = n,
+        .data = buffer
+    };
+}

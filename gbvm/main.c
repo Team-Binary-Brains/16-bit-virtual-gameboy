@@ -9,7 +9,7 @@ char* srcCode = "PSH 0\n"
                 "ADD\n"
                 "JMP 2\n"
                 "HLT\n";
-
+/*
 Instruction ins[] = {
     MAKE_INST_ARG(PSH, 0),
     MAKE_INST_ARG(PSH, 1),
@@ -18,30 +18,33 @@ Instruction ins[] = {
     MAKE_INST(ADD),
     MAKE_INST_ARG(JMP, 2),
     MAKE_INST(HLT),
-};
+};*/
+
 int main()
 {
-    Program prog;
-    memcpy(prog.instructions, ins, sizeof(ins));
-    prog.instruction_count = sizeof(ins) / sizeof(ins[0]);
-    prog.instruction_size = sizeof(ins[0]);
+    // Program prog;
+    // memcpy(prog.instructions, ins, sizeof(ins));
+    // prog.instruction_count = sizeof(ins) / sizeof(ins[0]);
+    // prog.instruction_size = sizeof(ins[0]);
 
-    assembleInstructions(prog, "./prog/fibonacci.pbl");
+    // assembleInstructionsIntoBinary(prog, "./prog/fibonacci.pbl");
+    // prog = loadBytecodeIntoProgram("./prog/fibonacci.pbl");
     // loadProgram(&vm, prog);
-    loadBytecode(&vm, "./prog/fibonacci.pbl");
 
-    // loadProgram(&vm, translate_asm(srcCode, strlen(srcCode)));
+    String s = { strlen(srcCode), srcCode };
+    Program prog = translate_asm(s);
+    // loadProgram(&vm, prog);
 
-    dumpStack(stdout, &vm);
     for (int i = 0; i < EXECUTION_LIMIT && !vm.cpu.halt; i++) {
-        printf("%s\n", opcodeAsCstr(prog.instructions[vm.cpu.registers.IP].type));
-        Error error = executeInst(&(vm.prog), &(vm.mem), &(vm.cpu));
+        // printString(opcodeAsStr(prog.instructions[vm.cpu.registers.IP].type));
+
+        Error error = executeInst(&prog, &(vm.mem), &(vm.cpu));
 
         if (error != ERR_OK) {
-            fprintf(stderr, "Error : %s\n", errorAsCstr(error));
-            exit(1);
+            executionErrorWithExit(error);
         }
     }
+
     dumpStack(stdout, &vm);
     return 0;
 }

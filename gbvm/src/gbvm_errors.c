@@ -21,3 +21,15 @@ const char* errorAsCstr(Error error)
         assert(0 && "error_as_cstr : Unreachable");
     }
 }
+
+void fileErrorDispWithExit(const char* message, const char* filePath)
+{
+    fprintf(stderr, "ERROR : %s\n %s : %s\n", message, filePath, strerror(errno));
+    exit(1);
+}
+
+void executionErrorWithExit(Error error)
+{
+    fprintf(stderr, "Error : %s\n", errorAsCstr(error));
+    exit(1);
+}

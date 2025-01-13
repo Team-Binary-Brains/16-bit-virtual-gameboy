@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #define STACK_CAPACITY 1024
 
@@ -30,8 +31,3 @@ typedef struct {
     Word stack[STACK_CAPACITY];
     Word stack_size;
 } Memory;
-
-typedef struct {
-    size_t parts;
-    char* data;
-} String;

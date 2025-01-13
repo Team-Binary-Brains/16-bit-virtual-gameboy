@@ -23,23 +23,9 @@ typedef enum {
 
 typedef struct {
     Opcode type;
-    const char* name;
+    size_t size;
+    char* name;
 } OpcodeString;
-
-static OpcodeString OpcodeStringMap[] = {
-    { NOP, "NOP" },
-    { PSH, "PSH" },
-    { POP, "POP" },
-    { DUP, "DUP" },
-    { ADD, "ADD" },
-    { SUB, "SUB" },
-    { MUL, "MUL" },
-    { DIV, "DIV" },
-    { JMP, "JMP" },
-    { JNZ, "JNZ" },
-    { EQL, "EQL" },
-    { HLT, "HLT" }
-};
 
 typedef struct {
     Opcode type;
@@ -70,6 +56,6 @@ Error __dup(Memory*, Word);
 
 Error executeInst(const Program*, Memory*, CPU*);
 
-const char* opcodeAsCstr(Opcode);
+String opcodeAsStr(Opcode);
 
-Opcode cstrAsOpcode(const char*);
+Opcode strAsOpcode(String);

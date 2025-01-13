@@ -1,5 +1,20 @@
 #include "gbvm_instructions.h"
 
+static OpcodeString OpcodeStringMap[] = {
+    { NOP, 3, "NOP" },
+    { PSH, 3, "PSH" },
+    { POP, 3, "POP" },
+    { DUP, 3, "DUP" },
+    { ADD, 3, "ADD" },
+    { SUB, 3, "SUB" },
+    { MUL, 3, "MUL" },
+    { DIV, 3, "DIV" },
+    { JMP, 3, "JMP" },
+    { JNZ, 3, "JNZ" },
+    { EQL, 3, "EQL" },
+    { HLT, 3, "HLT" }
+};
+
 Error __psh(Memory* mem, Word operand)
 {
     if (mem->stack_size >= STACK_CAPACITY) {
@@ -165,20 +180,26 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
     return ERR_OK;
 }
 
-const char* opcodeAsCstr(Opcode type)
+String opcodeAsStr(Opcode type)
 {
     for (size_t i = 0; i < sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]); ++i) {
-        if (type == OpcodeStringMap[i].type)
-            return OpcodeStringMap[i].name;
+        if (type == OpcodeStringMap[i].type) {
+            return (String) { .data = OpcodeStringMap[i].name, .parts = OpcodeStringMap[i].size };
+        }
     }
-    assert(0 && "opcodeAsCstr : Unreachable");
+    assert(0 && "opcodeAsStr : Unreachable");
 }
 
-Opcode cstrAsOpcode(const char* str)
+Opcode strAsOpcode(String s)
 {
     for (size_t i = 0; i < sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]); ++i) {
-        if (!strcmp(str, OpcodeStringMap[i].name))
+
+        if (s.parts != OpcodeStringMap[i].size || memcmp(s.data, OpcodeStringMap[i].name, s.parts)) {
+            continue;
+        } else {
+            // printf("Operation : %.*s\n", (int)OpcodeStringMap[i].size, OpcodeStringMap[i].name);
             return OpcodeStringMap[i].type;
+        }
     }
-    assert(0 && "cstrAsOpcode : Unreachable");
+    return NOP;
 }

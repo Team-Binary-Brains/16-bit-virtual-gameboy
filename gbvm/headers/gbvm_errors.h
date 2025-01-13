@@ -1,4 +1,5 @@
-#include "gbvm_memory.h"
+// #include "gbvm_memory.h"
+#include "gbvm_strings.h"
 
 typedef enum {
     ERR_OK = 0,
@@ -11,3 +12,7 @@ typedef enum {
 } Error;
 
 const char* errorAsCstr(Error);
+
+void fileErrorDispWithExit(const char*, const char*);
+
+void executionErrorWithExit(Error);
