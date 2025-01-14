@@ -1,4 +1,9 @@
-#include "gbvm_fileops.h"
+#pragma once
+
+#include "external_includes.h"
+#include "gbvm_errors.h"
+#include "gbvm_memory.h"
+#include "gbvm_strings.h"
 
 #define PROGRAM_CAPACITY 1024
 

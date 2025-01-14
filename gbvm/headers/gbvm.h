@@ -1,4 +1,9 @@
-#include "gbvm_assembler.h"
+#pragma once
+
+#include "external_includes.h"
+#include "gbvm_errors.h"
+#include "gbvm_instructions.h"
+#include "gbvm_memory.h"
 
 #define EXECUTION_LIMIT 90
 

@@ -4,7 +4,7 @@ LIBS =
 IDIR = ./headers
 CDIR = ./src
 
-_HEADERS = gbvm_memory.h gbvm_errors.h gbvm_strings.h gbvm_fileops.h gbvm_instructions.h gbvm_assembler.h gbvm.h 
+_HEADERS = gbvm_memory.h gbvm_errors.h gbvm_strings.h gbvm_fileops.h gbvm_instructions.h gbvm_assembler.h gbvm.h external_includes.h
 HEADERS = $(patsubst %,$(IDIR)/%,$(_HEADERS))
 
 _CODE = gbvm_errors.c gbvm_strings.c gbvm_fileops.c gbvm_instructions.c gbvm_assembler.c gbvm.c

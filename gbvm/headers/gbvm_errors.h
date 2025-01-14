@@ -1,4 +1,6 @@
-#include "gbvm_strings.h"
+#pragma once
+
+#include "external_includes.h"
 
 typedef enum {
     ERR_OK = 0,
