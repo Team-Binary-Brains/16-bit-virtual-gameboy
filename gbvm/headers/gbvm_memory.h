@@ -1,11 +1,9 @@
 #pragma once
 
-#define STACK_CAPACITY 1024
-
-typedef unsigned char Byte;
+typedef char Byte;
 typedef short int Word;
-typedef unsigned int Double_Word;
-typedef unsigned long long int Quad_Word;
+typedef int Double_Word;
+typedef long long int Quad_Word;
 
 typedef struct {
     Word AX;
@@ -18,10 +16,9 @@ typedef struct {
 
 typedef struct {
     Registers registers;
-    int halt;
+    Word flags;
 } CPU;
 
 typedef struct {
     Word stack[STACK_CAPACITY];
-    Word stack_size;
 } Memory;

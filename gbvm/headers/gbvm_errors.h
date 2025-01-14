@@ -7,7 +7,8 @@ typedef enum {
     ERR_DIV_BY_ZERO,
     ERR_ILLEGAL_INST,
     ERR_ILLEGAL_INST_ACCESS,
-    ERR_ILLEGAL_OPERAND
+    ERR_ILLEGAL_OPERAND,
+    ERR_ILLEGAL_ALU_OPERATION,
 } Error;
 
 const char* errorAsCstr(const Error*);

@@ -5,8 +5,6 @@
 #include "gbvm_instructions.h"
 #include "gbvm_memory.h"
 
-#define EXECUTION_LIMIT 90
-
 typedef struct {
     Memory mem;
     Program prog;

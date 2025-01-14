@@ -5,6 +5,6 @@
     DUP 2
 
     ADD
-    JMP 2
+    JIP 2
     
     HLT

@@ -15,5 +15,6 @@ int main()
     executeProgram(&vm);
 
     dumpStack(stdout, &vm);
+    dumpFlags(stdout, &vm);
     return 0;
 }

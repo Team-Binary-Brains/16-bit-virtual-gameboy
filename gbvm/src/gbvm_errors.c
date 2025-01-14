@@ -18,6 +18,8 @@ const char* errorAsCstr(const Error* error)
         return "ERR_ILLEGAL_INST_ACCESS";
     case ERR_ILLEGAL_OPERAND:
         return "ERR_ILLEGAL_OPERAND";
+    case ERR_ILLEGAL_ALU_OPERATION:
+        return "ERR_ILLEGAL_ALU_OPERATION";
     default:
         assert(0 && "error_as_cstr : Unreachable");
     }

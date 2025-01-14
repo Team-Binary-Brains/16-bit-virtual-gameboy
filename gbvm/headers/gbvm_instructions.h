@@ -5,8 +5,6 @@
 #include "gbvm_memory.h"
 #include "gbvm_strings.h"
 
-#define PROGRAM_CAPACITY 1024
-
 #define MAKE_INST_ARG(typ, opr) { .type = (typ), .operand = (opr) }
 #define MAKE_INST(typ) { .type = (typ) }
 
@@ -23,6 +21,7 @@ typedef enum {
     DUP,
     JMP,
     JNZ,
+    JIP,
 } Opcode;
 
 typedef struct {
@@ -42,21 +41,21 @@ typedef struct {
     Word instruction_size;
 } Program;
 
-Error __psh(Memory*, const Word*);
+Error __psh(Registers*, Memory*, const Word*);
 
-Error __add(Memory*);
+Error __add(Registers*, Memory*);
 
-Error __sub(Memory*);
+Error __sub(Registers*, Memory*);
 
-Error __mul(Memory*);
+Error __mul(Registers*, Memory*);
 
-Error __div(Memory*);
+Error __div(Registers*, Memory*);
 
-Error __eql(Memory*);
+Error __eql(Registers*, Memory*);
 
-Error __pop(Memory*);
+Error __pop(Registers*, Memory*);
 
-Error __dup(Memory*, const Word*);
+Error __dup(Registers*, Memory*, const Word*);
 
 Error executeInst(const Program*, Memory*, CPU*);
 

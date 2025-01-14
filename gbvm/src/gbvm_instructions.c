@@ -1,4 +1,6 @@
 #include "gbvm_instructions.h"
+#include "gbvm_flags.h"
+#include "gbvm_alu.h"
 
 static OpcodeString OpcodeStringMap[] = {
     { NOP, 3, "NOP" },
@@ -11,8 +13,9 @@ static OpcodeString OpcodeStringMap[] = {
     { DIV, 3, "DIV" },
     { JMP, 3, "JMP" },
     { JNZ, 3, "JNZ" },
+    { JIP, 3, "JIP" },
     { EQL, 3, "EQL" },
-    { HLT, 3, "HLT" }
+    { HLT, 3, "HLT" },
 };
 
 String opcodeAsStr(const Opcode* type)
@@ -29,9 +32,10 @@ Opcode strAsOpcode(const String* s)
 {
     for (size_t i = 0; i < sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]); ++i) {
 
-        if (s->length != OpcodeStringMap[i].size || memcmp(s->data, OpcodeStringMap[i].name, s->length)) {
+        if (s->length != OpcodeStringMap[i].size) {
             continue;
-        } else {
+        }
+        if (strncmp(s->data, OpcodeStringMap[i].name, s->length) == 0) {
             // printf("Operation : %.*s\n", (int)OpcodeStringMap[i].size, OpcodeStringMap[i].name);
             return OpcodeStringMap[i].type;
         }
@@ -55,54 +59,63 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
         break;
 
     case POP:
-        err = __pop(mem);
+        err = __pop(&(cpu->registers), mem);
         break;
 
     case PSH:
-        err = __psh(mem, &(inst.operand));
+        err = __psh(&(cpu->registers), mem, &(inst.operand));
         break;
 
     case DUP:
-        err = __dup(mem, &(inst.operand));
+        err = __dup(&(cpu->registers), mem, &(inst.operand));
         break;
 
     case ADD:
-        err = __add(mem);
+        err = performArithmeticOperation(cpu, mem, ADDITION);
         break;
 
     case SUB:
-        err = __sub(mem);
+        err = performArithmeticOperation(cpu, mem, SUBTRACT);
         break;
 
     case MUL:
-        err = __mul(mem);
+        err = performArithmeticOperation(cpu, mem, MULTIPLY);
         break;
 
     case DIV:
-        err = __div(mem);
+        err = performArithmeticOperation(cpu, mem, DIVIDE);
         break;
 
     case EQL:
-        err = __eql(mem);
+        err = __eql(&(cpu->registers), mem);
         break;
 
-    case JMP:
+    case HLT:
+        setHalt(cpu, true);
+        break;
+
+    case JIP:
+        if (cpu->registers.SP < 1) {
+            return ERR_STACK_UNDERFLOW;
+        }
+        if (getSign(cpu)) {
+            break;
+        }
         cpu->registers.IP = inst.operand;
         return ERR_OK;
 
     case JNZ:
-        if (mem->stack_size < 1) {
+        if (cpu->registers.SP < 1) {
             return ERR_STACK_UNDERFLOW;
         }
-        if (!(mem->stack[mem->stack_size - 1])) {
+        if (getZero(cpu)) {
             break;
         }
-        mem->stack_size -= 1;
         cpu->registers.IP = inst.operand;
         return ERR_OK;
 
-    case HLT:
-        cpu->halt = 1;
+    case JMP:
+        cpu->registers.IP = inst.operand;
         return ERR_OK;
 
     default:
@@ -112,94 +125,52 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
     if (err) {
         return err;
     }
+
     cpu->registers.IP += 1;
     return ERR_OK;
 }
 
-Error __psh(Memory* mem, const Word* operand)
+Error __psh(Registers* r, Memory* mem, const Word* operand)
 {
-    if (mem->stack_size >= STACK_CAPACITY) {
+    if (r->SP >= STACK_CAPACITY) {
         return ERR_STACK_OVERFLOW;
     }
-    mem->stack[mem->stack_size++] = *operand;
+    mem->stack[r->SP++] = *operand;
     return 0;
 }
 
-Error __add(Memory* mem)
+Error __eql(Registers* r, Memory* mem)
 {
-    if (mem->stack_size < 2) {
+    if (r->SP < 2) {
         return ERR_STACK_UNDERFLOW;
     }
-    mem->stack[mem->stack_size - 2] += mem->stack[mem->stack_size - 1];
-    mem->stack_size -= 1;
+    mem->stack[r->SP - 2] = mem->stack[r->SP - 1] == mem->stack[r->SP - 2];
+    r->SP -= 1;
     return 0;
 }
 
-Error __sub(Memory* mem)
+Error __pop(Registers* r, Memory* mem)
 {
-    if (mem->stack_size < 2) {
+    if (r->SP < 1) {
         return ERR_STACK_UNDERFLOW;
     }
-    mem->stack[mem->stack_size - 2] -= mem->stack[mem->stack_size - 1];
-    mem->stack_size -= 1;
+    printf("%d\n", mem->stack[r->SP - 1]);
+    r->SP -= 1;
     return 0;
 }
 
-Error __mul(Memory* mem)
+Error __dup(Registers* r, Memory* mem, const Word* operand)
 {
-    if (mem->stack_size < 2) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    mem->stack[mem->stack_size - 2] *= mem->stack[mem->stack_size - 1];
-    mem->stack_size -= 1;
-    return 0;
-}
-
-Error __div(Memory* mem)
-{
-    if (mem->stack_size < 2) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    if (mem->stack[mem->stack_size - 1] == 0) {
-        return ERR_DIV_BY_ZERO;
-    }
-    mem->stack[mem->stack_size - 2] /= mem->stack[mem->stack_size - 1];
-    mem->stack_size -= 1;
-    return 0;
-}
-
-Error __eql(Memory* mem)
-{
-    if (mem->stack_size < 2) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    mem->stack[mem->stack_size - 2] = mem->stack[mem->stack_size - 1] == mem->stack[mem->stack_size - 2];
-    mem->stack_size -= 1;
-    return 0;
-}
-
-Error __pop(Memory* mem)
-{
-    if (mem->stack_size < 1) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    printf("%d\n", mem->stack[mem->stack_size - 1]);
-    mem->stack_size -= 1;
-    return 0;
-}
-
-Error __dup(Memory* mem, const Word* operand)
-{
-    if (mem->stack_size >= STACK_CAPACITY) {
+    if (r->SP >= STACK_CAPACITY) {
         return ERR_STACK_OVERFLOW;
     }
-    if ((mem->stack_size - (*operand)) < 0) {
+    if ((r->SP - (*operand)) < 0) {
         return ERR_STACK_UNDERFLOW;
     }
     if ((*operand) < 0) {
         return ERR_ILLEGAL_OPERAND;
     }
-    mem->stack[mem->stack_size] = mem->stack[mem->stack_size - (*operand)];
-    mem->stack_size += 1;
+    mem->stack[r->SP] = mem->stack[r->SP - (*operand)];
+    r->SP += 1;
     return 0;
 }
