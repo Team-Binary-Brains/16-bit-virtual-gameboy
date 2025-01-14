@@ -3,11 +3,11 @@
 String ltrim(String s)
 {
     size_t i = 0;
-    while (i < s.parts && isspace(s.data[i])) {
+    while (i < s.length && isspace(s.data[i])) {
         i++;
     }
     return (String) {
-        .parts = s.parts - i,
+        .length = s.length - i,
         .data = s.data + i
     };
 }
@@ -15,11 +15,11 @@ String ltrim(String s)
 String rtrim(String s)
 {
     size_t i = 0;
-    while (i < s.parts && isspace(s.data[s.parts - i - 1])) {
+    while (i < s.length && isspace(s.data[s.length - i - 1])) {
         i++;
     }
     return (String) {
-        .parts = s.parts - i,
+        .length = s.length - i,
         .data = s.data
     };
 }
@@ -32,21 +32,22 @@ String trim(String s)
 String splitStr(String* s, char c)
 {
     size_t i = 0;
-    while (i < s->parts && s->data[i] != c) {
+    while (i < s->length && s->data[i] != c) {
         i++;
     }
     String res = {
-        .parts = i,
+        .length = i,
         .data = s->data
     };
 
-    if (i < s->parts) {
-        s->parts -= i + 1;
-        s->data += i + 1;
-    } else {
-        s->parts -= i;
-        s->data += i;
+    s->length -= i;
+    s->data += i;
+
+    if (i < s->length) {
+        s->length -= 1;
+        s->data += 1;
     }
+
     return res;
 }
 
@@ -55,7 +56,7 @@ Word strToWord(String s)
     Word val = 0;
     size_t i = 0;
 
-    while (i < s.parts && isdigit(s.data[i])) {
+    while (i < s.length && isdigit(s.data[i])) {
         val = val * 10 + s.data[i] - '0';
         i++;
     }
@@ -64,5 +65,5 @@ Word strToWord(String s)
 
 void printString(String s)
 {
-    printf("%.*s\n", (int)(s.parts), s.data);
+    printf("%.*s\n", (int)(s.length), s.data);
 }

@@ -15,92 +15,28 @@ static OpcodeString OpcodeStringMap[] = {
     { HLT, 3, "HLT" }
 };
 
-Error __psh(Memory* mem, Word operand)
+String opcodeAsStr(const Opcode* type)
 {
-    if (mem->stack_size >= STACK_CAPACITY) {
-        return ERR_STACK_OVERFLOW;
+    for (size_t i = 0; i < sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]); ++i) {
+        if ((*type) == OpcodeStringMap[i].type) {
+            return (String) { .data = OpcodeStringMap[i].name, .length = OpcodeStringMap[i].size };
+        }
     }
-    mem->stack[mem->stack_size++] = operand;
-    return 0;
+    assert(0 && "opcodeAsStr : Unreachable");
 }
 
-Error __add(Memory* mem)
+Opcode strAsOpcode(const String* s)
 {
-    if (mem->stack_size < 2) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    mem->stack[mem->stack_size - 2] += mem->stack[mem->stack_size - 1];
-    mem->stack_size -= 1;
-    return 0;
-}
+    for (size_t i = 0; i < sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]); ++i) {
 
-Error __sub(Memory* mem)
-{
-    if (mem->stack_size < 2) {
-        return ERR_STACK_UNDERFLOW;
+        if (s->length != OpcodeStringMap[i].size || memcmp(s->data, OpcodeStringMap[i].name, s->length)) {
+            continue;
+        } else {
+            // printf("Operation : %.*s\n", (int)OpcodeStringMap[i].size, OpcodeStringMap[i].name);
+            return OpcodeStringMap[i].type;
+        }
     }
-    mem->stack[mem->stack_size - 2] -= mem->stack[mem->stack_size - 1];
-    mem->stack_size -= 1;
-    return 0;
-}
-
-Error __mul(Memory* mem)
-{
-    if (mem->stack_size < 2) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    mem->stack[mem->stack_size - 2] *= mem->stack[mem->stack_size - 1];
-    mem->stack_size -= 1;
-    return 0;
-}
-
-Error __div(Memory* mem)
-{
-    if (mem->stack_size < 2) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    if (mem->stack[mem->stack_size - 1] == 0) {
-        return ERR_DIV_BY_ZERO;
-    }
-    mem->stack[mem->stack_size - 2] += mem->stack[mem->stack_size - 1];
-    mem->stack_size -= 1;
-    return 0;
-}
-
-Error __eql(Memory* mem)
-{
-    if (mem->stack_size < 2) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    mem->stack[mem->stack_size - 2] = mem->stack[mem->stack_size - 1] == mem->stack[mem->stack_size - 2];
-    mem->stack_size -= 1;
-    return 0;
-}
-
-Error __pop(Memory* mem)
-{
-    if (mem->stack_size < 1) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    printf("%d\n", mem->stack[mem->stack_size - 1]);
-    mem->stack_size -= 1;
-    return 0;
-}
-
-Error __dup(Memory* mem, Word operand)
-{
-    if (mem->stack_size >= STACK_CAPACITY) {
-        return ERR_STACK_OVERFLOW;
-    }
-    if ((mem->stack_size - operand) < 0) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    if (operand < 0) {
-        return ERR_ILLEGAL_OPERAND;
-    }
-    mem->stack[mem->stack_size] = mem->stack[mem->stack_size - operand];
-    mem->stack_size += 1;
-    return 0;
+    return NOP;
 }
 
 Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
@@ -123,11 +59,11 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
         break;
 
     case PSH:
-        err = __psh(mem, inst.operand);
+        err = __psh(mem, &(inst.operand));
         break;
 
     case DUP:
-        err = __dup(mem, inst.operand);
+        err = __dup(mem, &(inst.operand));
         break;
 
     case ADD:
@@ -180,26 +116,90 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
     return ERR_OK;
 }
 
-String opcodeAsStr(Opcode type)
+Error __psh(Memory* mem, const Word* operand)
 {
-    for (size_t i = 0; i < sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]); ++i) {
-        if (type == OpcodeStringMap[i].type) {
-            return (String) { .data = OpcodeStringMap[i].name, .parts = OpcodeStringMap[i].size };
-        }
+    if (mem->stack_size >= STACK_CAPACITY) {
+        return ERR_STACK_OVERFLOW;
     }
-    assert(0 && "opcodeAsStr : Unreachable");
+    mem->stack[mem->stack_size++] = *operand;
+    return 0;
 }
 
-Opcode strAsOpcode(String s)
+Error __add(Memory* mem)
 {
-    for (size_t i = 0; i < sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]); ++i) {
-
-        if (s.parts != OpcodeStringMap[i].size || memcmp(s.data, OpcodeStringMap[i].name, s.parts)) {
-            continue;
-        } else {
-            // printf("Operation : %.*s\n", (int)OpcodeStringMap[i].size, OpcodeStringMap[i].name);
-            return OpcodeStringMap[i].type;
-        }
+    if (mem->stack_size < 2) {
+        return ERR_STACK_UNDERFLOW;
     }
-    return NOP;
+    mem->stack[mem->stack_size - 2] += mem->stack[mem->stack_size - 1];
+    mem->stack_size -= 1;
+    return 0;
+}
+
+Error __sub(Memory* mem)
+{
+    if (mem->stack_size < 2) {
+        return ERR_STACK_UNDERFLOW;
+    }
+    mem->stack[mem->stack_size - 2] -= mem->stack[mem->stack_size - 1];
+    mem->stack_size -= 1;
+    return 0;
+}
+
+Error __mul(Memory* mem)
+{
+    if (mem->stack_size < 2) {
+        return ERR_STACK_UNDERFLOW;
+    }
+    mem->stack[mem->stack_size - 2] *= mem->stack[mem->stack_size - 1];
+    mem->stack_size -= 1;
+    return 0;
+}
+
+Error __div(Memory* mem)
+{
+    if (mem->stack_size < 2) {
+        return ERR_STACK_UNDERFLOW;
+    }
+    if (mem->stack[mem->stack_size - 1] == 0) {
+        return ERR_DIV_BY_ZERO;
+    }
+    mem->stack[mem->stack_size - 2] /= mem->stack[mem->stack_size - 1];
+    mem->stack_size -= 1;
+    return 0;
+}
+
+Error __eql(Memory* mem)
+{
+    if (mem->stack_size < 2) {
+        return ERR_STACK_UNDERFLOW;
+    }
+    mem->stack[mem->stack_size - 2] = mem->stack[mem->stack_size - 1] == mem->stack[mem->stack_size - 2];
+    mem->stack_size -= 1;
+    return 0;
+}
+
+Error __pop(Memory* mem)
+{
+    if (mem->stack_size < 1) {
+        return ERR_STACK_UNDERFLOW;
+    }
+    printf("%d\n", mem->stack[mem->stack_size - 1]);
+    mem->stack_size -= 1;
+    return 0;
+}
+
+Error __dup(Memory* mem, const Word* operand)
+{
+    if (mem->stack_size >= STACK_CAPACITY) {
+        return ERR_STACK_OVERFLOW;
+    }
+    if ((mem->stack_size - (*operand)) < 0) {
+        return ERR_STACK_UNDERFLOW;
+    }
+    if ((*operand) < 0) {
+        return ERR_ILLEGAL_OPERAND;
+    }
+    mem->stack[mem->stack_size] = mem->stack[mem->stack_size - (*operand)];
+    mem->stack_size += 1;
+    return 0;
 }

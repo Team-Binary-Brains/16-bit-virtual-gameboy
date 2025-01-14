@@ -1,5 +1,4 @@
-// #include "gbvm_memory.h"
-#include "gbvm_errors.h"
+#include "gbvm_fileops.h"
 
 #define PROGRAM_CAPACITY 1024
 
@@ -38,7 +37,7 @@ typedef struct {
     Word instruction_size;
 } Program;
 
-Error __psh(Memory*, Word);
+Error __psh(Memory*, const Word*);
 
 Error __add(Memory*);
 
@@ -52,10 +51,10 @@ Error __eql(Memory*);
 
 Error __pop(Memory*);
 
-Error __dup(Memory*, Word);
+Error __dup(Memory*, const Word*);
 
 Error executeInst(const Program*, Memory*, CPU*);
 
-String opcodeAsStr(Opcode);
+String opcodeAsStr(const Opcode*);
 
-Opcode strAsOpcode(String);
+Opcode strAsOpcode(const String*);

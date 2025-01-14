@@ -1,8 +1,8 @@
 #include "gbvm_errors.h"
 
-const char* errorAsCstr(Error error)
+const char* errorAsCstr(const Error* error)
 {
-    switch (error) {
+    switch ((*error)) {
     case ERR_OK:
         return "ERR_OK";
     case ERR_STACK_OVERFLOW:
@@ -28,7 +28,7 @@ void fileErrorDispWithExit(const char* message, const char* filePath)
     exit(1);
 }
 
-void executionErrorWithExit(Error error)
+void executionErrorWithExit(const Error* error)
 {
     fprintf(stderr, "Error : %s\n", errorAsCstr(error));
     exit(1);

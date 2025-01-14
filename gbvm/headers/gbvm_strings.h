@@ -1,7 +1,7 @@
 #include "gbvm_memory.h"
 
 typedef struct {
-    size_t parts;
+    size_t length;
     const char* data;
 } String;
 

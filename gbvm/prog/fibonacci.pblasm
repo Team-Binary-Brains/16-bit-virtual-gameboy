@@ -1,7 +1,10 @@
-PSH 0
-PSH 1
-DUP 2
-DUP 2
-ADD
-JMP 2
-HLT
+    PSH 0
+    PSH 1
+
+    DUP 2
+    DUP 2
+
+    ADD
+    JMP 2
+    
+    HLT

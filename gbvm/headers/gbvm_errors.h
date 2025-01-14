@@ -1,4 +1,3 @@
-// #include "gbvm_memory.h"
 #include "gbvm_strings.h"
 
 typedef enum {
@@ -11,8 +10,8 @@ typedef enum {
     ERR_ILLEGAL_OPERAND
 } Error;
 
-const char* errorAsCstr(Error);
+const char* errorAsCstr(const Error*);
 
 void fileErrorDispWithExit(const char*, const char*);
 
-void executionErrorWithExit(Error);
+void executionErrorWithExit(const Error*);
