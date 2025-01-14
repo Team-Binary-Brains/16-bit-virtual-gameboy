@@ -13,4 +13,6 @@ typedef struct {
 
 void dumpStack(FILE*, const Vm*);
 
+void dumpFlags(FILE*, const Vm*);
+
 Error executeProgram(Vm* vm);
