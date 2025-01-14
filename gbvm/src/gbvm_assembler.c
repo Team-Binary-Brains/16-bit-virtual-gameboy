@@ -1,4 +1,6 @@
+#include "external_includes.h"
 #include "gbvm_assembler.h"
+#include "gbvm_fileops.h"
 
 Program disassembleBytecodeIntoProgram(const char* filePath)
 {
@@ -34,33 +36,41 @@ void assembleProgramIntoBytecode(const Program* prog, const char* filePath)
 Instruction processLine(String* line)
 {
     *line = trim(*line);
+
     String opStr = splitStr(line, ' ');
     Opcode op = strAsOpcode(&opStr);
+
     if (op < PSH) {
         return (Instruction) { .type = op };
     }
-    *line = ltrim(*line);
+
+    *line = trim(*line);
     Word operand = strToWord(splitStr(line, ' '));
     // printf("Operand :%d\n", operand);
+
     return (Instruction) { .type = op, .operand = operand };
 }
 
 Program parseAsmIntoProgram(String* src)
 {
-    Instruction ins[src->length];
     Program prog;
     prog.instruction_count = 0;
+
     while (src->length > 0) {
         String line = splitStr(src, '\n');
         // printf("Line : %.*s\n", (int)(line.length), line.data);
+
         Instruction tmp = processLine(&line);
+
         if (tmp.type != NOP) {
-            ins[prog.instruction_count++] = tmp;
+            if (prog.instruction_count >= PROGRAM_CAPACITY) {
+                displayMsgWithExit("Program LOC capacity exceeded");
+            }
+            prog.instructions[prog.instruction_count++] = tmp;
         }
     }
 
-    memcpy(prog.instructions, ins, sizeof(ins));
-    prog.instruction_size = sizeof(ins[0]);
+    prog.instruction_size = sizeof(prog.instructions[0]);
 
     return prog;
 }
@@ -70,7 +80,7 @@ String loadFileIntoString(const char* filePath)
     FILE* f = openFile(filePath, "r");
     Word m = getFileSize(f, filePath);
 
-    char* buffer = malloc(m);
+    char* buffer = malloc(m + 1);
 
     if (buffer == NULL) {
         fileErrorDispWithExit("can't allocate memory for file", filePath);
@@ -81,6 +91,7 @@ String loadFileIntoString(const char* filePath)
     }
 
     size_t n = fread(buffer, 1, m, f);
+    buffer[n] = '\0';
 
     closeFile(filePath, f);
 

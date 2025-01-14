@@ -1,3 +1,4 @@
+#include "gbvm_errors.h"
 #include "gbvm_fileops.h"
 
 FILE* openFile(const char* filePath, const char* mode)
@@ -7,28 +8,38 @@ FILE* openFile(const char* filePath, const char* mode)
     if (!f) {
         fileErrorDispWithExit("can't open file", filePath);
     }
+
     return f;
 }
 
 void closeFile(const char* filePath, FILE* file)
 {
-    if (ferror(file)) {
-        fileErrorDispWithExit("can't write to file", filePath);
+    if (file == NULL) {
+        return;
     }
 
-    fclose(file);
+    if (fclose(file) != 0) {
+        fileErrorDispWithExit("can't close file", filePath);
+    }
 }
 
 Word getFileSize(FILE* f, const char* filePath)
 {
-    if (fseek(f, 0, SEEK_END) < 0) {
+    if (f == NULL) {
+        fileErrorDispWithExit("invalid file pointer", filePath);
+    }
+
+    if (fseek(f, 0, SEEK_END) != 0) {
         fileErrorDispWithExit("can't read from file", filePath);
     }
 
-    Word m = ftell(f);
+    Word fileSize = ftell(f);
 
-    if (m < 0) {
+    if (fileSize < 0) {
         fileErrorDispWithExit("can't read from file", filePath);
     }
-    return m;
+
+    rewind(f);
+
+    return fileSize;
 }

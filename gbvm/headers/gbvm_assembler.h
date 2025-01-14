@@ -1,7 +1,5 @@
 #pragma once
 
-#include "external_includes.h"
-#include "gbvm_fileops.h"
 #include "gbvm_instructions.h"
 #include "gbvm_memory.h"
 #include "gbvm_strings.h"

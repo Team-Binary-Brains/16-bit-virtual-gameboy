@@ -14,12 +14,12 @@ String ltrim(String s)
 
 String rtrim(String s)
 {
-    size_t i = 0;
-    while (i < s.length && isspace(s.data[s.length - i - 1])) {
-        i++;
+    size_t i = s.length;
+    while (i > 0 && isspace(s.data[i - 1])) {
+        i--;
     }
     return (String) {
-        .length = s.length - i,
+        .length = i,
         .data = s.data
     };
 }

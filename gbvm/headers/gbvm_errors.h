@@ -1,7 +1,5 @@
 #pragma once
 
-#include "external_includes.h"
-
 typedef enum {
     ERR_OK = 0,
     ERR_STACK_OVERFLOW,
@@ -17,3 +15,5 @@ const char* errorAsCstr(const Error*);
 void fileErrorDispWithExit(const char*, const char*);
 
 void executionErrorWithExit(const Error*);
+
+void displayMsgWithExit(const char*);

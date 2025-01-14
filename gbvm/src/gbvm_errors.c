@@ -1,3 +1,4 @@
+#include "external_includes.h"
 #include "gbvm_errors.h"
 
 const char* errorAsCstr(const Error* error)
@@ -31,5 +32,11 @@ void fileErrorDispWithExit(const char* message, const char* filePath)
 void executionErrorWithExit(const Error* error)
 {
     fprintf(stderr, "Error : %s\n", errorAsCstr(error));
+    exit(1);
+}
+
+void displayMsgWithExit(const char* message)
+{
+    fprintf(stderr, "ERROR : %s\n", message);
     exit(1);
 }
