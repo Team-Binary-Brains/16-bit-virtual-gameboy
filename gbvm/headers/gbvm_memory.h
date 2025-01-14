@@ -8,10 +8,10 @@
 
 #define STACK_CAPACITY 1024
 
-typedef int8_t Byte;
-typedef int16_t Word;
-typedef int32_t Double_Word;
-typedef int64_t Quad_Word;
+typedef unsigned char Byte;
+typedef short int Word;
+typedef unsigned int Double_Word;
+typedef unsigned long long int Quad_Word;
 
 typedef struct {
     Word AX;
