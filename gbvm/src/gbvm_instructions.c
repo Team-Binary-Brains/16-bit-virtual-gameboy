@@ -40,6 +40,7 @@ Opcode strAsOpcode(const String* s)
             return OpcodeStringMap[i].type;
         }
     }
+    displayStringMessageError("Unknown instruction detected and was ignored", *s);
     return NOP;
 }
 

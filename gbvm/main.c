@@ -9,7 +9,15 @@ Vm vm = { 0 };
 int main()
 {
     String src = loadFileIntoString("prog/fibonacci.pblasm");
+
+    printf("\n\n");
+    printf("|--------------------------------------------------Comments detected while parsing-------------------------------------------------|\n");
+    printf("|   |                                                                                                                              |\n");
     Program prog = parseAsmIntoProgram(&src);
+    printf("|   |                                                                                                                              |\n");
+    printf("|-------------------------------------------------------Compilation completed------------------------------------------------------|\n");
+    printf("\n\n");
+
     vm.prog = prog;
 
     executeProgram(&vm);

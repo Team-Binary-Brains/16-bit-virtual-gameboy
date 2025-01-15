@@ -38,6 +38,9 @@ Instruction processLine(String* line)
     *line = trim(*line);
 
     String opStr = splitStr(line, ' ');
+    if (opStr.length == 0) {
+        return (Instruction) { .type = NOP };
+    }
     Opcode op = strAsOpcode(&opStr);
 
     if (op < PSH) {
@@ -55,19 +58,30 @@ Program parseAsmIntoProgram(String* src)
 {
     Program prog;
     prog.instruction_count = 0;
-
     while (src->length > 0) {
-        String line = splitStr(src, '\n');
+        String line = trim(splitStr(src, '\n'));
         // printf("Line : %.*s\n", (int)(line.length), line.data);
+
+        if (line.length == 0) {
+            continue;
+        }
+
+        if (*line.data == '#' || *line.data == ';') {
+
+            debugCommentDisplay(&line);
+            continue;
+        }
 
         Instruction tmp = processLine(&line);
 
-        if (tmp.type != NOP) {
-            if (prog.instruction_count >= PROGRAM_CAPACITY) {
-                displayMsgWithExit("Program LOC capacity exceeded");
-            }
-            prog.instructions[prog.instruction_count++] = tmp;
+        if (tmp.type == NOP) {
+            continue;
         }
+
+        if (prog.instruction_count >= PROGRAM_CAPACITY) {
+            displayMsgWithExit("Program LOC capacity exceeded");
+        }
+        prog.instructions[prog.instruction_count++] = tmp;
     }
 
     prog.instruction_size = sizeof(prog.instructions[0]);

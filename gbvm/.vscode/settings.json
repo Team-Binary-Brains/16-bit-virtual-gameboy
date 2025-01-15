@@ -2,6 +2,8 @@
     "files.associations": {
         "gbvm_fileops.h": "c",
         "gbvm_errors.h": "c",
-        "external_includes.h": "c"
+        "external_includes.h": "c",
+        "gbvm_flags.C": "cpp",
+        "gbvm_strings.h": "c"
     }
 }

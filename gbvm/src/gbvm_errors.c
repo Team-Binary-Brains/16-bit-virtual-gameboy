@@ -1,5 +1,6 @@
 #include "external_includes.h"
 #include "gbvm_errors.h"
+#include "gbvm_strings.h"
 
 const char* errorAsCstr(const Error* error)
 {
@@ -41,4 +42,28 @@ void displayMsgWithExit(const char* message)
 {
     fprintf(stderr, "ERROR : %s\n", message);
     exit(1);
+}
+
+void displayStringMessageError(const char* msg, String str)
+{
+    printf("|   |                                                                                                                              |\n");
+    fprintf(stderr, "| W | WARNING | '%.*s' |", (int)str.length, str.data);
+    fprintf(stderr, " %s", msg);
+    for (size_t i = strlen(msg) + (int)str.length; i < 110; i++) {
+        fprintf(stderr, " ");
+    }
+    fprintf(stderr, "|\n");
+
+    printf("|   |                                                                                                                              |\n");
+}
+
+void debugCommentDisplay(String* s)
+{
+    String seperator = splitStr(s, ' ');
+    printf("| %.*s |", 1, seperator.data);
+    if (s->length < 125) {
+        printf(" %-*.*s |\n", (int)(124), (int)(s->length), s->data);
+    } else {
+        printf(" %.*s |\n", (int)(124), s->data);
+    }
 }

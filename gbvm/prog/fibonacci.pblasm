@@ -1,10 +1,28 @@
+# Push first 2 fibonacci numbers onto stack
+
     PSH 0
     PSH 1
 
-    DUP 2
-    DUP 2
+# duplicate the 2nd last element on stack
 
-    ADD
-    JIP 2
-    
-    HLT
+    DUP 2              Stack : 0,1 second last element is 0
+    DUP 2              Stack : 0,1,0 second last element is 1
+
+    ADD                Stack : 0,1,0,1 add last 2, so stack becomes 0,1,1
+
+# loop over until we overflow(get a negative value)
+
+    JIP 2              jump to the 2nd instruction, instruction count starts at 0
+
+#
+    ABC                Instruction doesn't exist, added to show error msg
+;
+
+    HLT                Program end, any text after the instruction is ignored, so it doesn't matter if you use # or ;
+
+
+; But the difference is that comments written on individual lines will be displayed when compiling
+; Also the comments are checked compile-time and "loops" dont cause comment repetitions
+; So we can use it to check compile time errors, can use both '#' and ';'
+; Current display comment width limit is 125 characters, if we have more than 125 characters, extra will be discarded, for example, this part is only visible in file but not in cli
+;      Comment indentation is preserved

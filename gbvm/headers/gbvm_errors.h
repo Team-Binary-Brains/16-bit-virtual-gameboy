@@ -1,5 +1,7 @@
 #pragma once
 
+#include "gbvm_strings.h"
+
 typedef enum {
     ERR_OK = 0,
     ERR_STACK_OVERFLOW,
@@ -18,3 +20,7 @@ void fileErrorDispWithExit(const char*, const char*);
 void executionErrorWithExit(const Error*);
 
 void displayMsgWithExit(const char*);
+
+void displayStringMessageError(const char*, String);
+
+void debugCommentDisplay(String*);
