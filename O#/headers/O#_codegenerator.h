@@ -1,3 +1,4 @@
-#pragma onec
+#pragma once
 
-int generate_code(Node *root, char *filename);
+int generateCode(Node *root, char *filename);
+void traverseTree(Node *node, int is_left, FILE *file);

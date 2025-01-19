@@ -1,4 +1,5 @@
 #pragma once
+#include "../headers/O#_lexer.h"
 
 typedef struct Node{
     char *value;
@@ -10,11 +11,12 @@ typedef struct Node{
 
 
 Node *parser(Token *tokens);
-void print_tree(Node *node, int indent, char *identifier);
-Node *init_node(Node *node, char *value, TokenType type);
+void __printTree(Node *node, int indent, char *identifier);
+Node *initNode(Node *node, char *value, TokenType type);
+Token* generateOperationNodes(Token *currentToken, Node* currentNode);
 
-void print_error(char *error_type, size_t line_number);
-void handle_token_errors(char *error_text, Token *current_token, TokenType type);
+void printError(char *errorType, size_t line_number);
+void handleTokenErrors(char *error_text, Token *currentToken, TokenType type);
 
-Node *handle_exit_syscall(Node *root, Token *current_token, Node *current);
-Node *create_variables(Token *current_token, Node *current);
+Node *handleExitSyscall(Node *root, Token *currentToken, Node *current);
+Node *createVariables(Token *currentToken, Node *current);

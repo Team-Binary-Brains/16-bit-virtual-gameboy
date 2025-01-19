@@ -15,11 +15,17 @@ typedef enum{
 typedef struct{
     TokenType type;
     char *value;
-    size_t line_num;
+    size_t lineNum;
 } Token;
 
-void _print_token(Token token);
-Token *generate_number(char *current, int *current_index);
-Token *generate_keyword_or_identifier(char *current, int *current_index);
-Token *generate_seperator_or_operator(char *current, int *current_index, TokenType type);
+void __printToken(Token token);
+
+Token *generateNumber(char *current, int *currentIndex);
+
+Token *generateStringToken(char* current, int *currentIndex);
+
+Token *generateKeywordOrIdentifier(char *current, int *currentIndex);
+
+Token *generateSeperatorOrOperator(char *current, int *currentIndex, TokenType type);
+
 Token *lexer(FILE *file);

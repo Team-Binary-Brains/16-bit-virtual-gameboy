@@ -4,12 +4,13 @@
 #include<string.h>
 
 #include "./headers/O#_lexer.h"
-#include "headers/O#_parser.h"
-#include "headers/O#_codegenerator.h"
+#include "./headers/O#_parser.h"
+#include "./headers/O#_codegenerator.h"
 
 int main(int argc, char *argv[]){
     if(argc!=3){
-        printf("Error: Correc Syntax: ./build/occ <filename> <output_filename>");
+        printf("Error: Invalid Syntax. Correct Syntax: ./build/occ <filename> <output_filename>\n");
+        exit(1);
     }
 
     char *output_filename = malloc(sizeof(char) * 16);
@@ -25,14 +26,14 @@ int main(int argc, char *argv[]){
     Token *tokens = lexer(file);
 
     Node *root = parser(tokens);
+    
+    generateCode(root, output_filename);
 
-    code_generator(root, "%s.pblasm", argv[2]);
-
-    FILE *assembly_file = fopen("gbvmasm.asm", "r");
-    if(!assembly_file){
-        printf("ERROR NOT KNOWN: Kya coder banega re tu\n");
-        exit(1);
-    }
+    // FILE *assembly_file = fopen("gbvmasm.asm", "r");
+    // if(!assembly_file){
+    //     printf("ERROR NOT KNOWN: Kya coder banega re tu\n");
+    //     exit(1);
+    // }
 
     printf("Compiler Ready!!!\n");
 
