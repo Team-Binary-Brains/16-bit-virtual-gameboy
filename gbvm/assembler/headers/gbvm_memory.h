@@ -1,9 +1,6 @@
 #pragma once
 
-typedef char Byte;
-typedef short int Word;
-typedef int Double_Word;
-typedef long long int Quad_Word;
+#include "global_definitions.h"
 
 typedef struct {
     Word AX;

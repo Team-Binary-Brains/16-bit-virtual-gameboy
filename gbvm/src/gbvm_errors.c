@@ -1,4 +1,4 @@
-#include "external_includes.h"
+#include "global_definitions.h"
 #include "gbvm_errors.h"
 #include "gbvm_strings.h"
 
@@ -41,7 +41,7 @@ void executionErrorWithExit(const Error* error)
 void displayMsgWithExit(const char* message)
 {
     fprintf(stderr, "ERROR : %s\n", message);
-    exit(1);
+    // exit(1); done temporarily
 }
 
 void displayStringMessageError(const char* msg, String str)

@@ -1,4 +1,4 @@
-#include "external_includes.h"
+#include "global_definitions.h"
 #include "gbvm_assembler.h"
 #include "gbvm_fileops.h"
 
@@ -113,4 +113,46 @@ String loadFileIntoString(const char* filePath)
         .length = n,
         .data = buffer
     };
+}
+
+void writeProgramToFile(const Program* prog, const char* filePath)
+{
+    FILE* f = openFile(filePath, "w");
+    for (Word i = 0; i < prog->instruction_count; i++) {
+        Instruction inst = prog->instructions[i];
+        String op = opcodeAsStr(&inst.type);
+        fwrite(op.data, op.length, 1, f);
+        if (inst.type >= PSH) {
+            fwrite(" ", 1, 1, f);
+            char buf[32];
+            sprintf(buf, "%d", inst.operand);
+            fwrite(buf, strlen(buf), 1, f);
+        }
+        fwrite("\n", 1, 1, f);
+    }
+    closeFile(filePath, f);
+}
+
+int assemblyMode(char* inputFile, char* outputFile)
+{
+    String src = loadFileIntoString(inputFile);
+
+    printf("\n\n");
+    printf("|--------------------------------------------------Comments detected while parsing-------------------------------------------------|\n");
+    printf("|   |                                                                                                                              |\n");
+    Program prog = parseAsmIntoProgram(&src);
+    printf("|   |                                                                                                                              |\n");
+    printf("|-------------------------------------------------------Compilation completed------------------------------------------------------|\n");
+    printf("\n\n");
+
+    assembleProgramIntoBytecode(&prog, outputFile);
+
+    return 0;
+}
+
+int disassemblyMode(char* inputFile, char* outputFile)
+{
+    Program prog = disassembleBytecodeIntoProgram(inputFile);
+    writeProgramToFile(&prog, outputFile);
+    return 0;
 }

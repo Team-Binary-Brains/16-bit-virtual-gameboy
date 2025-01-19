@@ -1,6 +1,6 @@
 #pragma once
 
-#include "external_includes.h"
+#include "global_definitions.h"
 #include "gbvm_memory.h"
 
 typedef struct {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "external_includes.h"
+#include "global_definitions.h"
 #include "gbvm_errors.h"
 #include "gbvm_memory.h"
 #include "gbvm_strings.h"
@@ -23,12 +23,6 @@ typedef enum {
     JNZ,
     JIP,
 } Opcode;
-
-typedef struct {
-    Opcode type;
-    size_t size;
-    char* name;
-} OpcodeString;
 
 typedef struct {
     Opcode type;

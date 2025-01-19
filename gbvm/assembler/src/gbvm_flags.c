@@ -1,4 +1,4 @@
-#include "external_includes.h"
+#include "global_definitions.h"
 #include "gbvm_memory.h"
 #include "gbvm_flags.h"
 

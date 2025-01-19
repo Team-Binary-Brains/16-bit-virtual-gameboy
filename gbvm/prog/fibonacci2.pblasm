@@ -1,0 +1,8 @@
+PSH 0
+PSH 1
+DUP 2
+DUP 2
+ADD
+JIP 2
+POP
+JMP 6

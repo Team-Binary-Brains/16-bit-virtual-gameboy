@@ -1,6 +1,6 @@
 #pragma once
 
-#include "external_includes.h"
+#include "global_definitions.h"
 #include "gbvm_errors.h"
 #include "gbvm_instructions.h"
 #include "gbvm_memory.h"
@@ -15,4 +15,4 @@ void dumpStack(FILE*, const Vm*);
 
 void dumpFlags(FILE*, const Vm*);
 
-Error executeProgram(Vm* vm);
+void executeProgram(Vm* vm, int debug, int i);

@@ -2,6 +2,12 @@
 #include "gbvm_flags.h"
 #include "gbvm_alu.h"
 
+typedef struct {
+    Opcode type;
+    size_t size;
+    char* name;
+} OpcodeString;
+
 static OpcodeString OpcodeStringMap[] = {
     { NOP, 3, "NOP" },
     { PSH, 3, "PSH" },
@@ -20,17 +26,22 @@ static OpcodeString OpcodeStringMap[] = {
 
 String opcodeAsStr(const Opcode* type)
 {
-    for (size_t i = 0; i < sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]); ++i) {
+    size_t len = sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]);
+
+    for (size_t i = 0; i < len; ++i) {
         if ((*type) == OpcodeStringMap[i].type) {
             return (String) { .data = OpcodeStringMap[i].name, .length = OpcodeStringMap[i].size };
         }
     }
+
     assert(0 && "opcodeAsStr : Unreachable");
 }
 
 Opcode strAsOpcode(const String* s)
 {
-    for (size_t i = 0; i < sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]); ++i) {
+    size_t len = sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]);
+
+    for (size_t i = 0; i < len; ++i) {
 
         if (s->length != OpcodeStringMap[i].size) {
             continue;
@@ -40,6 +51,7 @@ Opcode strAsOpcode(const String* s)
             return OpcodeStringMap[i].type;
         }
     }
+
     displayStringMessageError("Unknown instruction detected and was ignored", *s);
     return NOP;
 }
