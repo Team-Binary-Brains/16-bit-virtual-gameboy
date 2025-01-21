@@ -3,55 +3,87 @@
 
 size_t lineNumber = 0;
 
-void __printToken(Token token)
-{
-    printf("TOKEN VALUE: ");
-    printf("'");
-    for (int i = 0; token.value[i] != '\0'; i++) {
-        printf("%c", token.value[i]);
-    }
-    printf("'");
-    printf("\nline number: %zu", token.lineNum);
+// void __printToken(Token token)
+// {
+//     printf("TOKEN VALUE: ");
+//     printf("'");
+//     for (int i = 0; token.value[i] != '\0'; i++) {
+//         printf("%c", token.value[i]);
+//     }
+//     printf("'");
+//     printf("\nline number: %zu", token.lineNum);
 
-    switch (token.type) {
-    case INT:
-        printf(" TOKEN TYPE: INT\n");
-        break;
-    case KEYWORD:
-        printf(" TOKEN TYPE: KEYWORD\n");
-        break;
-    case SEPARATOR:
-        printf(" TOKEN TYPE: SEPARATOR\n");
-        break;
-    case OPERATOR:
-        printf(" TOKEN TYPE: OPERATOR\n");
-        break;
-    case IDENTIFIER:
-        printf(" TOKEN TYPE: IDENTIFIER\n");
-        break;
-    case STRING:
-        printf(" TOKEN TYPE: STRING\n");
-        break;
-    case COMP:
-        printf(" TOKEN TYPE: COMPARATOR\n");
-        break;
-    case END_OF_TOKENS:
-        printf(" END OF TOKENS\n");
-        break;
-    case BEGINNING:
-        printf("BEGINNING\n");
-        break;
+//     switch (token.type) {
+//     case INT:
+//         printf(" TOKEN TYPE: INT\n");
+//         break;
+//     case KEYWORD:
+//         printf(" TOKEN TYPE: KEYWORD\n");
+//         break;
+//     case SEPARATOR:
+//         printf(" TOKEN TYPE: SEPARATOR\n");
+//         break;
+//     case OPERATOR:
+//         printf(" TOKEN TYPE: OPERATOR\n");
+//         break;
+//     case IDENTIFIER:
+//         printf(" TOKEN TYPE: IDENTIFIER\n");
+//         break;
+//     case STRING:
+//         printf(" TOKEN TYPE: STRING\n");
+//         break;
+//     case COMP:
+//         printf(" TOKEN TYPE: COMPARATOR\n");
+//         break;
+//     case END_OF_TOKENS:
+//         printf(" END OF TOKENS\n");
+//         break;
+//     case BEGINNING:
+//         printf("BEGINNING\n");
+//         break;
+//     }
+// }
+
+Token *generateKeywordOrIdentifier(char *current, int* currentIndex){
+    Token *token = initToken(UNKNOWN);
+    char *keyword = malloc(sizeof(char) * 8);
+    int keywordIndex = 0;
+    while(current[*currentIndex]!='\0' && isalpha(current[*currentIndex])){
+        keyword[keywordIndex] = current[*currentIndex];
+        keywordIndex++;
+        *currentIndex+=1;
     }
+
+    keyword[keywordIndex] = '\0';
+
+    size_t len = sizeof(StringTokenMap) / sizeof(StringTokenMap[0]);
+    for(int i=0; i<len; i++){
+        if((*keyword) == SingleCharTokenMap[i].value){
+            token->value = *keyword;
+            token->type = SingleCharTokenMap[i].type;
+            return token;
+        }
+    }
+
+    token->value = *keyword;
+    token->type = IDENTIFIER;
+
+
+    return token;
 }
 
-Token* generateNumber(char* current, int* currentIndex)
-{
-    // Token Creation
+Token* initToken(TokenType type){
     Token* token = malloc(sizeof(Token));
     token->lineNum = (size_t)malloc(sizeof(size_t));
     token->lineNum = lineNumber;
-    token->type = INT;
+    token->type = type;
+    return token;
+}
 
+Token* generateIntLToken(char* current, int* currentIndex)
+{
+    // Token Creation
+    Token* token = initToken(INT_L);
     char* value = malloc(sizeof(char) * 8);
     int value_index = 0;
     while (current[*currentIndex] != '\0' && isdigit(current[*currentIndex])) {
@@ -64,60 +96,38 @@ Token* generateNumber(char* current, int* currentIndex)
     return token;
 }
 
-Token* generateKeywordOrIdentifier(char* current, int* currentIndex)
+void generateSingleCharToken(char ch, Token* token)
 {
-    Token* token = malloc(sizeof(Token));
-    token->lineNum = (size_t)malloc(sizeof(size_t));
-    token->lineNum = lineNumber;
-    char* keyword = malloc(sizeof(char) * 8);
-    int keywordIndex = 0;
-    while (current[*currentIndex] != '\0' && isalpha(current[*currentIndex])) {
-        keyword[keywordIndex] = current[*currentIndex];
-        keywordIndex++;
-        *currentIndex += 1;
+    size_t len = sizeof(SingleCharTokenMap) / sizeof(SingleCharTokenMap[0]);
+    for(int i=0; i<len; i++){
+        if(ch == SingleCharTokenMap[i].value){
+            token->value = ch;
+            token->type = SingleCharTokenMap[i].type;
+        }
     }
-
-    keyword[keywordIndex] = '\0';
-
-    if (strcmp(keyword, "exit") == 0) {
-        token->type = KEYWORD;
-        token->value = "EXIT";
-    } else if (strcmp(keyword, "int") == 0) {
-        token->type = KEYWORD;
-        token->value = "INT";
-    } else if (strcmp(keyword, "if") == 0) {
-        token->type = KEYWORD;
-        token->value = "IF";
-    } else if (strcmp(keyword, "while") == 0) {
-        token->type = KEYWORD;
-        token->value = "WHILE";
-    } else if (strcmp(keyword, "write") == 0) {
-        token->type = KEYWORD;
-        token->value = "WRITE";
-    } else if (strcmp(keyword, "eq") == 0) {
-        token->type = KEYWORD;
-        token->value = "EQ";
-    } else if (strcmp(keyword, "neq") == 0) {
-        token->type = COMP;
-        token->value = "NEQ";
-    } else if (strcmp(keyword, "less") == 0) {
-        token->type = COMP;
-        token->value = "LESS";
-    } else if (strcmp(keyword, "greater") == 0) {
-        token->type = COMP;
-        token->value = "GREATER";
-    } else {
-        token->type = IDENTIFIER;
-        token->value = keyword;
-    }
-    return token;
 }
 
-Token* generateStringToken(char* current, int* currentIndex)
+void generateTwoCharToken(char* current, int* currentIndex, Token* token){
+    char* value = malloc(sizeof(char)*3);
+    value[0] = current[*currentIndex];
+    currentIndex++;
+    value[1] = current[*currentIndex];
+    value[2] = '\0';
+
+    size_t len = sizeof(TwoCharTokenMap) / sizeof(TwoCharTokenMap[0]);
+    for(int i=0; i<len; i++){
+        if(value == SingleCharTokenMap[i].value){
+            token->value = value;
+            token->type = SingleCharTokenMap[i].type;
+        }
+    }
+    currentIndex--;
+    
+}
+
+Token* generateStringLToken(char* current, int* currentIndex)
 {
-    Token* token = malloc(sizeof(Token));
-    token->lineNum = (size_t)malloc(sizeof(size_t));
-    token->lineNum = lineNumber;
+    Token* token = initToken(STR_L);
     char* value = malloc(sizeof(char) * 64);
     int value_index = 0;
     *currentIndex += 1;
@@ -127,20 +137,7 @@ Token* generateStringToken(char* current, int* currentIndex)
         *currentIndex += 1;
     }
     value[value_index] = '\0';
-    token->type = STRING;
     token->value = value;
-    return token;
-}
-
-Token* generateSeparatorOrOperator(char* current, int* currentIndex, TokenType type)
-{
-    Token* token = malloc(sizeof(Token));
-    token->value = malloc(sizeof(char) * 2);
-    token->value[0] = current[*currentIndex];
-    token->value[1] = '\0';
-    token->lineNum = (size_t)malloc(sizeof(size_t));
-    token->lineNum = lineNumber;
-    token->type = type;
     return token;
 }
 
@@ -168,57 +165,37 @@ Token* lexer(FILE* file)
     tokensIndex = 0;
 
     while (current[currentIndex] != '\0') {
-        Token* token = malloc(sizeof(Token));
+        if (current[currentIndex] == ' ') {
+            currentIndex++;
+            continue;
+        }
+
         tokens_size++;
         if (tokens_size > number_of_tokens) {
             number_of_tokens *= 1.5;
             tokens = realloc(tokens, sizeof(Token) * number_of_tokens);
         }
 
-        if (current[currentIndex] == ' ') {
-            free(token);
-            currentIndex++;
-            continue;
-        }
+        if(current[currentIndex] == '\n'){
+            lineNumber++;
+        }else{
+            Token* token = initToken(UNKNOWN);
+            generateTwoCharToken(current, &currentIndex, token);
+            generateSingleCharToken(current[currentIndex], token);
 
-        switch (current[currentIndex]) {     // Improvement
-        case ';':
-        case ',':
-        case '(':
-        case ')':
-        case '{':
-        case '}':
-            token = generateSeparatorOrOperator(current, &currentIndex, SEPARATOR);
-            break;
-
-        case '=':
-        case '+':
-        case '-':
-        case '*':
-        case '/':
-        case '%':
-            token = generateSeparatorOrOperator(current, &currentIndex, OPERATOR);
-            break;
-        case '"':
-            token = generateStringToken(current, &currentIndex);
-            break;
-        }
-
-        if (isdigit(current[currentIndex])) {
-            token = generateNumber(current, &currentIndex);
-            currentIndex--;
-        } else if (isalpha(current[currentIndex])) {
-            token = generateKeywordOrIdentifier(current, &currentIndex);
-            currentIndex--;
-        }
-
-        if (current[currentIndex] == '\n') {     // Improvement
-            lineNumber += 1;
-        } else {
+            if(strcmp(current[currentIndex], '"')){
+                token = generateStringLToken(current, &currentIndex);
+            }else if (isdigit(current[currentIndex])) {
+                token = generateIntLToken(current, &currentIndex);
+                currentIndex--;
+            } else if (isalpha(current[currentIndex])) {
+                token = generateKeywordOrIdentifier(current, &currentIndex);
+                currentIndex--;
+            }
             tokens[tokensIndex] = *token;
             tokensIndex++;
+            free(token);
         }
-        free(token);
         currentIndex++;
     }
     // Token *token = malloc(sizeof(Token));
