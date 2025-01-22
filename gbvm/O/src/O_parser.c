@@ -15,21 +15,25 @@ void handleTokenErrors(char* errorText, Token* currentToken, TokenType type)
     }
 }
 
-void __printTree(Node* node, int indent, char* identifier)
+void __printTree(Node* node, char identifier, int indent)
 {
     if (node == NULL) {
         return;
     }
-    for (int i = 0; i < indent; i++) {
-        printf(" ");
-    }
-    printf("%s -> ", identifier);
+
+    int i;
+    for (i = 1; i < indent; i++)
+        printf("             ");
+
+    for (int j = 0; j < (indent - i + 1); j++)
+        printf("┗━━━━━━━ (%c) '", identifier);
+
     for (size_t i = 0; node->value[i] != '\0'; i++) {
         printf("%c", node->value[i]);
     }
-    printf("\n");
-    __printTree(node->left, indent + 1, "left");
-    __printTree(node->right, indent + 1, "right");
+    printf("'\n");
+    __printTree(node->left, 'L', indent + 1);
+    __printTree(node->right, 'R', indent + 1);
 }
 
 Node* initNode(Node* node, char* value, TokenType type)
@@ -348,6 +352,6 @@ Node* parser(Token* tokens)
         currentToken++;
         // printf("I am here");
     }
-    __printTree(root, 0, "root");
+    __printTree(root, 'O', 0);
     return root;
 }

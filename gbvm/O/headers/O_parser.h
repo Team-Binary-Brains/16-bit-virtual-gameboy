@@ -9,7 +9,7 @@ typedef struct Node {
 } Node;
 
 Node* parser(Token*);
-void __printTree(Node*, int, char*);
+void __printTree(Node*, char, int);
 Node* initNode(Node*, char*, TokenType);
 Token* generateOperationNodes(Token*, Node*);
 
