@@ -158,7 +158,7 @@ void dump(HashTable *hashtable) {
             continue;
         }
 
-        printf("slot[%4lu]: ", i);
+        printf("slot[%4llu]: ", i);
 
         while (entry != NULL) {
             printf("%s:%s ", entry->key, entry->value);

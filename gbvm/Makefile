@@ -20,8 +20,8 @@ CMDIR = ./VM/src
 _A_HEAD = 		sasm_alu.h			sasm_assembler.h	sasm_flags.h			sasm_instructions.c		sasm_memory.h
 _A_CODE = 		sasm_alu.c			sasm_assembler.c	sasm_flags.c			sasm_instructions.c					 		 				 	
 
-_G_HEAD = 		univ_cmdutils.h 	univ_errors.h		univ_fileops.h 		 	univ_strings.h			univ_defs.h 
-_G_CODE = 		univ_cmdutils.c		univ_errors.c		univ_fileops.c 		 	univ_strings.c
+_G_HEAD = 		univ_cmdutils.h 	univ_errors.h		univ_fileops.h 		 	univ_strings.h			univ_defs.h 		univ_hashmap.h
+_G_CODE = 		univ_cmdutils.c		univ_errors.c		univ_fileops.c 		 	univ_strings.c			univ_hashmap.c
 
 _C_HEAD =		O_lexer.h			
 _C_CODE = 		O_lexer.c			
