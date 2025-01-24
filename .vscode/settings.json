@@ -1,5 +1,7 @@
 {
-    "files.associations": {
-        "random": "c"
-    }
+  "files.associations": {
+    "random": "c",
+    "univ_defs.h": "c"
+  },
+  "clang-format.executable": "C:\\Users\\OMKAR VIJAY JAGTAP\\Documents\\4th Sem\\PBL\\16-bit-virtual-gameboy\\.clang-format"
 }
