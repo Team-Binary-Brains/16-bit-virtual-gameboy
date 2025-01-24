@@ -48,44 +48,42 @@ typedef struct {
     size_t lineNum;
 } Token;
 
-static Token SingleCharTokenMap[] = {
-    { LPAREN, '(', 0 },
-    { RPAREN, ')', 0 },
-    { LBRACE, '{', 0 },
-    { LBRACE, '{', 0 },
-    { SEMICOLON, ';', 0 },
-    { COMMA, ',', 0 },
-    { PLUS, '+', 0 },
-    { MINUS, '-', 0 },
-    { STAR, '*', 0 },
-    { SLASH, '/', 0 },
-    { MOD, '%', 0 },
-    { LT, '<', 0 },
-    { GT, '>', 0 },
+static Token OpAndSepTokenMap[] = {
+    { LPAREN, "(", 0 },
+    { RPAREN, ")", 0 },
+    { LBRACE, "{", 0 },
+    { LBRACE, "{", 0 },
+    { SEMICOLON, ";", 0 },
+    { COMMA, ",", 0 },
+    { PLUS, "+", 0 },
+    { MINUS, "-", 0 },
+    { STAR, "*", 0 },
+    { SLASH, "/", 0 },
+    { MOD, "%", 0 },
+    { LT, "<", 0 },
+    { GT, ">", 0 },
+    { LE, "<=", 0 },
+    { GE, ">=", 0 },
+    { EQ, "==", 0 },
+    { NEQ, "!=", 0 },
 
 };
 
-static Token TwoCharTokenMap[] = {
-    { LE, '<=', 0 },
-    { GE, '>=', 0 },
-    { EQ, '==', 0 },
-    { NEQ, '!=', 0 },
-};
 
-static Token StringTokenMap[] = {
-    { INT, 'int', 0 },
-    { FLOAT, 'float', 0 },
-    { VOID, 'void', 0 },
-    { STRING, 'float', 0 },
-    { CHAR, 'char', 0 },
-    { CONSTANT, 'const', 0 },
-    { IF, 'if', 0 },
-    { ELSE, 'else', 0 },
-    { WHILE, 'while', 0 },
-    { FOR, 'for', 0 },
-    { RETURN, 'return', 0 },
-    { EXIT, 'exit', 0 },
-    { WRITE, 'cwrite', 0 },
+static Token KeywordTokenMap[] = {
+    { INT, "int", 0 },
+    { FLOAT, "float", 0 },
+    { VOID, "void", 0 },
+    { STRING, "float", 0 },
+    { CHAR, "char", 0 },
+    { CONSTANT, "const", 0 },
+    { IF, "if", 0 },
+    { ELSE, "else", 0 },
+    { WHILE, "while", 0 },
+    { FOR, "for", 0 },
+    { RETURN, "return", 0 },
+    { EXIT, "exit", 0 },
+    { WRITE, "cwrite", 0 },
 
 };
 
@@ -93,16 +91,14 @@ void __printToken(Token);
 
 Token* initToken(TokenType);
 
-void generateSingleCharToken(char, Token*);
+void generateOpAndSepToken(char*, int*, Token*);
 
-void generateTwoCharToken(char*, int*, Token*);
+void generateIntLToken(char*, int*, Token*);
 
-Token* generateIntLToken(char*, int*);
+void generateStringLToken(char*, int*, Token*);
 
-Token* generateStringLToken(char*, int*);
-
-Token* generateKeywordOrIdentifier(char*, int*);
+void generateKeywordOrIdentifier(char*, int*, Token*);
 
 Token* generateSeparatorOrOperator(char*, int*, TokenType);
 
-Token* lexer(FILE* file);
+Token* lexer(FILE* file, char* inputFile);

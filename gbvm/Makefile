@@ -23,8 +23,8 @@ _A_CODE = 		sasm_alu.c			sasm_assembler.c	sasm_flags.c			sasm_instructions.c
 _G_HEAD = 		univ_cmdutils.h 	univ_errors.h		univ_fileops.h 		 	univ_strings.h			univ_defs.h 
 _G_CODE = 		univ_cmdutils.c		univ_errors.c		univ_fileops.c 		 	univ_strings.c
 
-_C_HEAD =		O_lexer.h			O_parser.h			O_codegenerator.h 	
-_C_CODE = 		O_lexer.c			O_parser.c			O_codegenerator.c 	
+_C_HEAD =		O_lexer.h			
+_C_CODE = 		O_lexer.c			
 
 _M_HEAD = 		gbvm.h
 _M_CODE =		gbvm.c

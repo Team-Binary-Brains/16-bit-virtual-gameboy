@@ -1,54 +1,17 @@
 #include "univ_defs.h"
+#include "univ_fileops.h"
 #include "O_lexer.h"
 
 size_t lineNumber = 0;
 
-// void __printToken(Token token)
-// {
-//     printf("TOKEN VALUE: ");
-//     printf("'");
-//     for (int i = 0; token.value[i] != '\0'; i++) {
-//         printf("%c", token.value[i]);
-//     }
-//     printf("'");
-//     printf("\nline number: %zu", token.lineNum);
+void __printToken(Token token){
+    printf("Token value: %s\n", token.value);
+}
 
-//     switch (token.type) {
-//     case INT:
-//         printf(" TOKEN TYPE: INT\n");
-//         break;
-//     case KEYWORD:
-//         printf(" TOKEN TYPE: KEYWORD\n");
-//         break;
-//     case SEPARATOR:
-//         printf(" TOKEN TYPE: SEPARATOR\n");
-//         break;
-//     case OPERATOR:
-//         printf(" TOKEN TYPE: OPERATOR\n");
-//         break;
-//     case IDENTIFIER:
-//         printf(" TOKEN TYPE: IDENTIFIER\n");
-//         break;
-//     case STRING:
-//         printf(" TOKEN TYPE: STRING\n");
-//         break;
-//     case COMP:
-//         printf(" TOKEN TYPE: COMPARATOR\n");
-//         break;
-//     case END_OF_TOKENS:
-//         printf(" END OF TOKENS\n");
-//         break;
-//     case BEGINNING:
-//         printf("BEGINNING\n");
-//         break;
-//     }
-// }
-
-Token *generateKeywordOrIdentifier(char *current, int* currentIndex){
-    Token *token = initToken(UNKNOWN);
+void generateKeywordOrIdentifier(char *current, int* currentIndex, Token* token){
     char *keyword = malloc(sizeof(char) * 8);
     int keywordIndex = 0;
-    while(current[*currentIndex]!='\0' && isalpha(current[*currentIndex])){
+    while(current[*currentIndex]!='\0' && (isalpha(current[*currentIndex]) || isdigit(current[*currentIndex]))){
         keyword[keywordIndex] = current[*currentIndex];
         keywordIndex++;
         *currentIndex+=1;
@@ -56,34 +19,27 @@ Token *generateKeywordOrIdentifier(char *current, int* currentIndex){
 
     keyword[keywordIndex] = '\0';
 
-    size_t len = sizeof(StringTokenMap) / sizeof(StringTokenMap[0]);
+    size_t len = sizeof(KeywordTokenMap) / sizeof(KeywordTokenMap[0]);
+    token->value = keyword;
     for(int i=0; i<len; i++){
-        if((*keyword) == SingleCharTokenMap[i].value){
-            token->value = *keyword;
-            token->type = SingleCharTokenMap[i].type;
-            return token;
+        if(strcmp(keyword,KeywordTokenMap[i].value) == 0){
+            token->type = KeywordTokenMap[i].type;
+            //free(keyword);
+            return;
         }
     }
-
-    token->value = *keyword;
     token->type = IDENTIFIER;
-
-
-    return token;
+    //free(keyword);
 }
 
 Token* initToken(TokenType type){
     Token* token = malloc(sizeof(Token));
-    token->lineNum = (size_t)malloc(sizeof(size_t));
     token->lineNum = lineNumber;
     token->type = type;
     return token;
 }
 
-Token* generateIntLToken(char* current, int* currentIndex)
-{
-    // Token Creation
-    Token* token = initToken(INT_L);
+void generateIntLToken(char* current, int* currentIndex, Token* token){
     char* value = malloc(sizeof(char) * 8);
     int value_index = 0;
     while (current[*currentIndex] != '\0' && isdigit(current[*currentIndex])) {
@@ -93,41 +49,32 @@ Token* generateIntLToken(char* current, int* currentIndex)
     }
     value[value_index] = '\0';
     token->value = value;
-    return token;
 }
 
-void generateSingleCharToken(char ch, Token* token)
-{
-    size_t len = sizeof(SingleCharTokenMap) / sizeof(SingleCharTokenMap[0]);
-    for(int i=0; i<len; i++){
-        if(ch == SingleCharTokenMap[i].value){
-            token->value = ch;
-            token->type = SingleCharTokenMap[i].type;
-        }
-    }
-}
-
-void generateTwoCharToken(char* current, int* currentIndex, Token* token){
+void generateOpAndSepToken(char* current, int* currentIndex, Token* token){
     char* value = malloc(sizeof(char)*3);
     value[0] = current[*currentIndex];
-    currentIndex++;
-    value[1] = current[*currentIndex];
-    value[2] = '\0';
-
-    size_t len = sizeof(TwoCharTokenMap) / sizeof(TwoCharTokenMap[0]);
-    for(int i=0; i<len; i++){
-        if(value == SingleCharTokenMap[i].value){
-            token->value = value;
-            token->type = SingleCharTokenMap[i].type;
-        }
+    if(current[(*currentIndex)+1] == '='){
+        currentIndex++;
+        value[1] = current[*currentIndex];
+        value[2] = '\0';
+    }else{
+        value = realloc(value, sizeof(char)*2);
+        value[1] = '\0';
     }
-    currentIndex--;
-    
+
+    size_t len = sizeof(OpAndSepTokenMap) / sizeof(OpAndSepTokenMap[0]);
+    for(int i=0; i<len; i++){
+        if(strcmp(value, OpAndSepTokenMap[i].value)){
+            token->value = value;
+            token->type = OpAndSepTokenMap[i].type;
+            return;
+        }
+    }  
 }
 
-Token* generateStringLToken(char* current, int* currentIndex)
-{
-    Token* token = initToken(STR_L);
+void generateStringLToken(char* current, int* currentIndex, Token* token){
+    token->type = STR_L;
     char* value = malloc(sizeof(char) * 64);
     int value_index = 0;
     *currentIndex += 1;
@@ -138,30 +85,32 @@ Token* generateStringLToken(char* current, int* currentIndex)
     }
     value[value_index] = '\0';
     token->value = value;
-    return token;
 }
 
 size_t tokensIndex;
 
-Token* lexer(FILE* file)
-{
-    int length;
+Token* lexer(FILE* file, char* inputFile){
+    long file_size;
     char* current = 0;
 
-    fseek(file, 0, SEEK_END);
-    length = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    // 'file_size' will contain actual size of file ('\n' are also counted)
+    file_size = getFileSize(file, inputFile);
 
-    current = malloc(sizeof(char) * length);
-    fread(current, 1, length, file);
+    // Allocate data to store all the contents of file (including '\n')
+    // file_size +1 is for null character
+    current = malloc(sizeof(char) * file_size+1u);
+
+    // 'read_len' will contain no. of characters(including spaces) in the file. (Note: '\n' are excluded)
+    // Also, No. of lines in the file = file_size - read_len
+    size_t read_len = fread(current, 1, file_size, file);
+    current[read_len] = '\0';
+
     fclose(file);
-
-    current[length] = '\0';
     int currentIndex = 0;
 
-    int number_of_tokens = 15;
+    int numberOfTokens = 15;
     int tokens_size = 0;
-    Token* tokens = malloc(sizeof(Token) * number_of_tokens);
+    Token* tokens = malloc(sizeof(Token) * numberOfTokens);
     tokensIndex = 0;
 
     while (current[currentIndex] != '\0') {
@@ -171,44 +120,39 @@ Token* lexer(FILE* file)
         }
 
         tokens_size++;
-        if (tokens_size > number_of_tokens) {
-            number_of_tokens *= 1.5;
-            tokens = realloc(tokens, sizeof(Token) * number_of_tokens);
+        if (tokens_size > numberOfTokens) {
+            numberOfTokens *= 1.5;
+            tokens = realloc(tokens, sizeof(Token) * numberOfTokens);
         }
 
         if(current[currentIndex] == '\n'){
             lineNumber++;
         }else{
             Token* token = initToken(UNKNOWN);
-            generateTwoCharToken(current, &currentIndex, token);
-            generateSingleCharToken(current[currentIndex], token);
 
-            if(strcmp(current[currentIndex], '"')){
-                token = generateStringLToken(current, &currentIndex);
+            if(current[currentIndex] == '"'){
+                generateStringLToken(current, &currentIndex, token);
             }else if (isdigit(current[currentIndex])) {
-                token = generateIntLToken(current, &currentIndex);
+                generateIntLToken(current, &currentIndex, token);
                 currentIndex--;
             } else if (isalpha(current[currentIndex])) {
-                token = generateKeywordOrIdentifier(current, &currentIndex);
+                generateKeywordOrIdentifier(current, &currentIndex, token);
                 currentIndex--;
+            }else{
+                generateOpAndSepToken(current, &currentIndex, token);
             }
+
             tokens[tokensIndex] = *token;
             tokensIndex++;
             free(token);
         }
         currentIndex++;
     }
-    // Token *token = malloc(sizeof(Token));
-    // token->value = malloc(sizeof(char)*1);
-    // token->value = "a";
-    // token->type = END_OF_TOKENS;
-    // tokens[tokensIndex] = *token;
-    // free(token);
-    // printf("token index: %zu\n", tokensIndex);
-    tokens[tokensIndex].value = '\0';
+
+    tokens[tokensIndex].value = "\0";
     tokens[tokensIndex].type = END_OF_TOKENS;
-    // for(int i=0; i<tokensIndex; i++){
-    //     __printToken(tokens[i]);
-    // }
+    for(int i=0; i<tokensIndex+1; i++){
+        __printToken(tokens[i]);
+    }
     return tokens;
 }

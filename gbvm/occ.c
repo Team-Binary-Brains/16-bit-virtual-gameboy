@@ -37,9 +37,10 @@ int main(int argc, char* argv[])
         exit(1);
     }
 
-    Node* root = parser(lexer(file));
+    Token* tokens = lexer(file, inputFile);
+    // Node* root = parser(tokens);
 
-    generateCode(root, outputFile);
+    // generateCode(root, outputFile);
 
     // FILE *assembly_file = fopen("gbvmasm.asm", "r");
     // if(!assembly_file){
