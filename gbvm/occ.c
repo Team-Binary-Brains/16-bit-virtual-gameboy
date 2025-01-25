@@ -1,9 +1,11 @@
+#pragma GCC diagnostic ignored "-Wswitch-enum"
 #include "O_codegenerator.h"
 #include "O_lexer.h"
 #include "O_parser.h"
 #include "univ_cmdutils.h"
 #include "univ_defs.h"
 #include "univ_errors.h"
+#include "univ_fileops.h"
 
 char* inputFile = NULL;
 char* outputFile = NULL;
@@ -29,13 +31,7 @@ int main(int argc, char* argv[])
                            "\tSample Command    : ./gbasm -i ./prog/FirstProgram.osh  -o ./prog/example.pblasm\n");
     }
 
-    FILE* file;
-    file = fopen(inputFile, "r");
-
-    if (!file) {
-        printf("FILE_ERROR: %s file not found\n", inputFile);
-        exit(1);
-    }
+    FILE* file = openFile(inputFile, "r");
 
     Node* root = parser(lexer(file));
 
@@ -54,20 +50,19 @@ int main(int argc, char* argv[])
     */
     return 0;
 }
+
 void processFlag(char* flag, int* argc, char*** argv)
 {
     Option opt = flagAsOption(flag);
 
     switch (opt) {
-    case INPUT_FILE:
+    case FILE_INPUT:
         inputFile = getNextCmdLineArg(argc, argv);
         return;
-    case OUTPUT_FILE:
+    case FILE_OUTPUT:
         outputFile = getNextCmdLineArg(argc, argv);
         return;
     case ASM_LANG:
-    case ASSEMBLE_MODE:
-    case DISASSEMBLE_MODE:
     default:
         displayMsgWithExit("Unknown option provided.");
     }

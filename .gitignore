@@ -4,3 +4,7 @@
 *.out
 .vscode/
 /gbvm/.vscode/
+/samplePrograms/
+/gbvm/gbvm
+/gbvm/occ
+/gbvm/sasm
