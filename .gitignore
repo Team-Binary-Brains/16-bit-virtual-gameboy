@@ -1,0 +1,6 @@
+/gbvm/build/
+*.o
+*.exe
+*.out
+.vscode/
+/gbvm/.vscode/
