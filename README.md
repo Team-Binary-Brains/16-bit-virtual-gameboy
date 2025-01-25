@@ -1,5 +1,9 @@
 # 16 bit virtual gameboy
 
+## UPDATE
+
+### It has been confirmed that the previous MakeFile worked on windows as well, So this "CMake Transfer" has been paused for an indefinite amount of time
+
 ## AIM
 
 -   A fun project where we aim to create a virtual machine with it's own instruction set, a language in that instruction set and then a simple game(Tetris?) in that language
