@@ -29,6 +29,7 @@ typedef enum {
     STAR,
     SLASH,
     MOD,
+    EQUAL,
     LT,
     LE,
     GT,
@@ -48,7 +49,7 @@ typedef struct {
     size_t lineNum;
 } Token;
 
-static Token OpAndSepTokenMap[] = {
+static Token OpAndSepTokens[] = {
     { LPAREN, "(", 0 },
     { RPAREN, ")", 0 },
     { LBRACE, "{", 0 },
@@ -60,6 +61,7 @@ static Token OpAndSepTokenMap[] = {
     { STAR, "*", 0 },
     { SLASH, "/", 0 },
     { MOD, "%", 0 },
+    { EQUAL, "=", 0},
     { LT, "<", 0 },
     { GT, ">", 0 },
     { LE, "<=", 0 },
@@ -70,7 +72,7 @@ static Token OpAndSepTokenMap[] = {
 };
 
 
-static Token KeywordTokenMap[] = {
+static Token KeywordTokens[] = {
     { INT, "int", 0 },
     { FLOAT, "float", 0 },
     { VOID, "void", 0 },

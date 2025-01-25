@@ -1,35 +1,25 @@
 #include "univ_defs.h"
 #include "univ_hashmap.h"
-// Hash function to calculate the index based on the key
-size_t hashFunc(const char *key, size_t tableSize) {
-    size_t hashValue = 0;
-    size_t i = 0;
-    unsigned int keyLength = strlen(key);
-
-    for (; i < keyLength; ++i) {
-        hashValue = hashValue * 37 + key[i];
-    }
-
-    return hashValue % tableSize; // Ensure the hash value is within the table size
-}
 
 // Create a new entry (key-value pair)
-Entry *createEntry(const char *key, const char *value) {
+Entry *createEntry(void *key, void *value) {
     Entry *entry = malloc(sizeof(Entry));
-    entry->key = malloc(strlen(key) + 1);
-    entry->value = malloc(strlen(value) + 1);
-    strcpy(entry->key, key);
-    strcpy(entry->value, value);
+    entry->key = key;
+    entry->value = value;
     entry->next = NULL;
     return entry;
 }
 
 // Create a new hash table
-HashTable *createHashTable(size_t size) {
+HashTable *createHashTable(size_t size, HashFunc hashFunc, KeyCompareFunc compare, KeyDestroyFunc destroyKey, ValueDestroyFunc destroyValue) {
     HashTable *hashtable = malloc(sizeof(HashTable));
     hashtable->size = size;
     hashtable->count = 0;
     hashtable->entries = malloc(sizeof(Entry*) * size);
+    hashtable->hashFunc = hashFunc;
+    hashtable->compare = compare;
+    hashtable->destroyKey = destroyKey;
+    hashtable->destroyValue = destroyValue;
 
     for (size_t i = 0; i < size; ++i) {
         hashtable->entries[i] = NULL;
@@ -52,7 +42,7 @@ void resizeHashTable(HashTable *hashtable) {
     for (size_t i = 0; i < hashtable->size; ++i) {
         Entry *entry = hashtable->entries[i];
         while (entry) {
-            size_t newSlot = hashFunc(entry->key, newSize);
+            size_t newSlot = hashtable->hashFunc(entry->key, newSize);
             Entry *next = entry->next;
 
             // Insert into the new table
@@ -72,13 +62,13 @@ void resizeHashTable(HashTable *hashtable) {
 }
 
 // Insert a key-value pair into the hash table
-void insert(HashTable *hashtable, const char *key, const char *value) {
+void insert(HashTable *hashtable, void *key, void *value) {
     // Resize if load factor exceeds threshold
     if ((double)hashtable->count / hashtable->size > LOAD_FACTOR_THRESHOLD) {
         resizeHashTable(hashtable);
     }
 
-    size_t slot = hashFunc(key, hashtable->size);
+    size_t slot = hashtable->hashFunc(key, hashtable->size);
     Entry *entry = hashtable->entries[slot];
 
     if (entry == NULL) {
@@ -89,10 +79,11 @@ void insert(HashTable *hashtable, const char *key, const char *value) {
 
     Entry *prev;
     while (entry != NULL) {
-        if (strcmp(entry->key, key) == 0) {
-            free(entry->value);
-            entry->value = malloc(strlen(value) + 1);
-            strcpy(entry->value, value);
+        if (hashtable->compare(entry->key, key) == 0) {
+            if (hashtable->destroyValue) {
+                hashtable->destroyValue(entry->value);
+            }
+            entry->value = value;
             return;
         }
         prev = entry;
@@ -104,12 +95,12 @@ void insert(HashTable *hashtable, const char *key, const char *value) {
 }
 
 // Retrieve a value from the hash table using a key
-char *retrieve(HashTable *hashtable, const char *key) {
-    size_t slot = hashFunc(key, hashtable->size);
+void *retrieve(HashTable *hashtable, const void *key) {
+    size_t slot = hashtable->hashFunc(key, hashtable->size);
     Entry *entry = hashtable->entries[slot];
 
     while (entry != NULL) {
-        if (strcmp(entry->key, key) == 0) {
+        if (hashtable->compare(entry->key, key) == 0) {
             return entry->value;
         }
         entry = entry->next;
@@ -119,8 +110,8 @@ char *retrieve(HashTable *hashtable, const char *key) {
 }
 
 // Delete a key-value pair from the hash table
-void deletePair(HashTable *hashtable, const char *key) {
-    size_t slot = hashFunc(key, hashtable->size);
+void deletePair(HashTable *hashtable, const void *key) {
+    size_t slot = hashtable->hashFunc(key, hashtable->size);
     Entry *entry = hashtable->entries[slot];
 
     if (entry == NULL) {
@@ -130,15 +121,19 @@ void deletePair(HashTable *hashtable, const char *key) {
     Entry *prev = NULL;
 
     while (entry != NULL) {
-        if (strcmp(entry->key, key) == 0) {
+        if (hashtable->compare(entry->key, key) == 0) {
             if (prev == NULL) {
                 hashtable->entries[slot] = entry->next;
             } else {
                 prev->next = entry->next;
             }
 
-            free(entry->key);
-            free(entry->value);
+            if (hashtable->destroyKey) {
+                hashtable->destroyKey(entry->key);
+            }
+            if (hashtable->destroyValue) {
+                hashtable->destroyValue(entry->value);
+            }
             free(entry);
             hashtable->count--;
             return;
@@ -150,7 +145,7 @@ void deletePair(HashTable *hashtable, const char *key) {
 }
 
 // Print the entire hash table
-void dump(HashTable *hashtable) {
+void dump(HashTable *hashtable, void (*printKeyValue)(const void *key, const void *value)) {
     for (size_t i = 0; i < hashtable->size; ++i) {
         Entry *entry = hashtable->entries[i];
 
@@ -161,7 +156,7 @@ void dump(HashTable *hashtable) {
         printf("slot[%4llu]: ", i);
 
         while (entry != NULL) {
-            printf("%s:%s ", entry->key, entry->value);
+            printKeyValue(entry->key, entry->value);
             entry = entry->next;
         }
 
@@ -176,8 +171,12 @@ void destroyHashTable(HashTable *hashtable) {
         while (entry) {
             Entry *temp = entry;
             entry = entry->next;
-            free(temp->key);
-            free(temp->value);
+            if (hashtable->destroyKey) {
+                hashtable->destroyKey(temp->key);
+            }
+            if (hashtable->destroyValue) {
+                hashtable->destroyValue(temp->value);
+            }
             free(temp);
         }
     }
@@ -185,3 +184,45 @@ void destroyHashTable(HashTable *hashtable) {
     free(hashtable->entries);
     free(hashtable);
 }
+
+
+/* -------------------- PRE DEFINED OPERATIONS FOR DIFFERENT KEY-VALUE PAIRS -------------------- */
+
+// 1) Hash Functions
+size_t stringHashFunc(const void *key, size_t tableSize) {
+    const char *str = (const char *)key;
+    size_t hashValue = 0;
+    while (*str) {
+        hashValue = hashValue * 37 + *str++;
+    }
+    return hashValue % tableSize;
+}
+
+
+// 2) Comparision Functions
+int stringKeyCompare(const void *key1, const void *key2) {
+    return strcmp((const char *)key1, (const char *)key2);
+}
+
+
+// 3) Key destruction function (for dynamically allocated keys)
+void stringKeyDestroy(void *key) {
+    free(key);
+}
+
+
+// 4) Value destruction function (for dynamically allocated values)
+void intValueDestroy(void *value) {
+    free(value);
+}
+
+void tokenTypeValueDestroy(void *value){
+    free(value);
+}
+
+
+// 5) Printing Functions
+void printStringInt(const void *key, const void *value) {
+    printf("%s : %d ", (const char *)key, *(const int *)value);
+}
+

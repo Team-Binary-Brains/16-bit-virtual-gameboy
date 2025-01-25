@@ -1,11 +1,43 @@
 #include "univ_defs.h"
+#include "univ_hashmap.h"
 #include "univ_fileops.h"
 #include "O_lexer.h"
 
 size_t lineNumber = 0;
+HashTable *OpAndSepTokenMap;
+HashTable *KeywordTokenMap;
+
+void createOpAndSepTokenMap(){
+    OpAndSepTokenMap = createHashTable(20000, stringHashFunc, stringKeyCompare, stringKeyDestroy, intValueDestroy);
+    size_t len = sizeof(OpAndSepTokens) / sizeof(OpAndSepTokens[0]);
+    for (int i = 0; i < len; i++) {
+        char *key = strdup(OpAndSepTokens[i].value);           // Dynamically allocate memory for the key
+        int *value = malloc(sizeof(int));     // Dynamically allocate memory for the value
+        *value = OpAndSepTokens[i].type;
+        insert(OpAndSepTokenMap, key, value);
+    }
+}
+
+void createKeywordTokenMap(){
+    KeywordTokenMap = createHashTable(20000, stringHashFunc, stringKeyCompare, stringKeyDestroy, intValueDestroy);
+    size_t len = sizeof(KeywordTokens) / sizeof(KeywordTokens[0]);
+    for (int i = 0; i < len; i++) {
+        char *key = strdup(KeywordTokens[i].value);           
+        int *value = malloc(sizeof(int));     
+        *value = KeywordTokens[i].type;
+        insert(KeywordTokenMap, key, value);
+    }
+}
 
 void __printToken(Token token){
     printf("Token value: %s\n", token.value);
+}
+
+Token* initToken(TokenType type){
+    Token* token = malloc(sizeof(Token));
+    token->lineNum = lineNumber;
+    token->type = type;
+    return token;
 }
 
 void generateKeywordOrIdentifier(char *current, int* currentIndex, Token* token){
@@ -19,24 +51,25 @@ void generateKeywordOrIdentifier(char *current, int* currentIndex, Token* token)
 
     keyword[keywordIndex] = '\0';
 
-    size_t len = sizeof(KeywordTokenMap) / sizeof(KeywordTokenMap[0]);
     token->value = keyword;
-    for(int i=0; i<len; i++){
-        if(strcmp(keyword,KeywordTokenMap[i].value) == 0){
-            token->type = KeywordTokenMap[i].type;
-            //free(keyword);
-            return;
-        }
-    }
-    token->type = IDENTIFIER;
-    //free(keyword);
-}
 
-Token* initToken(TokenType type){
-    Token* token = malloc(sizeof(Token));
-    token->lineNum = lineNumber;
-    token->type = type;
-    return token;
+    // O(n) operation
+    // size_t len = sizeof(KeywordTokens) / sizeof(KeywordTokens[0]);
+    // for(int i=0; i<len; i++){
+    //     if(strcmp(keyword,KeywordTokens[i].value) == 0){
+    //         token->type = KeywordTokens[i].type;
+    //         //free(keyword);
+    //         return;
+    //     }
+    // }
+    // token->type = IDENTIFIER;
+
+    // O(1) operation
+    token->type = (TokenType)retrieve(KeywordTokenMap, keyword);
+    if(token->type == NULL){
+        token->type = IDENTIFIER;
+    }
+    //free(keyword);
 }
 
 void generateIntLToken(char* current, int* currentIndex, Token* token){
@@ -63,14 +96,21 @@ void generateOpAndSepToken(char* current, int* currentIndex, Token* token){
         value[1] = '\0';
     }
 
-    size_t len = sizeof(OpAndSepTokenMap) / sizeof(OpAndSepTokenMap[0]);
-    for(int i=0; i<len; i++){
-        if(strcmp(value, OpAndSepTokenMap[i].value)){
-            token->value = value;
-            token->type = OpAndSepTokenMap[i].type;
-            return;
-        }
-    }  
+    // O(n) operation
+    // size_t len = sizeof(OpAndSepTokenMap) / sizeof(OpAndSepTokenMap[0]);
+    // for(int i=0; i<len; i++){
+    //     if(strcmp(value, OpAndSepTokenMap[i].value)){
+    //         token->value = value;
+    //         token->type = OpAndSepTokenMap[i].type;
+    //         return;
+    //     }
+    // }
+
+    // O(1) operation
+    token->type = (TokenType)retrieve(OpAndSepTokenMap, value);
+    if(token->type != NULL){
+        token->value = value;
+    }
 }
 
 void generateStringLToken(char* current, int* currentIndex, Token* token){
@@ -106,6 +146,9 @@ Token* lexer(FILE* file, char* inputFile){
     current[read_len] = '\0';
 
     fclose(file);
+
+    createOpAndSepTokenMap();
+    createKeywordTokenMap();
     int currentIndex = 0;
 
     int numberOfTokens = 15;
@@ -154,5 +197,7 @@ Token* lexer(FILE* file, char* inputFile){
     for(int i=0; i<tokensIndex+1; i++){
         __printToken(tokens[i]);
     }
+    destroyHashTable(OpAndSepTokenMap);
+    destroyHashTable(KeywordTokenMap);
     return tokens;
 }

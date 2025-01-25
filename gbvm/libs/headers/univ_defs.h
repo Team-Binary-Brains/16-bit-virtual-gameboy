@@ -14,7 +14,6 @@
 #define PROGRAM_CAPACITY 1024
 #define STACK_CAPACITY 1024
 #define MAX_WORD 32767
-#define TABLE_SIZE 20000
 #define LOAD_FACTOR_THRESHOLD 0.75
 
 typedef char Byte;

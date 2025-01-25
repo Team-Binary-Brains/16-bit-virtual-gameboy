@@ -1,5 +1,7 @@
 #include "sasm_assembler.h"
 #include "univ_cmdutils.h"
+#include "univ_hashmap.h"
+HashTable *OptionStringMap;
 
 char* inputFile = NULL;
 char* outputFile = NULL;
@@ -11,6 +13,8 @@ int main(int argc, char* argv[])
 {
     char* progName = getNextCmdLineArg(&argc, &argv);
 
+    createOptionStringMap(OptionStringMap);
+    
     while (argc > 0) {
         char* arg = getNextCmdLineArg(&argc, &argv);
         processFlag(arg, &argc, &argv);
@@ -31,12 +35,14 @@ int main(int argc, char* argv[])
                            "\tDisassembly Sample Command : ./gbasm -o ../prog/fibonacci2.pblasm -i ../prog/fibonacci.pbl -d\n");
     }
 
+    destroyHashTable(OptionStringMap);
+
     return mode(inputFile, outputFile);
 }
 
 void processFlag(char* flag, int* argc, char*** argv)
 {
-    Option opt = flagAsOption(flag);
+    Option opt = (Option)retrieve(OptionStringMap, flag);
 
     switch (opt) {
     case INPUT_FILE:

@@ -1,12 +1,13 @@
 #include "univ_cmdutils.h"
 #include "univ_defs.h"
+#include "univ_hashmap.h"
 
 typedef struct {
     char* flag;
     Option type;
 } OptionFlag;
 
-static OptionFlag OptionStringMap[] = {
+static OptionFlag Options[] = {
     { "-i", INPUT_FILE },
     { "-o", OUTPUT_FILE },
     { "-a", ASSEMBLE_MODE },
@@ -26,15 +27,14 @@ char* getNextCmdLineArg(int* argc, char*** argv)
     return arg;
 }
 
-Option flagAsOption(char* s)
+void createOptionStringMap(HashTable *OptionStringMap)
 {
-    size_t len = sizeof(OptionStringMap) / sizeof(OptionStringMap[0]);
-
+    OptionStringMap = createHashTable(1000, stringHashFunc, stringKeyCompare, stringKeyDestroy, intValueDestroy);
+    size_t len = sizeof(Options) / sizeof(Options[0]);
     for (size_t i = 0; i < len; ++i) {
-        if (strcmp(s, OptionStringMap[i].flag) == 0) {
-            return OptionStringMap[i].type;
-        }
+        char *key = strdup(Options[i].flag);           // Dynamically allocate memory for the key
+        int *value = malloc(sizeof(int));     // Dynamically allocate memory for the value
+        *value = Options[i].type;
+        insert(OptionStringMap, key, value);
     }
-
-    return -1;
 }

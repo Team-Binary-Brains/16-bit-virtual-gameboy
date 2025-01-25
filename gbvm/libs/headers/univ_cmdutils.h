@@ -1,6 +1,6 @@
 #pragma once
 #include "univ_defs.h"
-
+#include "univ_hashmap.h"
 typedef enum {
     INPUT_FILE,
     OUTPUT_FILE,
@@ -11,4 +11,4 @@ typedef enum {
 
 char* getNextCmdLineArg(int* argc, char*** argv);
 
-Option flagAsOption(char* s);
+void createOptionStringMap(HashTable*);
