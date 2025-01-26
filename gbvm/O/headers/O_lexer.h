@@ -54,7 +54,6 @@ static Token OpAndSepTokens[] = {
     { LPAREN, "(", 0 },
     { RPAREN, ")", 0 },
     { LBRACE, "{", 0 },
-    { LBRACE, "{", 0 },
     { SEMICOLON, ";", 0 },
     { COMMA, ",", 0 },
     { PLUS, "+", 0 },

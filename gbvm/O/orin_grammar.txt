@@ -1,0 +1,16 @@
+/* ---------- ORIN GRAMMAR ---------- */
+
+
+<expression>: <number>
+          | <expression> "*" <expression>
+          | <expression> "/" <expression>
+          | <expression> "+" <expression>
+          | <expression> "-" <expression>
+          ;
+
+<variable-declaration>: INT IDENTIFIER "=" INT_L
+                    | STRING IDENTIFIER "=" STRING_L
+
+<number>:  INT_L ";"
+
+<exit> ::= EXIT "(" <expression> ")" ";"

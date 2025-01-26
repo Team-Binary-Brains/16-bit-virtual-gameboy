@@ -98,9 +98,9 @@ void insert(HashTable *hashtable, void *key, void *value) {
 void *retrieve(HashTable *hashtable, const void *key) {
     size_t slot = hashtable->hashFunc(key, hashtable->size);
     Entry *entry = hashtable->entries[slot];
-
     while (entry != NULL) {
         if (hashtable->compare(entry->key, key) == 0) {
+            //printf("Entry Value: %d\n", *(TokenType*)entry->value);
             return entry->value;
         }
         entry = entry->next;

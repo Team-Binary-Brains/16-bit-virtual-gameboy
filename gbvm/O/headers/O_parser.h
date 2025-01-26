@@ -1,20 +1,25 @@
 #pragma once
 #include "O_lexer.h"
 
-typedef struct Node {
-    char* value;
-    TokenType type;
-    struct Node* right;
-    struct Node* left;
-} Node;
+typedef struct ParseTreeNode {
+    char* value; // Value of that node
+    TokenType type; // Type of node
+    struct ParseTreeNode** children; // Array of child nodes
+    int childCount; // Number of children
+} ParseTreeNode;
 
-Node* parser(Token*);
-void __printTree(Node*, char, int);
-Node* initNode(Node*, char*, TokenType);
-Token* generateOperationNodes(Token*, Node*);
+ParseTreeNode* parser(Token*);
 
-void printError(char*, size_t);
-void handleTokenErrors(char*, Token*, TokenType);
+ParseTreeNode* createParseTreeNode(Token*);
 
-Node* handleExitSyscall(Node*, Token*, Node*);
-Node* createVariables(Token*, Node*);
+void addChild(ParseTreeNode*, ParseTreeNode*);
+
+Token* match(Token** , TokenType);
+
+ParseTreeNode* parseDeclaration(Token**);
+
+ParseTreeNode* parseExitStatement(Token** currentToken);
+
+void printParseTree(ParseTreeNode*, char*, int);
+
+void freeParseTree(ParseTreeNode*);

@@ -8,29 +8,29 @@ HashTable *OpAndSepTokenMap;
 HashTable *KeywordTokenMap;
 
 void createOpAndSepTokenMap(){
-    OpAndSepTokenMap = createHashTable(20000, stringHashFunc, stringKeyCompare, stringKeyDestroy, intValueDestroy);
+    OpAndSepTokenMap = createHashTable(20, stringHashFunc, stringKeyCompare, stringKeyDestroy, intValueDestroy);
     size_t len = sizeof(OpAndSepTokens) / sizeof(OpAndSepTokens[0]);
     for (size_t i = 0; i < len; i++) {
         char *key = strdup(OpAndSepTokens[i].value);           // Dynamically allocate memory for the key
-        int *value = malloc(sizeof(int));     // Dynamically allocate memory for the value
+        TokenType *value = malloc(sizeof(int));     // Dynamically allocate memory for the value
         *value = OpAndSepTokens[i].type;
         insert(OpAndSepTokenMap, key, value);
     }
 }
 
 void createKeywordTokenMap(){
-    KeywordTokenMap = createHashTable(20000, stringHashFunc, stringKeyCompare, stringKeyDestroy, intValueDestroy);
+    KeywordTokenMap = createHashTable(20, stringHashFunc, stringKeyCompare, stringKeyDestroy, intValueDestroy);
     size_t len = sizeof(KeywordTokens) / sizeof(KeywordTokens[0]);
     for (int i = 0; i < len; i++) {
         char *key = strdup(KeywordTokens[i].value);           
-        int *value = malloc(sizeof(int));     
+        TokenType *value = malloc(sizeof(int));     
         *value = KeywordTokens[i].type;
         insert(KeywordTokenMap, key, value);
     }
 }
 
 void __printToken(Token token){
-    printf("Token value: %s\n", token.value);
+    printf("Token value: %s\t\tToken Type:%d\n", token.value, token.type);
 }
 
 Token* initToken(TokenType type){
@@ -65,9 +65,11 @@ void generateKeywordOrIdentifier(char *current, int* currentIndex, Token* token)
     // token->type = IDENTIFIER;
 
     // O(1) operation
-    token->type = (TokenType)retrieve(KeywordTokenMap, keyword);
-    if(token->type == NULL){
+    int *res = retrieve(KeywordTokenMap, keyword);
+    if(res == NULL){
         token->type = IDENTIFIER;
+    }else{
+        token->type = *res;
     }
     //free(keyword);
 }
@@ -82,6 +84,7 @@ void generateIntLToken(char* current, int* currentIndex, Token* token){
     }
     value[value_index] = '\0';
     token->value = value;
+    token->type = INT_L;
 }
 
 void generateOpAndSepToken(char* current, int* currentIndex, Token* token){
@@ -107,8 +110,9 @@ void generateOpAndSepToken(char* current, int* currentIndex, Token* token){
     // }
 
     // O(1) operation
-    token->type = (TokenType)retrieve(OpAndSepTokenMap, value);
-    if(token->type != NULL){
+    int *res = retrieve(OpAndSepTokenMap, value);
+    if(res != NULL){
+        token->type = *res;
         token->value = value;
     }
 }
