@@ -1,3 +1,11 @@
+/**
+ * @file sasm_instructions.h
+ * @brief This file contains the declarations of functions and data structures related to the execution of instructions in the SASM assembly language.
+ *
+ * @author Soham Metha
+ * @date January 2025
+ */
+
 #pragma once
 
 #include "univ_defs.h"
@@ -5,54 +13,102 @@
 #include "sasm_memory.h"
 #include "univ_strings.h"
 
-#define MAKE_INST_ARG(typ, opr) { .type = (typ), .operand = (opr) }
-#define MAKE_INST(typ) { .type = (typ) }
-
+/**
+ * @brief Enumeration of opcodes for SASM instructions.
+ */
 typedef enum {
-    NOP = 0,
-    HLT,
-    ADD,
-    SUB,
-    MUL,
-    DIV,
-    EQL,
-    POP,
-    PSH,
-    DUP,
-    JMP,
-    JNZ,
-    JIP,
+    NOP = 0, /**< No operation */
+    HLT,     /**< Halt */
+    ADD,     /**< Addition */
+    SUB,     /**< Subtraction */
+    MUL,     /**< Multiplication */
+    DIV,     /**< Division */
+    EQL,     /**< Equality */
+    POP,     /**< Pop */
+    PSH,     /**< Push */
+    DUP,     /**< Duplicate */
+    JMP,     /**< Jump */
+    JNZ,     /**< Jump if not zero */
+    JIP,     /**< Jump if positive */
 } Opcode;
 
+/**
+ * @brief Structure representing an instruction in the SASM assembly language.
+ */
 typedef struct {
-    Opcode type;
-    Word operand;
+    Opcode type;  /**< The opcode of the instruction */
+    Word operand; /**< The operand of the instruction */
 } Instruction;
 
+/**
+ * @brief Structure representing a program in the SASM assembly language.
+ */
 typedef struct {
-    Instruction instructions[PROGRAM_CAPACITY];
-    Word instruction_count;
-    Word instruction_size;
+    Instruction instructions[PROGRAM_CAPACITY]; /**< The array of instructions */
+    Word instruction_count;                     /**< The number of instructions in the program */
+    Word instruction_size;                      /**< The size of each instruction in bytes */
 } Program;
 
-Error __psh(Registers*, Memory*, const Word*);
+/**
+ * @brief Pushes a value onto the stack.
+ *
+ * @param r The CPU registers.
+ * @param mem The memory of the virtual machine.
+ * @param operand The value to push onto the stack.
+ * @return An error code indicating the success or failure of the operation.
+ */
+Error __psh(Registers* r, Memory* mem, const Word* operand);
 
-Error __add(Registers*, Memory*);
+/**
+ * @brief Performs the equality operation on the top two values of the stack.
+ *
+ * @param r The CPU registers.
+ * @param mem The memory of the virtual machine.
+ * @return An error code indicating the success or failure of the operation.
+ */
+Error __eql(Registers* r, Memory* mem);
 
-Error __sub(Registers*, Memory*);
+/**
+ * @brief Pops a value from the stack.
+ *
+ * @param r The CPU registers.
+ * @param mem The memory of the virtual machine.
+ * @return An error code indicating the success or failure of the operation.
+ */
+Error __pop(Registers* r, Memory* mem);
 
-Error __mul(Registers*, Memory*);
+/**
+ * @brief Duplicates a value on the stack.
+ *
+ * @param r The CPU registers.
+ * @param mem The memory of the virtual machine.
+ * @param operand The number of positions to duplicate.
+ * @return An error code indicating the success or failure of the operation.
+ */
+Error __dup(Registers* r, Memory* mem, const Word* operand);
 
-Error __div(Registers*, Memory*);
+/**
+ * @brief Executes an instruction in the virtual machine.
+ *
+ * @param prog The program containing the instructions.
+ * @param mem The memory of the virtual machine.
+ * @param cpu The CPU of the virtual machine.
+ * @return An error code indicating the success or failure of the execution.
+ */
+Error executeInst(const Program* prog, Memory* mem, CPU* cpu);
 
-Error __eql(Registers*, Memory*);
+/**
+ * @brief Converts an opcode to its corresponding string representation.
+ *
+ * @param type The opcode to convert.
+ * @return The string representation of the opcode.
+ */
+String opcodeAsStr(const Opcode* type);
 
-Error __pop(Registers*, Memory*);
-
-Error __dup(Registers*, Memory*, const Word*);
-
-Error executeInst(const Program*, Memory*, CPU*);
-
-String opcodeAsStr(const Opcode*);
-
-Opcode strAsOpcode(const String*);
+/**
+ * @brief Converts a string to its corresponding opcode.
+ *
+ * @param s The string to convert.
+ * @return The opcode corresponding to the string.
+ */
+Opcode strAsOpcode(const String* s);
