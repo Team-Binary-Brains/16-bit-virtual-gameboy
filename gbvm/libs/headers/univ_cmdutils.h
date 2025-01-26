@@ -11,4 +11,4 @@ typedef enum {
 
 char* getNextCmdLineArg(int* argc, char*** argv);
 
-void createOptionStringMap(HashTable*);
+Option flagAsOption(char* s);
