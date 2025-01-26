@@ -22,7 +22,7 @@ const char* errorAsCstr(const Error* error)
     case ERR_ILLEGAL_ALU_OPERATION:
         return "ERR_ILLEGAL_ALU_OPERATION";
     default:
-        assert(0 && "error_as_cstr : Unreachable");
+        assert(0 && "univ_errors : errorAsCstr : Unreachable");
     }
 }
 

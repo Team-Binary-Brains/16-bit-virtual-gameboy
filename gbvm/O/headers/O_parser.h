@@ -1,3 +1,11 @@
+/**
+ * @file O_parser.h
+ * @brief MISSING DOCUMENTATION.
+ *
+ * @author Omkar Jagtap
+ * @date January 2025
+ */
+
 #pragma once
 #include "O_lexer.h"
 
