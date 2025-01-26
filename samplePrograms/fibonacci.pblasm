@@ -18,8 +18,8 @@
     ABC                Instruction doesn't exist, added to show error msg
 ;
     POP
-    JMP 6
-    ;HLT                Program end, any text after the instruction is ignored, so it doesn't matter if you use # or ;
+    JNZ 6
+    HLT                Program end, any text after the instruction is ignored, so it doesn't matter if you use # or ;
 
 
 ; But the difference is that comments written on individual lines will be displayed when compiling

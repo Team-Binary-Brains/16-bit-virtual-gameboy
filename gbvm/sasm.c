@@ -1,3 +1,5 @@
+#pragma GCC diagnostic ignored "-Wswitch-enum"
+
 #include "sasm_assembler.h"
 #include "univ_cmdutils.h"
 
@@ -38,19 +40,20 @@ int main(int argc, char* argv[])
 
 void processFlag(char* flag, int* argc, char*** argv)
 {
+
     Option opt = flagAsOption(flag);
 
     switch (opt) {
-    case INPUT_FILE:
+    case FILE_INPUT:
         inputFile = getNextCmdLineArg(argc, argv);
         return;
-    case OUTPUT_FILE:
+    case FILE_OUTPUT:
         outputFile = getNextCmdLineArg(argc, argv);
         return;
-    case ASSEMBLE_MODE:
+    case MODE_ASSEMBLE:
         mode = &assemblyMode;
         return;
-    case DISASSEMBLE_MODE:
+    case MODE_DISASSEMBLE:
         mode = &disassemblyMode;
         return;
     default:

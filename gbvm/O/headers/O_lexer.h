@@ -37,10 +37,11 @@ typedef enum {
     EQ,
     NEQ,
     IDENTIFIER,
+    COMP,
     EXIT,
     WRITE,
-    END_OF_TOKENS,
     UNKNOWN,
+    END_OF_TOKENS,
 } TokenType;
 
 typedef struct {
@@ -101,6 +102,6 @@ void generateStringLToken(char*, int*, Token*);
 
 void generateKeywordOrIdentifier(char*, int*, Token*);
 
-Token* generateSeparatorOrOperator(char*, int*, TokenType);
+Token* generateSeperatorOrOperator(char*, int*, TokenType);
 
 Token* lexer(FILE* file, char* inputFile);

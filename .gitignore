@@ -1,1 +1,10 @@
-.vscode
+/gbvm/build/
+*.o
+*.exe
+*.out
+.vscode/
+/gbvm/.vscode/
+/samplePrograms/
+/gbvm/gbvm
+/gbvm/occ
+/gbvm/sasm

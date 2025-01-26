@@ -10,7 +10,7 @@ HashTable *KeywordTokenMap;
 void createOpAndSepTokenMap(){
     OpAndSepTokenMap = createHashTable(20000, stringHashFunc, stringKeyCompare, stringKeyDestroy, intValueDestroy);
     size_t len = sizeof(OpAndSepTokens) / sizeof(OpAndSepTokens[0]);
-    for (int i = 0; i < len; i++) {
+    for (size_t i = 0; i < len; i++) {
         char *key = strdup(OpAndSepTokens[i].value);           // Dynamically allocate memory for the key
         int *value = malloc(sizeof(int));     // Dynamically allocate memory for the value
         *value = OpAndSepTokens[i].type;
@@ -124,6 +124,7 @@ void generateStringLToken(char* current, int* currentIndex, Token* token){
         *currentIndex += 1;
     }
     value[value_index] = '\0';
+    token->type = STRING;
     token->value = value;
 }
 
@@ -157,11 +158,11 @@ Token* lexer(FILE* file, char* inputFile){
     tokensIndex = 0;
 
     while (current[currentIndex] != '\0') {
-        if (current[currentIndex] == ' ') {
+        if(current[currentIndex] == ' '){
             currentIndex++;
             continue;
         }
-
+        Token* token = malloc(sizeof(Token));
         tokens_size++;
         if (tokens_size > numberOfTokens) {
             numberOfTokens *= 1.5;
@@ -187,8 +188,8 @@ Token* lexer(FILE* file, char* inputFile){
 
             tokens[tokensIndex] = *token;
             tokensIndex++;
-            free(token);
         }
+        free(token);
         currentIndex++;
     }
 

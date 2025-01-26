@@ -1,3 +1,5 @@
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wswitch"
 #include "univ_defs.h"
 #include "O_lexer.h"
 #include "O_parser.h"
@@ -26,8 +28,9 @@ void __printTree(Node* node, char identifier, int indent)
         printf("             ");
 
     for (int j = 0; j < (indent - i + 1); j++)
-        printf("┗━━━━━━━ (%c) '", identifier);
+        printf("┗━━━━━━━ (%c) ", identifier);
 
+    printf("'");
     for (size_t i = 0; node->value[i] != '\0'; i++) {
         printf("%c", node->value[i]);
     }

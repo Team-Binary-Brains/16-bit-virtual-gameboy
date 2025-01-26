@@ -1,4 +1,6 @@
 #include "gbvm.h"
+#include "sasm_assembler.h"
+#include "sasm_instructions.h"
 #include "sasm_flags.h"
 
 void dumpStack(FILE* stream, const Vm* vm)
@@ -6,13 +8,15 @@ void dumpStack(FILE* stream, const Vm* vm)
     fprintf(stream, "-------------------------------STACK------------------------------------------");
     Word SP = vm->cpu.registers.SP;
 
-    Word i;
-    Word len = (SP < 5) ? SP : 5;
-    for (i = 0; i < len; i++)
-        fprintf(stream, "\n  %d  ", vm->mem.stack[i]);
+    Word start = (SP < 5) ? 0 : SP - 5;
+    Word len = (SP < 5) ? SP : start + 5;
 
-    for (; i < 5; i++)
-        fprintf(stream, "\n  [X]  ");
+    Word i;
+    for (i = start; i < len; i++)
+        fprintf(stream, "\n\t%d", vm->mem.stack[i]);
+
+    for (i = len; i < start + 5; i++)
+        fprintf(stream, "\n\t[X]  ");
 
     fprintf(stream, "\n-------------------------------STACK------------------------------------------ \n\n");
 }
@@ -31,26 +35,40 @@ void dumpFlags(FILE* stream, const Vm* vm)
         getBorrow(&(vm->cpu)));
 }
 
+void loadProgram(Vm* vm, char* inputFile)
+{
+    vm->prog = disassembleBytecodeIntoProgram(inputFile);
+    vm->cpu.registers.IP = 0;
+    vm->cpu.registers.SP = 0;
+    setHalt(&(vm->cpu), 0);
+}
+
 void executeProgram(Vm* vm, int debug, int i)
 {
     if (i >= EXECUTION_LIMIT || getHalt(&(vm->cpu))) {
         return;
     }
     String operation = opcodeAsStr(&(vm->prog.instructions[vm->cpu.registers.IP].type));
-    Error error = executeInst(&(vm->prog), &(vm->mem), &(vm->cpu));
 
     switch (debug) {
-    case 3:
-        dumpFlags(stdout, vm);
     case 2:
-        dumpStack(stdout, vm);
-    case 1:
-        printString(operation);
         scanf("%*c");
         system("clear");
+        dumpFlags(stdout, vm);
+        dumpStack(stdout, vm);
+        printString(operation);
+        break;
+    case 1:
+        scanf("%*c");
+        system("clear");
+        dumpStack(stdout, vm);
+        printString(operation);
+        break;
     default:
         break;
     }
+
+    Error error = executeInst(&(vm->prog), &(vm->mem), &(vm->cpu));
 
     if (error != ERR_OK)
         executionErrorWithExit(&error);

@@ -42,19 +42,35 @@ M_HEAD = 		$(patsubst %, 	$(IMDIR)/%,			$(_M_HEAD))
 M_CODE =		$(patsubst %, 	$(CMDIR)/%,			$(_M_CODE))
 
 .PHONY: clean
+MAKEFLAGS += --no-print-directory
+
 
 CC = gcc
-CFLAGS = -O2 -Wall -Wextra -Wswitch-enum -std=c2x -pedantic -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR)
+CFLAGS = -O3 -Wall -Wextra -Wfatal-errors -Wswitch-enum -std=c99 -pedantic -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
 LIBS =
 
 sasm: 	sasm.c $(G_CODE) $(A_CODE)
-		$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
+		@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
+		@echo -e ""
+		@echo -e "SASM MADE SUCCESSFULLY"
+		@echo -e ""
 
 occ:	occ.c  $(G_CODE) $(C_CODE) 
-		$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
+		@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
+		@echo -e ""
+		@echo -e "COMPILER MADE SUCCESSFULLY"
+		@echo -e ""
 
 gbvm: 	main.c $(G_CODE) $(M_CODE) $(A_CODE) $(C_CODE)
-	  	$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
+		@make occ
+		@make sasm
+		@echo -e ""
+		@echo -e "VM MADE SUCCESSFULLY"
+		@echo -e ""
+	  	@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
 
 clean:
-		rm -f $(CGDIR)/*.o $(CADIR)/*.o $(CCDIR)/*.o main.o gbvm sasm occ
+		@rm -f $(CGDIR)/*.o $(CADIR)/*.o $(CCDIR)/*.o main.o gbvm sasm occ
+		@echo -e ""
+		@echo -e "CLEANED ALL OBJECT FILES AND EXECUTABLES"
+		@echo -e ""

@@ -11,6 +11,8 @@ typedef struct {
     CPU cpu;
 } Vm;
 
+void loadProgram(Vm*, char*);
+
 void dumpStack(FILE*, const Vm*);
 
 void dumpFlags(FILE*, const Vm*);

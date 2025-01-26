@@ -7,10 +7,10 @@ typedef struct {
 } OptionFlag;
 
 static OptionFlag OptionStringMap[] = {
-    { "-i", INPUT_FILE },
-    { "-o", OUTPUT_FILE },
-    { "-a", ASSEMBLE_MODE },
-    { "-d", DISASSEMBLE_MODE },
+    { "-i", FILE_INPUT },
+    { "-o", FILE_OUTPUT },
+    { "-a", MODE_ASSEMBLE },
+    { "-d", MODE_DISASSEMBLE },
     { "-l", ASM_LANG },
 };
 

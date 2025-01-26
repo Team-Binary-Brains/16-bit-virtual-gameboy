@@ -2,10 +2,10 @@
 #include "univ_defs.h"
 #include "univ_hashmap.h"
 typedef enum {
-    INPUT_FILE,
-    OUTPUT_FILE,
-    ASSEMBLE_MODE,
-    DISASSEMBLE_MODE,
+    FILE_INPUT,
+    FILE_OUTPUT,
+    MODE_ASSEMBLE,
+    MODE_DISASSEMBLE,
     ASM_LANG,
 } Option;
 

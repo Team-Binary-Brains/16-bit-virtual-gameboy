@@ -137,13 +137,13 @@ int assemblyMode(char* inputFile, char* outputFile)
 {
     String src = loadFileIntoString(inputFile);
 
-    printf("\n\n");
-    printf("|--------------------------------------------------Comments detected while parsing-------------------------------------------------|\n");
-    printf("|   |                                                                                                                              |\n");
+    printf("\n");
+    printf("\n|--------------------------------------------------Comments detected while parsing-------------------------------------------------|");
+    printf("\n|   |                                                                                                                              |");
     Program prog = parseAsmIntoProgram(&src);
-    printf("|   |                                                                                                                              |\n");
-    printf("|-------------------------------------------------------Compilation completed------------------------------------------------------|\n");
-    printf("\n\n");
+    printf("\n|   |                                                                                                                              |");
+    printf("\n|-------------------------------------------------------Compilation completed------------------------------------------------------|");
+    printf("\n");
 
     assembleProgramIntoBytecode(&prog, outputFile);
 
