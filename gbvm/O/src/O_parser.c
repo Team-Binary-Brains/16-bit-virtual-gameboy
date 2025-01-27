@@ -81,8 +81,56 @@ void printParseTree(ParseTreeNode* node, char* prefix, int is_last) {
     free(new_prefix);
 }
 
+// Parse a factor (basic unit of an expression)
+ParseTreeNode* parseFactor(Token** currentToken) {
+    if ((*currentToken)->type == LPAREN) {
+        // Match '('
+        match(currentToken, LPAREN);
+        ParseTreeNode* exprNode = parseExpression(currentToken);
+        // Match ')'
+        match(currentToken, RPAREN);
+        return exprNode;
+    } else if ((*currentToken)->type == IDENTIFIER) {
+        return createParseTreeNode(match(currentToken, IDENTIFIER));
+    } else if ((*currentToken)->type == INT_L) {
+        return createParseTreeNode(match(currentToken, INT_L));
+    } else {
+        printf("Syntax error: Unexpected token '%s' in factor at line %zu\n", (*currentToken)->value, (*currentToken)->lineNum);
+        exit(1);
+    }
+}
 
-// Parse declaration (e.g., int a = 8;)
+// Parse term (handles *, /, and %)
+ParseTreeNode* parseTerm(Token** currentToken) {
+    ParseTreeNode* left = parseFactor(currentToken);
+
+    while ((*currentToken)->type == STAR || (*currentToken)->type == SLASH || (*currentToken)->type == MOD) {
+        ParseTreeNode* operatorNode = createParseTreeNode(match(currentToken, (*currentToken)->type));
+        addChild(operatorNode, left);
+        addChild(operatorNode, parseFactor(currentToken));
+        left = operatorNode;  // Update left for chaining
+    }
+
+    return left;
+}
+
+
+// Parse expression (handles + and -)
+ParseTreeNode* parseExpression(Token** currentToken) {
+    ParseTreeNode* left = parseTerm(currentToken);
+
+    while ((*currentToken)->type == PLUS || (*currentToken)->type == MINUS) {
+        ParseTreeNode* operatorNode = createParseTreeNode(match(currentToken, (*currentToken)->type));
+        addChild(operatorNode, left);
+        addChild(operatorNode, parseTerm(currentToken));
+        left = operatorNode;  // Update left for chaining
+    }
+
+    return left;
+}
+
+
+// Parse declaration (e.g., int a = 8; or int a = 3 + 5;)
 ParseTreeNode* parseDeclaration(Token** currentToken) {
     ParseTreeNode* declarationNode = createParseTreeNode(&(Token){.value = "DECLARATION", .type = BEGINNING});
 
@@ -95,8 +143,8 @@ ParseTreeNode* parseDeclaration(Token** currentToken) {
     // Match '='
     addChild(declarationNode, createParseTreeNode(match(currentToken, EQUAL)));
 
-    // Match integer literal
-    addChild(declarationNode, createParseTreeNode(match(currentToken, INT_L)));
+    // Parse expression
+    addChild(declarationNode, parseExpression(currentToken));
 
     // Match ';'
     addChild(declarationNode, createParseTreeNode(match(currentToken, SEMICOLON)));
@@ -104,7 +152,7 @@ ParseTreeNode* parseDeclaration(Token** currentToken) {
     return declarationNode;
 }
 
-// Parse exit statement (e.g., exit(0);)
+// Parse exit statement (e.g., exit(3 + 5);)
 ParseTreeNode* parseExitStatement(Token** currentToken) {
     ParseTreeNode* exitNode = createParseTreeNode(&(Token){.value = "EXIT_STATEMENT", .type = BEGINNING});
 
@@ -114,8 +162,8 @@ ParseTreeNode* parseExitStatement(Token** currentToken) {
     // Match '('
     addChild(exitNode, createParseTreeNode(match(currentToken, LPAREN)));
 
-    // Match integer literal
-    addChild(exitNode, createParseTreeNode(match(currentToken, INT_L)));
+    // Parse expression
+    addChild(exitNode, parseExpression(currentToken));
 
     // Match ')'
     addChild(exitNode, createParseTreeNode(match(currentToken, RPAREN)));

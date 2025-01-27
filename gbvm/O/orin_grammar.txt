@@ -1,16 +1,29 @@
 /* ---------- ORIN GRAMMAR ---------- */
 
+PROGRAM -> STATEMENT_LIST
 
-<expression>: <number>
-          | <expression> "*" <expression>
-          | <expression> "/" <expression>
-          | <expression> "+" <expression>
-          | <expression> "-" <expression>
-          ;
+STATEMENT_LIST -> STATEMENT STATEMENT_LIST | ε
 
-<variable-declaration>: INT IDENTIFIER "=" INT_L
-                    | STRING IDENTIFIER "=" STRING_L
+STATEMENT -> DECLARATION
+           | EXIT_STATEMENT
 
-<number>:  INT_L ";"
+DECLARATION -> "int" IDENTIFIER "=" EXPRESSION ";"
 
-<exit> ::= EXIT "(" <expression> ")" ";"
+EXIT_STATEMENT -> "exit" "(" EXPRESSION ")" ";"
+
+EXPRESSION -> TERM EXPRESSION_TAIL
+
+EXPRESSION_TAIL -> "+" TERM EXPRESSION_TAIL
+                 | "-" TERM EXPRESSION_TAIL
+                 | ε
+
+TERM -> FACTOR TERM_TAIL
+
+TERM_TAIL -> "*" FACTOR TERM_TAIL
+           | "/" FACTOR TERM_TAIL
+           | "%" FACTOR TERM_TAIL
+           | ε
+
+FACTOR -> "(" EXPRESSION ")"
+        | IDENTIFIER
+        | INT_L

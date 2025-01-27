@@ -18,7 +18,13 @@ Token* match(Token** , TokenType);
 
 ParseTreeNode* parseDeclaration(Token**);
 
-ParseTreeNode* parseExitStatement(Token** currentToken);
+ParseTreeNode* parseExpression(Token**);
+
+ParseTreeNode* parseTerm(Token**);
+
+ParseTreeNode* parseFactor(Token**);
+
+ParseTreeNode* parseExitStatement(Token**);
 
 void printParseTree(ParseTreeNode*, char*, int);
 
