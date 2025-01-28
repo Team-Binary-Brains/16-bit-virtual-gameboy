@@ -96,7 +96,7 @@
 -   Done with the overall [**System Design and Architecture**](#system-design-and-architecture)
 
 -   **Achieved :**
-    -   [Code at end of week 4](https://github.com/Team-Binary-Brains/16-bit-virtual-gameboy/tree/1bbd7426f1c436f0dff2404d8a22c2ca330e0a05)
+    -   [Code at end of week 4](https://github.com/Team-Binary-Brains/16-bit-virtual-gameboy/commit/eaef5cfdfd16a75e57768ad89909ba2058cdc758)
     -   @Soham-Metha : Added documentation for the assembler and vm ( roughly 2500 LOC )
     -   @Soham-Metha : Tried switching to Cmake instead of GNU make.
     -   [Code for CMake on "experiment" branch](https://github.com/Team-Binary-Brains/16-bit-virtual-gameboy/tree/experiment)
