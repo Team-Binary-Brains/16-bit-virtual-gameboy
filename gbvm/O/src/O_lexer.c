@@ -2,6 +2,7 @@
 #include "univ_hashmap.h"
 #include "univ_fileops.h"
 #include "O_lexer.h"
+#include "O_token_types.h"
 
 size_t lineNumber = 0;
 HashTable *OpAndSepTokenMap;
@@ -27,10 +28,6 @@ void createKeywordTokenMap(){
         *value = KeywordTokens[i].type;
         insert(KeywordTokenMap, key, value);
     }
-}
-
-void __printToken(Token token){
-    printf("Token value: %s\t\tToken Type:%d\n", token.value, token.type);
 }
 
 Token* initToken(TokenType type){
