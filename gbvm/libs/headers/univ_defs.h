@@ -20,12 +20,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define EXECUTION_LIMIT 1024  /**< The maximum number of instructions that can be executed. */
-#define PROGRAM_CAPACITY 1024 /**< The maximum capacity of the program memory. */
-#define STACK_CAPACITY 1024   /**< The maximum capacity of the stack memory. */
-#define MAX_WORD 32767        /**< The maximum value that can be stored in a Word type. */
+#define EXECUTION_LIMIT 1024      /**< The maximum number of instructions that can be executed. */
+#define PROGRAM_CAPACITY 1024     /**< The maximum capacity of the program memory. */
+#define STACK_CAPACITY 1024       /**< The maximum capacity of the stack memory. */
+#define MAX_WORD 32767            /**< The maximum value that can be stored in a Word type. */
+#define ADDRESS_RANGE_LOW 0X0000  /**< The lower bound of the memory address range. */
+#define ADDRESS_RANGE_HIGH 0XFFFF /**< The upper bound of the memory address range. */
 
-typedef char Byte;               /**< Represents a single byte. */
-typedef short int Word;          /**< Represents a 16-bit word. */
-typedef int Double_Word;         /**< Represents a 32-bit double word. */
-typedef long long int Quad_Word; /**< Represents a 64-bit quad word. */
+typedef unsigned char Byte;               /**< Represents a single byte. */
+typedef unsigned short int Word;          /**< Represents a 16-bit word. */
+typedef unsigned int Double_Word;         /**< Represents a 32-bit double word. */
+typedef unsigned long long int Quad_Word; /**< Represents a 64-bit quad word. */

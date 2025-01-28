@@ -36,6 +36,9 @@ void assembleProgramIntoBytecode(const Program* prog, const char* filePath)
 Instruction processLine(String* line)
 {
     *line = trim(*line);
+    /*
+    TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
+    */
 
     String opStr = splitStr(line, ' ');
     if (opStr.length == 0) {
@@ -118,6 +121,11 @@ String loadFileIntoString(const char* filePath)
 void writeProgramToFile(const Program* prog, const char* filePath)
 {
     FILE* f = openFile(filePath, "w");
+
+    /*
+    TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
+    */
+
     for (Word i = 0; i < prog->instruction_count; i++) {
         Instruction inst = prog->instructions[i];
         String op = opcodeAsStr(&inst.type);

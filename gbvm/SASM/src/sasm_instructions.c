@@ -8,6 +8,9 @@ typedef struct {
     char* name;
 } OpcodeString;
 
+/*
+TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
+*/
 static OpcodeString OpcodeStringMap[] = {
     { NOP, 3, "NOP" },
     { PSH, 3, "PSH" },
@@ -55,6 +58,10 @@ Opcode strAsOpcode(const String* s)
     displayStringMessageError("Unknown instruction detected and was ignored", *s);
     return NOP;
 }
+
+/*
+TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
+*/
 
 Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
 {
