@@ -101,8 +101,8 @@
     -   @Soham-Metha : Tried switching to Cmake instead of GNU make.
     -   [Code for CMake on "experiment" branch](https://github.com/Team-Binary-Brains/16-bit-virtual-gameboy/tree/experiment)
     -   @omkarjagtap1011 : Refactored the entire lexer code
-    -   @omkarjagtap1011 : added a binary tree to the parser
-    -   @omkarjagtap1011 : imported the popular [hashmap.h](https://github.com/sheredom/hashmap.h) header file to help with the programming language.
+    -   @omkarjagtap1011 : Added a binary tree to the parser
+    -   @omkarjagtap1011 : Implemented dynamic hashmap data structure in C for creation of symbol table and other map related operations.
     -   [Code on the Programming Language branch at end of week 4](https://github.com/Team-Binary-Brains/16-bit-virtual-gameboy/commit/0ee9d1c712f0bf46b9851d3ffb7f00996c4a7af7)
     -   Switched to the C99 standard
     -   Iteration 1 completed, working executables uploaded in "releases".
