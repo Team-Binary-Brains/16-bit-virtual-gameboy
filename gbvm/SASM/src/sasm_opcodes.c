@@ -1,466 +1,582 @@
 #include "sasm_opcodes.h"
 
-void __AAA()
+Error __AAA(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __AAA");
+    printf("CALLED __AAA\n");
+    return ERR_OK;
 }
-void __AAD()
+Error __AAD(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __AAD");
+    printf("CALLED __AAD\n");
+    return ERR_OK;
 }
-void __AAM()
+Error __AAM(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __AAM");
+    printf("CALLED __AAM\n");
+    return ERR_OK;
 }
-void __AAS()
+Error __AAS(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __AAS");
+    printf("CALLED __AAS\n");
+    return ERR_OK;
 }
-void __ADC()
+Error __ADC(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __ADC");
+    printf("CALLED __ADC\n");
+    return ERR_OK;
 }
-void __ADD()
+Error __ADD(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __ADD");
+    printf("CALLED __ADD\n");
+    return ERR_OK;
 }
-void __AND()
+Error __AND(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __AND");
+    printf("CALLED __AND\n");
+    return ERR_OK;
 }
-void __CALL()
+Error __CALL(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __CALL");
+    printf("CALLED __CALL\n");
+    return ERR_OK;
 }
-void __CBW()
+Error __CBW(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __CBW");
+    printf("CALLED __CBW\n");
+    return ERR_OK;
 }
-void __CLC()
+Error __CLC(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __CLC");
+    printf("CALLED __CLC\n");
+    return ERR_OK;
 }
-void __CLD()
+Error __CLD(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __CLD");
+    printf("CALLED __CLD\n");
+    return ERR_OK;
 }
-void __CLI()
+Error __CLI(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __CLI");
+    printf("CALLED __CLI\n");
+    return ERR_OK;
 }
-void __CMC()
+Error __CMC(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __CMC");
+    printf("CALLED __CMC\n");
+    return ERR_OK;
 }
-void __CMP()
+Error __CMP(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __CMP");
+    printf("CALLED __CMP\n");
+    return ERR_OK;
 }
-void __CMPSB()
+Error __CMPSB(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __CMPSB");
+    printf("CALLED __CMPSB\n");
+    return ERR_OK;
 }
-void __CMPSW()
+Error __CMPSW(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __CMPSW");
+    printf("CALLED __CMPSW\n");
+    return ERR_OK;
 }
-void __CWD()
+Error __CWD(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __CWD");
+    printf("CALLED __CWD\n");
+    return ERR_OK;
 }
-void __DAA()
+Error __DAA(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __DAA");
+    printf("CALLED __DAA\n");
+    return ERR_OK;
 }
-void __DAS()
+Error __DAS(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __DAS");
+    printf("CALLED __DAS\n");
+    return ERR_OK;
 }
-void __DEC()
+Error __DEC(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __DEC");
+    printf("CALLED __DEC\n");
+    return ERR_OK;
 }
-void __DIV()
+Error __DIV(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __DIV");
+    printf("CALLED __DIV\n");
+    return ERR_OK;
 }
-void __HLT()
+Error __HLT(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __HLT");
+    printf("CALLED __HLT\n");
+    return ERR_OK;
 }
-void __IDIV()
+Error __IDIV(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __IDIV");
+    printf("CALLED __IDIV\n");
+    return ERR_OK;
 }
-void __IMUL()
+Error __IMUL(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __IMUL");
+    printf("CALLED __IMUL\n");
+    return ERR_OK;
 }
-void __IN()
+Error __IN(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __IN");
+    printf("CALLED __IN\n");
+    return ERR_OK;
 }
-void __INC()
+Error __INC(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __INC");
+    printf("CALLED __INC\n");
+    return ERR_OK;
 }
-void __INT()
+Error __INT(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __INT");
+    printf("CALLED __INT\n");
+    return ERR_OK;
 }
-void __INTO()
+Error __INTO(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __INTO");
+    printf("CALLED __INTO\n");
+    return ERR_OK;
 }
-void __IRET()
+Error __IRET(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __IRET");
+    printf("CALLED __IRET\n");
+    return ERR_OK;
 }
-void __JA()
+Error __JA(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JA");
+    printf("CALLED __JA\n");
+    return ERR_OK;
 }
-void __JAE()
+Error __JAE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JAE");
+    printf("CALLED __JAE\n");
+    return ERR_OK;
 }
-void __JB()
+Error __JB(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JB");
+    printf("CALLED __JB\n");
+    return ERR_OK;
 }
-void __JBE()
+Error __JBE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JBE");
+    printf("CALLED __JBE\n");
+    return ERR_OK;
 }
-void __JC()
+Error __JC(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JC");
+    printf("CALLED __JC\n");
+    return ERR_OK;
 }
-void __JCXZ()
+Error __JCXZ(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JCXZ");
+    printf("CALLED __JCXZ\n");
+    return ERR_OK;
 }
-void __JE()
+Error __JE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JE");
+    printf("CALLED __JE\n");
+    return ERR_OK;
 }
-void __JG()
+Error __JG(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JG");
+    printf("CALLED __JG\n");
+    return ERR_OK;
 }
-void __JGE()
+Error __JGE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JGE");
+    printf("CALLED __JGE\n");
+    return ERR_OK;
 }
-void __JL()
+Error __JL(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JL");
+    printf("CALLED __JL\n");
+    return ERR_OK;
 }
-void __JLE()
+Error __JLE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JLE");
+    printf("CALLED __JLE\n");
+    return ERR_OK;
 }
-void __JMP()
+Error __JMP(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JMP");
+    printf("CALLED __JMP\n");
+    return ERR_OK;
 }
-void __JNA()
+Error __JNA(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNA");
+    printf("CALLED __JNA\n");
+    return ERR_OK;
 }
-void __JNAE()
+Error __JNAE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNAE");
+    printf("CALLED __JNAE\n");
+    return ERR_OK;
 }
-void __JNB()
+Error __JNB(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNB");
+    printf("CALLED __JNB\n");
+    return ERR_OK;
 }
-void __JNBE()
+Error __JNBE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNBE");
+    printf("CALLED __JNBE\n");
+    return ERR_OK;
 }
-void __JNC()
+Error __JNC(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNC");
+    printf("CALLED __JNC\n");
+    return ERR_OK;
 }
-void __JNE()
+Error __JNE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNE");
+    printf("CALLED __JNE\n");
+    return ERR_OK;
 }
-void __JNG()
+Error __JNG(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNG");
+    printf("CALLED __JNG\n");
+    return ERR_OK;
 }
-void __JNGE()
+Error __JNGE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNGE");
+    printf("CALLED __JNGE\n");
+    return ERR_OK;
 }
-void __JNL()
+Error __JNL(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNL");
+    printf("CALLED __JNL\n");
+    return ERR_OK;
 }
-void __JNLE()
+Error __JNLE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNLE");
+    printf("CALLED __JNLE\n");
+    return ERR_OK;
 }
-void __JNO()
+Error __JNO(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNO");
+    printf("CALLED __JNO\n");
+    return ERR_OK;
 }
-void __JNP()
+Error __JNP(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNP");
+    printf("CALLED __JNP\n");
+    return ERR_OK;
 }
-void __JNS()
+Error __JNS(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNS");
+    printf("CALLED __JNS\n");
+    return ERR_OK;
 }
-void __JNZ()
+Error __JNZ(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JNZ");
+    printf("CALLED __JNZ\n");
+    return ERR_OK;
 }
-void __JO()
+Error __JO(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JO");
+    printf("CALLED __JO\n");
+    return ERR_OK;
 }
-void __JP()
+Error __JP(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JP");
+    printf("CALLED __JP\n");
+    return ERR_OK;
 }
-void __JPE()
+Error __JPE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JPE");
+    printf("CALLED __JPE\n");
+    return ERR_OK;
 }
-void __JPO()
+Error __JPO(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JPO");
+    printf("CALLED __JPO\n");
+    return ERR_OK;
 }
-void __JS()
+Error __JS(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JS");
+    printf("CALLED __JS\n");
+    return ERR_OK;
 }
-void __JZ()
+Error __JZ(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __JZ");
+    printf("CALLED __JZ\n");
+    return ERR_OK;
 }
-void __LAHF()
+Error __LAHF(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LAHF");
+    printf("CALLED __LAHF\n");
+    return ERR_OK;
 }
-void __LDS()
+Error __LDS(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LDS");
+    printf("CALLED __LDS\n");
+    return ERR_OK;
 }
-void __LEA()
+Error __LEA(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LEA");
+    printf("CALLED __LEA\n");
+    return ERR_OK;
 }
-void __LES()
+Error __LES(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LES");
+    printf("CALLED __LES\n");
+    return ERR_OK;
 }
-void __LODSB()
+Error __LODSB(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LODSB");
+    printf("CALLED __LODSB\n");
+    return ERR_OK;
 }
-void __LODSW()
+Error __LODSW(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LODSW");
+    printf("CALLED __LODSW\n");
+    return ERR_OK;
 }
-void __LOOP()
+Error __LOOP(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LOOP");
+    printf("CALLED __LOOP\n");
+    return ERR_OK;
 }
-void __LOOPE()
+Error __LOOPE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LOOPE");
+    printf("CALLED __LOOPE\n");
+    return ERR_OK;
 }
-void __LOOPNE()
+Error __LOOPNE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LOOPNE");
+    printf("CALLED __LOOPNE\n");
+    return ERR_OK;
 }
-void __LOOPNZ()
+Error __LOOPNZ(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LOOPNZ");
+    printf("CALLED __LOOPNZ\n");
+    return ERR_OK;
 }
-void __LOOPZ()
+Error __LOOPZ(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __LOOPZ");
+    printf("CALLED __LOOPZ\n");
+    return ERR_OK;
 }
-void __MOV()
+Error __MOV(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __MOV");
+    printf("CALLED __MOV\n");
+    return ERR_OK;
 }
-void __MOVSB()
+Error __MOVSB(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __MOVSB");
+    printf("CALLED __MOVSB\n");
+    return ERR_OK;
 }
-void __MOVSW()
+Error __MOVSW(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __MOVSW");
+    printf("CALLED __MOVSW\n");
+    return ERR_OK;
 }
-void __MUL()
+Error __MUL(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __MUL");
+    printf("CALLED __MUL\n");
+    return ERR_OK;
 }
-void __NEG()
+Error __NEG(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __NEG");
+    printf("CALLED __NEG\n");
+    return ERR_OK;
 }
-void __NOP()
+Error __NOP(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __NOP");
+    printf("CALLED __NOP\n");
+    return ERR_OK;
 }
-void __NOT()
+Error __NOT(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __NOT");
+    printf("CALLED __NOT\n");
+    return ERR_OK;
 }
-void __OR()
+Error __OR(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __OR");
+    printf("CALLED __OR\n");
+    return ERR_OK;
 }
-void __OUT()
+Error __OUT(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __OUT");
+    printf("CALLED __OUT\n");
+    return ERR_OK;
 }
-void __POP()
+Error __POP(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __POP");
+    printf("CALLED __POP\n");
+    return ERR_OK;
 }
-void __POPA()
+Error __POPA(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __POPA");
+    printf("CALLED __POPA\n");
+    return ERR_OK;
 }
-void __POPF()
+Error __POPF(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __POPF");
+    printf("CALLED __POPF\n");
+    return ERR_OK;
 }
-void __PUSH()
+Error __PUSH(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __PUSH");
+    printf("CALLED __PUSH\n");
+    return ERR_OK;
 }
-void __PUSHA()
+Error __PUSHA(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __PUSHA");
+    printf("CALLED __PUSHA\n");
+    return ERR_OK;
 }
-void __PUSHF()
+Error __PUSHF(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __PUSHF");
+    printf("CALLED __PUSHF\n");
+    return ERR_OK;
 }
-void __RCL()
+Error __RCL(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __RCL");
+    printf("CALLED __RCL\n");
+    return ERR_OK;
 }
-void __RCR()
+Error __RCR(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __RCR");
+    printf("CALLED __RCR\n");
+    return ERR_OK;
 }
-void __REP()
+Error __REP(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __REP");
+    printf("CALLED __REP\n");
+    return ERR_OK;
 }
-void __REPE()
+Error __REPE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __REPE");
+    printf("CALLED __REPE\n");
+    return ERR_OK;
 }
-void __REPNE()
+Error __REPNE(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __REPNE");
+    printf("CALLED __REPNE\n");
+    return ERR_OK;
 }
-void __REPNZ()
+Error __REPNZ(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __REPNZ");
+    printf("CALLED __REPNZ\n");
+    return ERR_OK;
 }
-void __REPZ()
+Error __REPZ(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __REPZ");
+    printf("CALLED __REPZ\n");
+    return ERR_OK;
 }
-void __RET()
+Error __RET(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __RET");
+    printf("CALLED __RET\n");
+    return ERR_OK;
 }
-void __RETF()
+Error __RETF(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __RETF");
+    printf("CALLED __RETF\n");
+    return ERR_OK;
 }
-void __ROL()
+Error __ROL(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __ROL");
+    printf("CALLED __ROL\n");
+    return ERR_OK;
 }
-void __ROR()
+Error __ROR(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __ROR");
+    printf("CALLED __ROR\n");
+    return ERR_OK;
 }
-void __SAHF()
+Error __SAHF(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __SAHF");
+    printf("CALLED __SAHF\n");
+    return ERR_OK;
 }
-void __SAL()
+Error __SAL(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __SAL");
+    printf("CALLED __SAL\n");
+    return ERR_OK;
 }
-void __SAR()
+Error __SAR(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __SAR");
+    printf("CALLED __SAR\n");
+    return ERR_OK;
 }
-void __SBB()
+Error __SBB(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __SBB");
+    printf("CALLED __SBB\n");
+    return ERR_OK;
 }
-void __SCASB()
+Error __SCASB(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __SCASB");
+    printf("CALLED __SCASB\n");
+    return ERR_OK;
 }
-void __SCASW()
+Error __SCASW(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __SCASW");
+    printf("CALLED __SCASW\n");
+    return ERR_OK;
 }
-void __SHL()
+Error __SHL(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __SHL");
+    printf("CALLED __SHL\n");
+    return ERR_OK;
 }
-void __SHR()
+Error __SHR(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __SHR");
+    printf("CALLED __SHR\n");
+    return ERR_OK;
 }
-void __STC()
+Error __STC(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __STC");
+    printf("CALLED __STC\n");
+    return ERR_OK;
 }
-void __STD()
+Error __STD(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __STD");
+    printf("CALLED __STD\n");
+    return ERR_OK;
 }
-void __STI()
+Error __STI(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __STI");
+    printf("CALLED __STI\n");
+    return ERR_OK;
 }
-void __STOSB()
+Error __STOSB(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __STOSB");
+    printf("CALLED __STOSB\n");
+    return ERR_OK;
 }
-void __STOSW()
+Error __STOSW(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __STOSW");
+    printf("CALLED __STOSW\n");
+    return ERR_OK;
 }
-void __SUB()
+Error __SUB(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __SUB");
+    printf("CALLED __SUB\n");
+    return ERR_OK;
 }
-void __TEST()
+Error __TEST(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __TEST");
+    printf("CALLED __TEST\n");
+    return ERR_OK;
 }
-void __XCHG()
+Error __XCHG(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __XCHG");
+    printf("CALLED __XCHG\n");
+    return ERR_OK;
 }
-void __XLATB()
+Error __XLATB(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __XLATB");
+    printf("CALLED __XLATB\n");
+    return ERR_OK;
 }
-void __XOR()
+Error __XOR(Registers* r, Memory* mem, const Word* offset)
 {
-    printf("CALLED __XOR");
+    printf("CALLED __XOR\n");
+    return ERR_OK;
 }

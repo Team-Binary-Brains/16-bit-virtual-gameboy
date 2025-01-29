@@ -6,6 +6,7 @@
  * @date January 2025
  */
 
+#pragma once
 #include "sasm_memory.h"
 
 /**

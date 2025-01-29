@@ -25,10 +25,14 @@ Word resolveAddress(CPU* cpu, String* s)
 {
     Word res = 0;
 
-    trim(splitStr(s, '['));
-
+    String ptrType = trim(splitStr(s, '['));
     if (s->length <= 0)
         return s->length;
+    if (*(ptrType.data + ptrType.length - 1) == 'b') {
+        printf("byte");
+    } else if (*(ptrType.data + ptrType.length - 1) == 'w') {
+        printf("word");
+    }
 
     String off = splitStr(s, ']');
 

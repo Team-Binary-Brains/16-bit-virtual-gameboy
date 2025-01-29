@@ -5,6 +5,10 @@
  * @author Soham Metha
  * @date January 2025
  */
+#pragma once
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#include "univ_errors.h"
+#include "sasm_memory.h"
 
 /**
  * @brief Enumeration of opcodes for SASM instructions.
@@ -82,7 +86,6 @@ typedef enum {
     LOOPNE,
     LOOPNZ,
     LOOPZ,
-    MOV,
     MOVSB,
     MOVSW,
     MUL,
@@ -126,121 +129,123 @@ typedef enum {
     XCHG,
     XLATB,
     XOR,
+
+    MOV,
 } Opcode;
 
-void __AAA();
-void __AAD();
-void __AAM();
-void __AAS();
-void __ADC();
-void __ADD();
-void __AND();
-void __CALL();
-void __CBW();
-void __CLC();
-void __CLD();
-void __CLI();
-void __CMC();
-void __CMP();
-void __CMPSB();
-void __CMPSW();
-void __CWD();
-void __DAA();
-void __DAS();
-void __DEC();
-void __DIV();
-void __HLT();
-void __IDIV();
-void __IMUL();
-void __IN();
-void __INC();
-void __INT();
-void __INTO();
-void __IRET();
-void __JA();
-void __JAE();
-void __JB();
-void __JBE();
-void __JC();
-void __JCXZ();
-void __JE();
-void __JG();
-void __JGE();
-void __JL();
-void __JLE();
-void __JMP();
-void __JNA();
-void __JNAE();
-void __JNB();
-void __JNBE();
-void __JNC();
-void __JNE();
-void __JNG();
-void __JNGE();
-void __JNL();
-void __JNLE();
-void __JNO();
-void __JNP();
-void __JNS();
-void __JNZ();
-void __JO();
-void __JP();
-void __JPE();
-void __JPO();
-void __JS();
-void __JZ();
-void __LAHF();
-void __LDS();
-void __LEA();
-void __LES();
-void __LODSB();
-void __LODSW();
-void __LOOP();
-void __LOOPE();
-void __LOOPNE();
-void __LOOPNZ();
-void __LOOPZ();
-void __MOV();
-void __MOVSB();
-void __MOVSW();
-void __MUL();
-void __NEG();
-void __NOP();
-void __NOT();
-void __OR();
-void __OUT();
-void __POP();
-void __POPA();
-void __POPF();
-void __PUSH();
-void __PUSHA();
-void __PUSHF();
-void __RCL();
-void __RCR();
-void __REP();
-void __REPE();
-void __REPNE();
-void __REPNZ();
-void __REPZ();
-void __RET();
-void __RETF();
-void __ROL();
-void __ROR();
-void __SAHF();
-void __SAL();
-void __SAR();
-void __SBB();
-void __SCASB();
-void __SCASW();
-void __SHL();
-void __SHR();
-void __STC();
-void __STD();
-void __STI();
-void __STOSB();
-void __STOSW();
-void __SUB();
-void __TEST();
-void __XCHG();
-void __XLATB();
-void __XOR();
+Error __AAA(Registers* r, Memory* mem, const Word* offset);
+Error __AAD(Registers* r, Memory* mem, const Word* offset);
+Error __AAM(Registers* r, Memory* mem, const Word* offset);
+Error __AAS(Registers* r, Memory* mem, const Word* offset);
+Error __ADC(Registers* r, Memory* mem, const Word* offset);
+Error __ADD(Registers* r, Memory* mem, const Word* offset);
+Error __AND(Registers* r, Memory* mem, const Word* offset);
+Error __CALL(Registers* r, Memory* mem, const Word* offset);
+Error __CBW(Registers* r, Memory* mem, const Word* offset);
+Error __CLC(Registers* r, Memory* mem, const Word* offset);
+Error __CLD(Registers* r, Memory* mem, const Word* offset);
+Error __CLI(Registers* r, Memory* mem, const Word* offset);
+Error __CMC(Registers* r, Memory* mem, const Word* offset);
+Error __CMP(Registers* r, Memory* mem, const Word* offset);
+Error __CMPSB(Registers* r, Memory* mem, const Word* offset);
+Error __CMPSW(Registers* r, Memory* mem, const Word* offset);
+Error __CWD(Registers* r, Memory* mem, const Word* offset);
+Error __DAA(Registers* r, Memory* mem, const Word* offset);
+Error __DAS(Registers* r, Memory* mem, const Word* offset);
+Error __DEC(Registers* r, Memory* mem, const Word* offset);
+Error __DIV(Registers* r, Memory* mem, const Word* offset);
+Error __HLT(Registers* r, Memory* mem, const Word* offset);
+Error __IDIV(Registers* r, Memory* mem, const Word* offset);
+Error __IMUL(Registers* r, Memory* mem, const Word* offset);
+Error __IN(Registers* r, Memory* mem, const Word* offset);
+Error __INC(Registers* r, Memory* mem, const Word* offset);
+Error __INT(Registers* r, Memory* mem, const Word* offset);
+Error __INTO(Registers* r, Memory* mem, const Word* offset);
+Error __IRET(Registers* r, Memory* mem, const Word* offset);
+Error __JA(Registers* r, Memory* mem, const Word* offset);
+Error __JAE(Registers* r, Memory* mem, const Word* offset);
+Error __JB(Registers* r, Memory* mem, const Word* offset);
+Error __JBE(Registers* r, Memory* mem, const Word* offset);
+Error __JC(Registers* r, Memory* mem, const Word* offset);
+Error __JCXZ(Registers* r, Memory* mem, const Word* offset);
+Error __JE(Registers* r, Memory* mem, const Word* offset);
+Error __JG(Registers* r, Memory* mem, const Word* offset);
+Error __JGE(Registers* r, Memory* mem, const Word* offset);
+Error __JL(Registers* r, Memory* mem, const Word* offset);
+Error __JLE(Registers* r, Memory* mem, const Word* offset);
+Error __JMP(Registers* r, Memory* mem, const Word* offset);
+Error __JNA(Registers* r, Memory* mem, const Word* offset);
+Error __JNAE(Registers* r, Memory* mem, const Word* offset);
+Error __JNB(Registers* r, Memory* mem, const Word* offset);
+Error __JNBE(Registers* r, Memory* mem, const Word* offset);
+Error __JNC(Registers* r, Memory* mem, const Word* offset);
+Error __JNE(Registers* r, Memory* mem, const Word* offset);
+Error __JNG(Registers* r, Memory* mem, const Word* offset);
+Error __JNGE(Registers* r, Memory* mem, const Word* offset);
+Error __JNL(Registers* r, Memory* mem, const Word* offset);
+Error __JNLE(Registers* r, Memory* mem, const Word* offset);
+Error __JNO(Registers* r, Memory* mem, const Word* offset);
+Error __JNP(Registers* r, Memory* mem, const Word* offset);
+Error __JNS(Registers* r, Memory* mem, const Word* offset);
+Error __JNZ(Registers* r, Memory* mem, const Word* offset);
+Error __JO(Registers* r, Memory* mem, const Word* offset);
+Error __JP(Registers* r, Memory* mem, const Word* offset);
+Error __JPE(Registers* r, Memory* mem, const Word* offset);
+Error __JPO(Registers* r, Memory* mem, const Word* offset);
+Error __JS(Registers* r, Memory* mem, const Word* offset);
+Error __JZ(Registers* r, Memory* mem, const Word* offset);
+Error __LAHF(Registers* r, Memory* mem, const Word* offset);
+Error __LDS(Registers* r, Memory* mem, const Word* offset);
+Error __LEA(Registers* r, Memory* mem, const Word* offset);
+Error __LES(Registers* r, Memory* mem, const Word* offset);
+Error __LODSB(Registers* r, Memory* mem, const Word* offset);
+Error __LODSW(Registers* r, Memory* mem, const Word* offset);
+Error __LOOP(Registers* r, Memory* mem, const Word* offset);
+Error __LOOPE(Registers* r, Memory* mem, const Word* offset);
+Error __LOOPNE(Registers* r, Memory* mem, const Word* offset);
+Error __LOOPNZ(Registers* r, Memory* mem, const Word* offset);
+Error __LOOPZ(Registers* r, Memory* mem, const Word* offset);
+Error __MOV(Registers* r, Memory* mem, const Word* offset);
+Error __MOVSB(Registers* r, Memory* mem, const Word* offset);
+Error __MOVSW(Registers* r, Memory* mem, const Word* offset);
+Error __MUL(Registers* r, Memory* mem, const Word* offset);
+Error __NEG(Registers* r, Memory* mem, const Word* offset);
+Error __NOP(Registers* r, Memory* mem, const Word* offset);
+Error __NOT(Registers* r, Memory* mem, const Word* offset);
+Error __OR(Registers* r, Memory* mem, const Word* offset);
+Error __OUT(Registers* r, Memory* mem, const Word* offset);
+Error __POP(Registers* r, Memory* mem, const Word* offset);
+Error __POPA(Registers* r, Memory* mem, const Word* offset);
+Error __POPF(Registers* r, Memory* mem, const Word* offset);
+Error __PUSH(Registers* r, Memory* mem, const Word* offset);
+Error __PUSHA(Registers* r, Memory* mem, const Word* offset);
+Error __PUSHF(Registers* r, Memory* mem, const Word* offset);
+Error __RCL(Registers* r, Memory* mem, const Word* offset);
+Error __RCR(Registers* r, Memory* mem, const Word* offset);
+Error __REP(Registers* r, Memory* mem, const Word* offset);
+Error __REPE(Registers* r, Memory* mem, const Word* offset);
+Error __REPNE(Registers* r, Memory* mem, const Word* offset);
+Error __REPNZ(Registers* r, Memory* mem, const Word* offset);
+Error __REPZ(Registers* r, Memory* mem, const Word* offset);
+Error __RET(Registers* r, Memory* mem, const Word* offset);
+Error __RETF(Registers* r, Memory* mem, const Word* offset);
+Error __ROL(Registers* r, Memory* mem, const Word* offset);
+Error __ROR(Registers* r, Memory* mem, const Word* offset);
+Error __SAHF(Registers* r, Memory* mem, const Word* offset);
+Error __SAL(Registers* r, Memory* mem, const Word* offset);
+Error __SAR(Registers* r, Memory* mem, const Word* offset);
+Error __SBB(Registers* r, Memory* mem, const Word* offset);
+Error __SCASB(Registers* r, Memory* mem, const Word* offset);
+Error __SCASW(Registers* r, Memory* mem, const Word* offset);
+Error __SHL(Registers* r, Memory* mem, const Word* offset);
+Error __SHR(Registers* r, Memory* mem, const Word* offset);
+Error __STC(Registers* r, Memory* mem, const Word* offset);
+Error __STD(Registers* r, Memory* mem, const Word* offset);
+Error __STI(Registers* r, Memory* mem, const Word* offset);
+Error __STOSB(Registers* r, Memory* mem, const Word* offset);
+Error __STOSW(Registers* r, Memory* mem, const Word* offset);
+Error __SUB(Registers* r, Memory* mem, const Word* offset);
+Error __TEST(Registers* r, Memory* mem, const Word* offset);
+Error __XCHG(Registers* r, Memory* mem, const Word* offset);
+Error __XLATB(Registers* r, Memory* mem, const Word* offset);
+Error __XOR(Registers* r, Memory* mem, const Word* offset);

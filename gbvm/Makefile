@@ -17,8 +17,8 @@ IMDIR = ./VM/headers
 CMDIR = ./VM/src
 
 
-_A_HEAD = 		sasm_alu.h			sasm_assembler.h	sasm_flags.h			sasm_instructions.c		sasm_memory.h
-_A_CODE = 		sasm_alu.c			sasm_assembler.c	sasm_flags.c			sasm_instructions.c					 		 				 	
+_A_HEAD = 		sasm_alu.h			sasm_assembler.h	sasm_flags.h			sasm_instructions.c		sasm_opcodes.h 	sasm_memory.h
+_A_CODE = 		sasm_alu.c			sasm_assembler.c	sasm_flags.c			sasm_instructions.c		sasm_opcodes.c	sasm_memory.c
 
 _G_HEAD = 		univ_cmdutils.h 	univ_errors.h		univ_fileops.h 		 	univ_strings.h			univ_defs.h 
 _G_CODE = 		univ_cmdutils.c		univ_errors.c		univ_fileops.c 		 	univ_strings.c

@@ -32,13 +32,6 @@ typedef enum {
 } ArithmeticOperations;
 
 typedef enum {
-    AND, /**< Represents logical AND operation */
-    OR,  /**< Represents logical OR operation */
-    XOR, /**< Represents logical XOR operation */
-    NOT  /**< Represents logical NOT operation */
-} LogicalOperations;
-
-typedef enum {
     LEFT_SHIFT, /**< Represents left shift operation */
     RIGHT_SHIFT /**< Represents right shift operation */
 } ShiftOperations;

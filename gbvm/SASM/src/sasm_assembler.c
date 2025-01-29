@@ -46,10 +46,6 @@ Instruction processLine(String* line)
     }
     Opcode op = strAsOpcode(&opStr);
 
-    if (op < PSH) {
-        return (Instruction) { .type = op };
-    }
-
     *line = trim(*line);
     Word operand = strToInt(splitStr(line, ' '));
     // printf("Operand :%d\n", operand);
@@ -130,7 +126,7 @@ void writeProgramToFile(const Program* prog, const char* filePath)
         Instruction inst = prog->instructions[i];
         String op = opcodeAsStr(&inst.type);
         fwrite(op.data, op.length, 1, f);
-        if (inst.type >= PSH) {
+        if (inst.type >= MOV) {
             fwrite(" ", 1, 1, f);
             char buf[32];
             sprintf(buf, "%d", inst.operand);

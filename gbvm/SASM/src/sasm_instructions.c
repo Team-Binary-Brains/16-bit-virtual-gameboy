@@ -12,21 +12,123 @@ typedef struct {
 TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
 */
 static OpcodeString OpcodeStringMap[] = {
-    { NOP, 3, "NOP" },
-    { PSH, 3, "PSH" },
-    { POP, 3, "POP" },
-    { DUP, 3, "DUP" },
+    { MOV, 3, "MOV" },
+    { AAA, 3, "AAA" },
+    { AAD, 3, "AAD" },
+    { AAM, 3, "AAM" },
+    { AAS, 3, "AAS" },
+    { ADC, 3, "ADC" },
     { ADD, 3, "ADD" },
-    { SUB, 3, "SUB" },
-    { MUL, 3, "MUL" },
+    { AND, 3, "AND" },
+    { CALL, 4, "CALL" },
+    { CBW, 3, "CBW" },
+    { CLC, 3, "CLC" },
+    { CLD, 3, "CLD" },
+    { CLI, 3, "CLI" },
+    { CMC, 3, "CMC" },
+    { CMP, 3, "CMP" },
+    { CMPSB, 5, "CMPSB" },
+    { CMPSW, 5, "CMPSW" },
+    { CWD, 3, "CWD" },
+    { DAA, 3, "DAA" },
+    { DAS, 3, "DAS" },
+    { DEC, 3, "DEC" },
     { DIV, 3, "DIV" },
-    { JMP, 3, "JMP" },
-    { JNZ, 3, "JNZ" },
-    { JIP, 3, "JIP" },
-    { EQL, 3, "EQL" },
     { HLT, 3, "HLT" },
+    { IDIV, 4, "IDIV" },
+    { IMUL, 4, "IMUL" },
+    { IN, 2, "IN" },
+    { INC, 3, "INC" },
+    { INT, 3, "INT" },
+    { INTO, 4, "INTO" },
+    { IRET, 4, "IRET" },
+    { JA, 2, "JA" },
+    { JAE, 3, "JAE" },
+    { JB, 2, "JB" },
+    { JBE, 3, "JBE" },
+    { JC, 2, "JC" },
+    { JCXZ, 4, "JCXZ" },
+    { JE, 2, "JE" },
+    { JG, 2, "JG" },
+    { JGE, 3, "JGE" },
+    { JL, 2, "JL" },
+    { JLE, 3, "JLE" },
+    { JMP, 3, "JMP" },
+    { JNA, 3, "JNA" },
+    { JNAE, 4, "JNAE" },
+    { JNB, 3, "JNB" },
+    { JNBE, 4, "JNBE" },
+    { JNC, 3, "JNC" },
+    { JNE, 3, "JNE" },
+    { JNG, 3, "JNG" },
+    { JNGE, 4, "JNGE" },
+    { JNL, 3, "JNL" },
+    { JNLE, 4, "JNLE" },
+    { JNO, 3, "JNO" },
+    { JNP, 3, "JNP" },
+    { JNS, 3, "JNS" },
+    { JNZ, 3, "JNZ" },
+    { JO, 2, "JO" },
+    { JP, 2, "JP" },
+    { JPE, 3, "JPE" },
+    { JPO, 3, "JPO" },
+    { JS, 2, "JS" },
+    { JZ, 2, "JZ" },
+    { LAHF, 4, "LAHF" },
+    { LDS, 3, "LDS" },
+    { LEA, 3, "LEA" },
+    { LES, 3, "LES" },
+    { LODSB, 5, "LODSB" },
+    { LODSW, 5, "LODSW" },
+    { LOOP, 4, "LOOP" },
+    { LOOPE, 5, "LOOPE" },
+    { LOOPNE, 6, "LOOPNE" },
+    { LOOPNZ, 6, "LOOPNZ" },
+    { LOOPZ, 5, "LOOPZ" },
+    { MOVSB, 5, "MOVSB" },
+    { MOVSW, 5, "MOVSW" },
+    { MUL, 3, "MUL" },
+    { NEG, 3, "NEG" },
+    { NOP, 3, "NOP" },
+    { NOT, 3, "NOT" },
+    { OR, 2, "OR" },
+    { OUT, 3, "OUT" },
+    { POP, 3, "POP" },
+    { POPA, 4, "POPA" },
+    { POPF, 4, "POPF" },
+    { PUSH, 4, "PUSH" },
+    { PUSHA, 5, "PUSHA" },
+    { PUSHF, 5, "PUSHF" },
+    { RCL, 3, "RCL" },
+    { RCR, 3, "RCR" },
+    { REP, 3, "REP" },
+    { REPE, 4, "REPE" },
+    { REPNE, 5, "REPNE" },
+    { REPNZ, 5, "REPNZ" },
+    { REPZ, 4, "REPZ" },
+    { RET, 3, "RET" },
+    { RETF, 4, "RETF" },
+    { ROL, 3, "ROL" },
+    { ROR, 3, "ROR" },
+    { SAHF, 4, "SAHF" },
+    { SAL, 3, "SAL" },
+    { SAR, 3, "SAR" },
+    { SBB, 3, "SBB" },
+    { SCASB, 5, "SCASB" },
+    { SCASW, 5, "SCASW" },
+    { SHL, 3, "SHL" },
+    { SHR, 3, "SHR" },
+    { STC, 3, "STC" },
+    { STD, 3, "STD" },
+    { STI, 3, "STI" },
+    { STOSB, 5, "STOSB" },
+    { STOSW, 5, "STOSW" },
+    { SUB, 3, "SUB" },
+    { TEST, 4, "TEST" },
+    { XCHG, 4, "XCHG" },
+    { XLATB, 5, "XLATB" },
+    { XOR, 3, "XOR" }
 };
-
 String opcodeAsStr(const Opcode* type)
 {
     size_t len = sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]);
@@ -63,84 +165,28 @@ Opcode strAsOpcode(const String* s)
 TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
 */
 
+Error (*instructionFuncPtrs[])(Registers* r, Memory* mem, const Word* offset) = {
+    __AAA, __AAD, __AAM, __AAS, __ADC, __ADD, __AND, __CALL, __CBW, __CLC,
+    __CLD, __CLI, __CMC, __CMP, __CMPSB, __CMPSW, __CWD, __DAA, __DAS, __DEC,
+    __DIV, __HLT, __IDIV, __IMUL, __IN, __INC, __INT, __INTO, __IRET, __JA,
+    __JAE, __JB, __JBE, __JC, __JCXZ, __JE, __JG, __JGE, __JL, __JLE,
+    __JMP, __JNA, __JNAE, __JNB, __JNBE, __JNC, __JNE, __JNG, __JNGE, __JNL,
+    __JNLE, __JNO, __JNP, __JNS, __JNZ, __JO, __JP, __JPE, __JPO, __JS,
+    __JZ, __LAHF, __LDS, __LEA, __LES, __LODSB, __LODSW, __LOOP, __LOOPE,
+    __LOOPNE, __LOOPNZ, __LOOPZ, __MOVSB, __MOVSW, __MUL, __NEG, __NOP, __NOT,
+    __OR, __OUT, __POP, __POPA, __POPF, __PUSH, __PUSHA, __PUSHF, __RCL, __RCR,
+    __REP, __REPE, __REPNE, __REPNZ, __REPZ, __RET, __RETF, __ROL, __ROR, __SAHF,
+    __SAL, __SAR, __SBB, __SCASB, __SCASW, __SHL, __SHR, __STC, __STD, __STI,
+    __STOSB, __STOSW, __SUB, __TEST, __XCHG, __XLATB, __XOR, __MOV
+};
 Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
 {
     if (cpu->registers.IP < 0 || cpu->registers.IP >= prog->instruction_size) {
         return ERR_ILLEGAL_INST_ACCESS;
     }
-
     Instruction inst = prog->instructions[cpu->registers.IP];
 
-    Error err = 0;
-
-    switch (inst.type) {
-
-    case NOP:
-        break;
-
-    case POP:
-        err = __pop(&(cpu->registers), mem);
-        break;
-
-    case PSH:
-        err = __psh(&(cpu->registers), mem, &(inst.operand));
-        break;
-
-    case DUP:
-        err = __dup(&(cpu->registers), mem, &(inst.operand));
-        break;
-
-    case ADD:
-        err = performArithmeticOperation(cpu, mem, ADDITION);
-        break;
-
-    case SUB:
-        err = performArithmeticOperation(cpu, mem, SUBTRACT);
-        break;
-
-    case MUL:
-        err = performArithmeticOperation(cpu, mem, MULTIPLY);
-        break;
-
-    case DIV:
-        err = performArithmeticOperation(cpu, mem, DIVIDE);
-        break;
-
-    case EQL:
-        err = __eql(&(cpu->registers), mem);
-        break;
-
-    case HLT:
-        setHalt(cpu, true);
-        break;
-
-    case JIP:
-        if (cpu->registers.SP < 1) {
-            return ERR_STACK_UNDERFLOW;
-        }
-        if (getSign(cpu)) {
-            break;
-        }
-        cpu->registers.IP = inst.operand;
-        return ERR_OK;
-
-    case JNZ:
-        if (cpu->registers.SP < 1) {
-            return ERR_STACK_UNDERFLOW;
-        }
-        if (getZero(cpu)) {
-            break;
-        }
-        cpu->registers.IP = inst.operand;
-        return ERR_OK;
-
-    case JMP:
-        cpu->registers.IP = inst.operand;
-        return ERR_OK;
-
-    default:
-        return ERR_ILLEGAL_INST;
-    }
+    Error err = instructionFuncPtrs[inst.type](&(cpu->registers), mem, 0);
 
     if (err) {
         return err;
@@ -148,49 +194,4 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
 
     cpu->registers.IP += 1;
     return ERR_OK;
-}
-
-Error __psh(Registers* r, Memory* mem, const Word* operand)
-{
-    if (r->SP >= STACK_CAPACITY) {
-        return ERR_STACK_OVERFLOW;
-    }
-    mem->stack[r->SP++] = *operand;
-    return 0;
-}
-
-Error __eql(Registers* r, Memory* mem)
-{
-    if (r->SP < 2) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    mem->stack[r->SP - 2] = mem->stack[r->SP - 1] == mem->stack[r->SP - 2];
-    r->SP -= 1;
-    return 0;
-}
-
-Error __pop(Registers* r, Memory* mem)
-{
-    if (r->SP < 1) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    printf("%d\n", mem->stack[r->SP - 1]);
-    r->SP -= 1;
-    return 0;
-}
-
-Error __dup(Registers* r, Memory* mem, const Word* operand)
-{
-    if (r->SP >= STACK_CAPACITY) {
-        return ERR_STACK_OVERFLOW;
-    }
-    if ((r->SP - (*operand)) < 0) {
-        return ERR_STACK_UNDERFLOW;
-    }
-    if ((*operand) < 0) {
-        return ERR_ILLEGAL_OPERAND;
-    }
-    mem->stack[r->SP] = mem->stack[r->SP - (*operand)];
-    r->SP += 1;
-    return 0;
 }

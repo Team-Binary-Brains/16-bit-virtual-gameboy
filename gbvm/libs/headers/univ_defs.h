@@ -27,7 +27,7 @@
 #define ADDRESS_RANGE_LOW 0X0000  /**< The lower bound of the memory address range. */
 #define ADDRESS_RANGE_HIGH 0XFFFF /**< The upper bound of the memory address range. */
 
-typedef unsigned char Byte;               /**< Represents a single byte. */
-typedef unsigned short int Word;          /**< Represents a 16-bit word. */
-typedef unsigned int Double_Word;         /**< Represents a 32-bit double word. */
-typedef unsigned long long int Quad_Word; /**< Represents a 64-bit quad word. */
+typedef char Byte;               /**< Represents a single byte. */
+typedef short int Word;          /**< Represents a 16-bit word. */
+typedef int Double_Word;         /**< Represents a 32-bit double word. */
+typedef long long int Quad_Word; /**< Represents a 64-bit quad word. */
