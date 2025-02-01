@@ -15,14 +15,6 @@
 #include "sasm_opcodes.h"
 
 /**
- * @brief Structure representing an instruction in the SASM assembly language.
- */
-typedef struct {
-    Opcode type;  /**< The opcode of the instruction */
-    Word operand; /**< The operand of the instruction */
-} Instruction;
-
-/**
  * @brief Structure representing a program in the SASM assembly language.
  */
 typedef struct {

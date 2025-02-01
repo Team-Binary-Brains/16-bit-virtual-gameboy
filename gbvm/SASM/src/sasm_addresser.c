@@ -6,8 +6,8 @@ Word evalRegister(CPU* cpu, String tmp)
     /*
     TODO: use a map here
     */
-    if (0 == strncmp(tmp.data, "BP", 2))
-        return cpu->registers.BP;
+    if (0 == strncmp(tmp.data, "EP", 2))
+        return cpu->registers.EP;
 
     if (0 == strncmp(tmp.data, "BX", 2))
         return cpu->registers.BX.full;
@@ -46,6 +46,31 @@ Word resolveAddress(CPU* cpu, String* s)
 
     while (tmp.length > 0) {
         res += evalRegister(cpu, tmp);
+        tmp = trim(splitStr(&off, ' '));
+    }
+
+    return res;
+}
+
+Word resolveImmediateAddress(String* s)
+{
+    Word res = 0;
+
+    String ptrType = trim(splitStr(s, '['));
+    if (s->length <= 0)
+        return s->length;
+    if (*(ptrType.data + ptrType.length - 1) == 'b') {
+        printf("byte");
+    } else if (*(ptrType.data + ptrType.length - 1) == 'w') {
+        printf("word");
+    }
+
+    String off = splitStr(s, ']');
+
+    String tmp = trim(splitStr(&off, ' '));
+
+    while (tmp.length > 0) {
+        res += strToInt(tmp);
         tmp = trim(splitStr(&off, ' '));
     }
 

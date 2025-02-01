@@ -113,4 +113,16 @@ TEST
 XCHG
 XLATB
 XOR
-MOV
+; MOV AX, 10
+; MOV BX, 20
+; MOV CX, 30
+; MOV DX, 40
+; MOV [3], 10
+; MOV [2 3], 20
+; MOV [1 2 3], 30
+; MOV [1 2 3 4], 40 
+; MOV CX, AX
+; MOV DX, BX
+; MOV [2], AX
+; MOV [3], [2]
+; MOV BX, [2]

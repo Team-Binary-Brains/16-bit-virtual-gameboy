@@ -1,6 +1,7 @@
 #include "univ_defs.h"
 #include "sasm_assembler.h"
 #include "univ_fileops.h"
+#include "sasm_addresser.h"
 
 Program disassembleBytecodeIntoProgram(const char* filePath)
 {
@@ -47,10 +48,51 @@ Instruction processLine(String* line)
     Opcode op = strAsOpcode(&opStr);
 
     *line = trim(*line);
-    Word operand = strToInt(splitStr(line, ' '));
-    // printf("Operand :%d\n", operand);
+    debugMessageDisplay(line);
 
-    return (Instruction) { .type = op, .operand = operand };
+    Byte registerMode = 0;
+    Word operand = -1, operand2 = -1;
+
+    if (*line->data == '[') {
+        operand = resolveImmediateAddress(line);
+        registerMode = registerMode | o1_mem;
+    } else if ((*line->data >= 'A' && *line->data < 'E')) {
+        if (0 == strncmp(line->data, "AX", 2))
+            operand = 1;
+        else if (0 == strncmp(line->data, "BX", 2))
+            operand = 2;
+        else if (0 == strncmp(line->data, "CX", 2))
+            operand = 3;
+        else if (0 == strncmp(line->data, "DX", 2))
+            operand = 4;
+        registerMode = registerMode | o1_reg;
+    } else {
+        assert(0 && "ERROR ");
+    }
+
+    splitStr(line, ',');
+    *line = trim(*line);
+    debugMessageDisplay(line);
+
+    if (*line->data == '[') {
+        operand2 = resolveImmediateAddress(line);
+        registerMode = registerMode | o2_mem;
+    } else if ((*line->data >= 'A' && *line->data < 'E')) {
+        if (0 == strncmp(line->data, "AX", 2))
+            operand2 = 1;
+        else if (0 == strncmp(line->data, "BX", 2))
+            operand2 = 2;
+        else if (0 == strncmp(line->data, "CX", 2))
+            operand2 = 3;
+        else if (0 == strncmp(line->data, "DX", 2))
+            operand2 = 4;
+        registerMode = registerMode | o2_reg;
+    } else {
+        operand2 = strToInt(splitStr(line, ' '));
+        registerMode = registerMode | o2_imm;
+    }
+
+    return (Instruction) { .type = op, .operand = operand, .operand2 = operand2, .registerMode = registerMode };
 }
 
 Program parseAsmIntoProgram(String* src)
@@ -59,7 +101,6 @@ Program parseAsmIntoProgram(String* src)
     prog.instruction_count = 0;
     while (src->length > 0) {
         String line = trim(splitStr(src, '\n'));
-        // printf("Line : %.*s\n", (int)(line.length), line.data);
 
         if (line.length == 0) {
             continue;
@@ -70,6 +111,7 @@ Program parseAsmIntoProgram(String* src)
             debugCommentDisplay(&line);
             continue;
         }
+        debugMessageDisplay(&line);
 
         Instruction tmp = processLine(&line);
 
@@ -129,7 +171,7 @@ void writeProgramToFile(const Program* prog, const char* filePath)
         if (inst.type >= MOV) {
             fwrite(" ", 1, 1, f);
             char buf[32];
-            sprintf(buf, "%d", inst.operand);
+            sprintf(buf, "%d %d %d", inst.operand, inst.operand2, inst.registerMode);
             fwrite(buf, strlen(buf), 1, f);
         }
         fwrite("\n", 1, 1, f);

@@ -1,6 +1,6 @@
 #include "sasm_memory.h"
 
-void writeToMemory(Memory* memory, Word address, Byte data)
+void writeToMemory(Memory* memory, Word address, Word data)
 {
     memory->stack[address] = data;
 }

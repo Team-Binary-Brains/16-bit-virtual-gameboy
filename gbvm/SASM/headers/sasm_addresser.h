@@ -28,3 +28,5 @@ Word evalRegister(CPU* cpu, String tmp);
  * @return The resolved address.
  */
 Word resolveAddress(CPU* cpu, String* s);
+
+Word resolveImmediateAddress(String* s);

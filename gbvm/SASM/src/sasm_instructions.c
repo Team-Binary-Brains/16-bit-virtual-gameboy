@@ -1,7 +1,7 @@
 #include "sasm_instructions.h"
 #include "sasm_flags.h"
 #include "sasm_alu.h"
-
+#include "univ_defs.h"
 typedef struct {
     Opcode type;
     size_t size;
@@ -165,7 +165,7 @@ Opcode strAsOpcode(const String* s)
 TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
 */
 
-Error (*instructionFuncPtrs[])(Registers* r, Memory* mem, const Word* offset) = {
+Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, const Instruction* inst) = {
     __AAA, __AAD, __AAM, __AAS, __ADC, __ADD, __AND, __CALL, __CBW, __CLC,
     __CLD, __CLI, __CMC, __CMP, __CMPSB, __CMPSW, __CWD, __DAA, __DAS, __DEC,
     __DIV, __HLT, __IDIV, __IMUL, __IN, __INC, __INT, __INTO, __IRET, __JA,
@@ -186,7 +186,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
     }
     Instruction inst = prog->instructions[cpu->registers.IP];
 
-    Error err = instructionFuncPtrs[inst.type](&(cpu->registers), mem, 0);
+    Error err = instructionFuncPtrs[inst.type](cpu, mem, &inst);
 
     if (err) {
         return err;

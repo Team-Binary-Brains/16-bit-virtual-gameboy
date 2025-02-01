@@ -92,6 +92,8 @@ void displayStringMessageError(const char*, String);
  */
 void debugCommentDisplay(String*);
 
+void debugMessageDisplay(String* s);
+
 /*
  * AI generated Tips :
  * @note This function is used to display general error messages.

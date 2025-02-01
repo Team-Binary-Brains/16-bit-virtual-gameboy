@@ -1,0 +1,39 @@
+# immediate data to register
+;
+    MOV AX, 10
+;
+    MOV BX, 20
+;
+    MOV CX, 30
+;
+    MOV DX, 40
+;
+
+# immediate data to address
+;
+    MOV [3], 10
+;
+    MOV [2 3], 20
+;
+    MOV [1 2 3], 30
+;
+    MOV [1 2 3 4], 40  GETS ADDED
+;
+
+# register to register
+    MOV CX, AX
+;
+    MOV DX, BX
+;
+
+# register to address
+    MOV [2], AX
+;
+
+# address to address
+    MOV [3], [2]
+;
+
+# address to register
+    MOV BX, [2]
+;

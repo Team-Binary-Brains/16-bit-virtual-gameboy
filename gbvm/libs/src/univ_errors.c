@@ -66,3 +66,13 @@ void debugCommentDisplay(String* s)
     else
         fprintf(stdout, " %.*s |", (int)(124), s->data);
 }
+
+void debugMessageDisplay(String* s)
+{
+    fprintf(stdout, "\n| D |");
+
+    if (s->length < 125)
+        fprintf(stdout, " %-*.*s |", (int)(124), (int)(s->length), s->data);
+    else
+        fprintf(stdout, " %.*s |", (int)(124), s->data);
+}
