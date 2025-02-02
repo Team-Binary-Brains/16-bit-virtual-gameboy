@@ -60,7 +60,15 @@ Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __AND\n");
+    // printf("\nBefore : %d, %d", *operand1, *operand2);
+
+    *operand1 = *operand1 & *operand2;
+
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    checkAndSetParity(cpu, *operand1);
+
+    // printf("\nAfter  : %d\n", *operand1);
     return ERR_OK;
 }
 Error __CALL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)

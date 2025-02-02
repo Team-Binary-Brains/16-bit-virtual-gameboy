@@ -19,7 +19,6 @@ typedef enum {
     AAD,
     AAM,
     AAS,
-    AND,
     CALL,
     CBW,
     CLC,
@@ -132,6 +131,7 @@ typedef enum {
     MOV,
     ADC,
     ADD,
+    AND,
 } Opcode;
 
 /**

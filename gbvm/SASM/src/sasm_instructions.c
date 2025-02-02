@@ -166,7 +166,7 @@ TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
 */
 
 Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* operand2) = {
-    __AAA, __AAD, __AAM, __AAS, __AND, __CALL, __CBW, __CLC,
+    __AAA, __AAD, __AAM, __AAS, __CALL, __CBW, __CLC,
     __CLD, __CLI, __CMC, __CMP, __CMPSB, __CMPSW, __CWD, __DAA, __DAS, __DEC,
     __DIV, __HLT, __IDIV, __IMUL, __IN, __INC, __INT, __INTO, __IRET, __JA,
     __JAE, __JB, __JBE, __JC, __JCXZ, __JE, __JG, __JGE, __JL, __JLE,
@@ -177,7 +177,8 @@ Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* oper
     __OR, __OUT, __POP, __POPA, __POPF, __PUSH, __PUSHA, __PUSHF, __RCL, __RCR,
     __REP, __REPE, __REPNE, __REPNZ, __REPZ, __RET, __RETF, __ROL, __ROR, __SAHF,
     __SAL, __SAR, __SBB, __SCASB, __SCASW, __SHL, __SHR, __STC, __STD, __STI,
-    __STOSB, __STOSW, __SUB, __TEST, __XCHG, __XLATB, __XOR, __MOV, __ADC, __ADD
+    __STOSB, __STOSW, __SUB, __TEST, __XCHG, __XLATB, __XOR,
+    __MOV, __ADC, __ADD, __AND
 };
 Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
 {
