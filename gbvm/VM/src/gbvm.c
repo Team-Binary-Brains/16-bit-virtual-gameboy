@@ -21,7 +21,7 @@ void dumpStack(FILE* stream, const Vm* vm)
     fprintf(stream, "\n-------------------------------STACK------------------------------------------ \n\n");
 }
 
-void dumpFlags(FILE* stream, const Vm* vm)
+void dumpFlags(FILE* stream, CPU* cpu)
 {
     fprintf(stream, "\n-------------------------------FLAGS------------------------------------------ "
                     "\n  Halt : %d\tOverflow : %d                                                     "
@@ -29,10 +29,10 @@ void dumpFlags(FILE* stream, const Vm* vm)
                     "\n  Zero : %d\tParity   : %d                                                     "
                     "\n  Borrow : %d                                                                  "
                     "\n-------------------------------FLAGS------------------------------------------ \n\n",
-        getHalt(&(vm->cpu)), getOverflow(&(vm->cpu)),
-        getSign(&(vm->cpu)), getCarry(&(vm->cpu)),
-        getZero(&(vm->cpu)), getParity(&(vm->cpu)),
-        getBorrow(&(vm->cpu)));
+        getFlag(HALT, cpu), getFlag(OVERFLOW, cpu),
+        getFlag(SIGN, cpu), getFlag(CARRY, cpu),
+        getFlag(ZERO, cpu), getFlag(PARITY, cpu),
+        getFlag(BORROW, cpu));
 }
 
 void loadProgram(Vm* vm, char* inputFile)
@@ -40,35 +40,44 @@ void loadProgram(Vm* vm, char* inputFile)
     vm->prog = disassembleBytecodeIntoProgram(inputFile);
     vm->cpu.registers.IP = 0;
     vm->cpu.registers.SP = 0;
-    setHalt(&(vm->cpu), 0);
+    setFlag(HALT, &(vm->cpu), 0);
 }
 
 void executeProgram(Vm* vm, int debug, int i)
 {
-    if (i >= EXECUTION_LIMIT || getHalt(&(vm->cpu))) {
+    CPU* cpu = &(vm->cpu);
+    Memory* mem = &(vm->mem);
+    Program* prog = &(vm->prog);
+    Instruction* inst = &(prog->instructions[vm->cpu.registers.IP]);
+    if (i >= EXECUTION_LIMIT || getFlag(HALT, cpu)) {
         return;
     }
-    String operation = opcodeAsStr(&(vm->prog.instructions[vm->cpu.registers.IP].type));
-
+    String operation = opcodeAsStr(&(inst->type));
+    Error error = 0;
     switch (debug) {
     case 2:
         scanf("%*c");
         system("clear");
-        dumpFlags(stdout, vm);
-        dumpStack(stdout, vm);
+        error = executeInst(prog, mem, cpu);
+        printf("\nInstruction Number :\t%d\nInstruction :\t\t", i);
         printString(operation);
+        printf("Operand1 : \t\t%d\nOperand2 : \t\t%d\n", inst->operand, inst->operand2);
+        dumpFlags(stdout, cpu);
+        dumpStack(stdout, vm);
         break;
     case 1:
         scanf("%*c");
         system("clear");
-        dumpStack(stdout, vm);
+        error = executeInst(prog, mem, cpu);
+        printf("\nInstruction Number :\t%d\nInstruction :\t\t", i);
         printString(operation);
+        printf("Operand1 : \t\t%d\nOperand2 : \t\t%d\n", inst->operand, inst->operand2);
+        dumpStack(stdout, vm);
         break;
     default:
+        error = executeInst(prog, mem, cpu);
         break;
     }
-
-    Error error = executeInst(&(vm->prog), &(vm->mem), &(vm->cpu));
 
     if (error != ERR_OK)
         executionErrorWithExit(&error);

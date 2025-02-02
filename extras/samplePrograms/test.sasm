@@ -37,3 +37,18 @@
 # address to register
     MOV BX, [2]
 ;
+
+# testing flags
+; PARITY
+MOV BX, 100
+MOV AX, 201
+ADC AX, BX
+; ZERO
+MOV AX, 0
+ADC AX, 0
+; PARITY
+MOV AX,32767
+ADC AX,0
+; OVERFLOW CARRY SIGN PARITY
+ADC AX,BX
+;

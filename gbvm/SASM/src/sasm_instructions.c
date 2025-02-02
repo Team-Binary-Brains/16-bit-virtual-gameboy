@@ -166,7 +166,7 @@ TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
 */
 
 Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* operand2) = {
-    __AAA, __AAD, __AAM, __AAS, __ADC, __ADD, __AND, __CALL, __CBW, __CLC,
+    __AAA, __AAD, __AAM, __AAS, __ADD, __AND, __CALL, __CBW, __CLC,
     __CLD, __CLI, __CMC, __CMP, __CMPSB, __CMPSW, __CWD, __DAA, __DAS, __DEC,
     __DIV, __HLT, __IDIV, __IMUL, __IN, __INC, __INT, __INTO, __IRET, __JA,
     __JAE, __JB, __JBE, __JC, __JCXZ, __JE, __JG, __JGE, __JL, __JLE,
@@ -177,7 +177,7 @@ Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* oper
     __OR, __OUT, __POP, __POPA, __POPF, __PUSH, __PUSHA, __PUSHF, __RCL, __RCR,
     __REP, __REPE, __REPNE, __REPNZ, __REPZ, __RET, __RETF, __ROL, __ROR, __SAHF,
     __SAL, __SAR, __SBB, __SCASB, __SCASW, __SHL, __SHR, __STC, __STD, __STI,
-    __STOSB, __STOSW, __SUB, __TEST, __XCHG, __XLATB, __XOR, __MOV
+    __STOSB, __STOSW, __SUB, __TEST, __XCHG, __XLATB, __XOR, __MOV, __ADC
 };
 Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
 {
@@ -190,31 +190,31 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
     if (inst.registerMode & o2_imm) {
 
         operand2 = &inst.operand2;
-        printf("\nSRC Data : %d \tMode : Immediate\n", *operand2);
+        // printf("\nSRC Data : %d \tMode : Immediate\n", *operand2);
 
     } else if (inst.registerMode & o2_mem) {
 
         operand2 = &(mem->stack[inst.operand2]);
-        printf("\nSRC Data : %d \tMode : Memory address [%d]\n", *operand2, inst.operand2);
+        // printf("\nSRC Data : %d \tMode : Memory address [%d]\n", *operand2, inst.operand2);
 
     } else if (inst.registerMode & o2_reg) {
 
         switch (inst.operand2) {
         case 1:
             operand2 = &(cpu->registers.AX.full);
-            printf("\nSRC Data : %d \tMode : Register AX\n", *operand2);
+            // printf("\nSRC Data : %d \tMode : Register AX\n", *operand2);
             break;
         case 2:
             operand2 = &(cpu->registers.BX.full);
-            printf("\nSRC Data : %d \tMode : Register BX\n", *operand2);
+            // printf("\nSRC Data : %d \tMode : Register BX\n", *operand2);
             break;
         case 3:
             operand2 = &(cpu->registers.CX.full);
-            printf("\nSRC Data : %d \tMode : Register CX\n", *operand2);
+            // printf("\nSRC Data : %d \tMode : Register CX\n", *operand2);
             break;
         case 4:
             operand2 = &(cpu->registers.DX.full);
-            printf("\nSRC Data : %d \tMode : Register DX\n", *operand2);
+            // printf("\nSRC Data : %d \tMode : Register DX\n", *operand2);
             break;
         }
     }
@@ -222,7 +222,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
     if (inst.registerMode & o1_mem) {
 
         operand1 = &(mem->stack[inst.operand]);
-        printf("DST Data : %d \tMode : Memory address [%d]\n", *operand1, inst.operand);
+        // printf("DST Data : %d \tMode : Memory address [%d]\n", *operand1, inst.operand);
 
     } else if (inst.registerMode & o1_reg) {
 
@@ -230,19 +230,19 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
 
         case 1:
             operand1 = &(cpu->registers.AX.full);
-            printf("DST Data : %d \tMode : Register AX\n", cpu->registers.AX.full);
+            // printf("DST Data : %d \tMode : Register AX\n", cpu->registers.AX.full);
             break;
         case 2:
             operand1 = &(cpu->registers.BX.full);
-            printf("DST Data : %d \tMode : Register BX\n", cpu->registers.BX.full);
+            // printf("DST Data : %d \tMode : Register BX\n", cpu->registers.BX.full);
             break;
         case 3:
             operand1 = &(cpu->registers.CX.full);
-            printf("DST Data : %d \tMode : Register CX\n", cpu->registers.CX.full);
+            // printf("DST Data : %d \tMode : Register CX\n", cpu->registers.CX.full);
             break;
         case 4:
             operand1 = &(cpu->registers.DX.full);
-            printf("DST Data : %d \tMode : Register DX\n", cpu->registers.DX.full);
+            // printf("DST Data : %d \tMode : Register DX\n", cpu->registers.DX.full);
             break;
         }
     }

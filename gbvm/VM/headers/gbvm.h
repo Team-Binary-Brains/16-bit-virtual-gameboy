@@ -45,9 +45,9 @@ void dumpStack(FILE* stream, const Vm* vm);
  * Dumps the flags of the virtual machine to the specified stream.
  *
  * @param stream The stream to dump the flags to.
- * @param vm The virtual machine instance.
+ * @param cpu The cpu of virtual machine instance.
  */
-void dumpFlags(FILE* stream, const Vm* vm);
+void dumpFlags(FILE* stream, CPU* cpu);
 
 /**
  * Executes the program loaded in the virtual machine.

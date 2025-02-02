@@ -53,7 +53,7 @@ typedef struct {
  */
 typedef struct {
     Registers registers; /**< CPU registers */
-    Word flags;          /**< CPU flags */
+    volatile Word flags; /**< CPU flags */
 } CPU;
 
 /**

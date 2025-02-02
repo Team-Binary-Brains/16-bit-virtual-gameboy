@@ -47,6 +47,10 @@ Instruction processLine(String* line)
     }
     Opcode op = strAsOpcode(&opStr);
 
+    if (op < MOV) {
+        return (Instruction) { .type = op };
+    }
+
     *line = trim(*line);
     debugMessageDisplay(line);
 

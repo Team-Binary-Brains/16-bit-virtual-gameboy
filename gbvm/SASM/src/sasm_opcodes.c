@@ -1,4 +1,5 @@
 #include "sasm_opcodes.h"
+#include "sasm_flags.h"
 
 Error __AAA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
@@ -22,7 +23,21 @@ Error __AAS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __ADC\n");
+    // printf("\nBefore : %d, %d", *operand1, *operand2);
+
+    bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
+    bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
+    *operand1 = *operand1 + *operand2;
+    *operand1 = *operand1 + (getFlag(CARRY, cpu) ? 1 : 0);
+
+    setFlag(CARRY, cpu, overflow);
+    setFlag(OVERFLOW, cpu, overflow);
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    setFlag(AUX, cpu, auxiliary);
+    checkAndSetParity(cpu, *operand1);
+
+    // printf("\nAfter  : %d\n", *operand1);
     return ERR_OK;
 }
 Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
@@ -362,7 +377,9 @@ Error __LOOPZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __MOV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
+    // printf("\nBefore : %d, %d", *operand1, *operand2);
     *operand1 = *operand2;
+    // printf("\nAfter  : %d\n", *operand1);
     return ERR_OK;
 }
 Error __MOVSB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)

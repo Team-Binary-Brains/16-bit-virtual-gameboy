@@ -1,7 +1,7 @@
 #include "univ_defs.h"
 #include "sasm_alu.h"
 #include "sasm_flags.h"
-
+/*
 Error performArithmeticOperation(CPU* cpu, Memory* mem, ArithmeticOperations operation)
 {
     if (cpu->registers.SP < 2) {
@@ -64,7 +64,7 @@ Error performArithmeticOperation(CPU* cpu, Memory* mem, ArithmeticOperations ope
     cpu->registers.SP -= 1;
     return ERR_OK;
 }
-
+*/
 /*
 TODO: Implement the following cases
 case LOGICAL
