@@ -31,9 +31,9 @@
     CPY BX, 100                                 15
     ADD AX, BX                                  16
 
-    CLRC                                        17
+    CLRCF                                       17
     CPY AX, 201                                 18
     ADC AX, BX                                  19
 
     ADC AX, 0                                   20
-    TGLC                                        21
+    TGLCF                                       21

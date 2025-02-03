@@ -126,8 +126,8 @@ typedef enum {
     XLATB,
     XOR,
 
-    CLRC,
-    TGLC,
+    CLRCF,
+    TGLCF,
     CPY,
     ADC,
     ADD,
@@ -154,10 +154,10 @@ Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CALL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CBW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __CLRC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __CLRCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CLD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CLI(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __TGLC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CMP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CMPSB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CMPSW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);

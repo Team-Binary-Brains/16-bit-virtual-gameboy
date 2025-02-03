@@ -22,10 +22,10 @@ static OpcodeString OpcodeStringMap[] = {
     { AND, 3, "AND" },
     { CALL, 4, "CALL" },
     { CBW, 3, "CBW" },
-    { CLRC, 4, "CLRC" },
+    { CLRCF, 5, "CLRCF" },
     { CLD, 3, "CLD" },
     { CLI, 3, "CLI" },
-    { TGLC, 4, "TGLC" },
+    { TGLCF, 5, "TGLCF" },
     { CMP, 3, "CMP" },
     { CMPSB, 5, "CMPSB" },
     { CMPSW, 5, "CMPSW" },
@@ -178,7 +178,8 @@ Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* oper
     __REP, __REPE, __REPNE, __REPNZ, __REPZ, __RET, __RETF, __ROL, __ROR, __SAHF,
     __SAL, __SAR, __SBB, __SCASB, __SCASW, __SHL, __SHR, __STC, __STD, __STI,
     __STOSB, __STOSW, __SUB, __TEST, __XCHG, __XLATB, __XOR,
-    __CLRC, __TGLC, __CPY, __ADC, __ADD,
+    __CLRCF, __TGLCF,
+    __CPY, __ADC, __ADD,
     __AND
 };
 Error executeInst(const Program* prog, Memory* mem, CPU* cpu)

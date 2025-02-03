@@ -81,7 +81,7 @@ Error __CBW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __CBW\n");
     return ERR_OK;
 }
-Error __CLRC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+Error __CLRCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("\nBefore : %d", getFlag(CARRY, cpu));
     setFlag(CARRY, cpu, false);
@@ -98,7 +98,7 @@ Error __CLI(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __CLI\n");
     return ERR_OK;
 }
-Error __TGLC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("\nBefore : %d", getFlag(CARRY, cpu));
     setFlag(CARRY, cpu, !getFlag(CARRY, cpu));
