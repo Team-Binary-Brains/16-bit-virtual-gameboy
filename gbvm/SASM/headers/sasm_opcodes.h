@@ -23,7 +23,6 @@ typedef enum {
     CBW,
     CLD,
     CLI,
-    CMC,
     CMP,
     CMPSB,
     CMPSW,
@@ -128,6 +127,7 @@ typedef enum {
     XOR,
 
     CLRC,
+    TGLC,
     CPY,
     ADC,
     ADD,
@@ -157,7 +157,7 @@ Error __CBW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CLRC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CLD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CLI(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __CMC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __TGLC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CMP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CMPSB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CMPSW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);

@@ -98,9 +98,11 @@ Error __CLI(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __CLI\n");
     return ERR_OK;
 }
-Error __CMC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+Error __TGLC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __CMC\n");
+    printf("\nBefore : %d", getFlag(CARRY, cpu));
+    setFlag(CARRY, cpu, !getFlag(CARRY, cpu));
+    printf("\nAfter  : %d\n", getFlag(CARRY, cpu));
     return ERR_OK;
 }
 Error __CMP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)

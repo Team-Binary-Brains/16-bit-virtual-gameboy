@@ -36,3 +36,4 @@
     ADC AX, BX                                  19
 
     ADC AX, 0                                   20
+    TGLC                                        21
