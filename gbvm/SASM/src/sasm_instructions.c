@@ -34,7 +34,7 @@ static OpcodeString OpcodeStringMap[] = {
     { DAS, 3, "DAS" },
     { DECR, 4, "DECR" },
     { DIV, 3, "DIV" },
-    { HLT, 3, "HLT" },
+    { SHUTS, 5, "SHUTS" },
     { IDIV, 4, "IDIV" },
     { IMUL, 4, "IMUL" },
     { IN, 2, "IN" },
@@ -168,7 +168,7 @@ TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
 Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* operand2) = {
     __AAA, __AAD, __AAM, __AAS, __CALL, __CBW,
     __CLD, __CLI, __CMP, __CMPSB, __CMPSW, __CWD, __DAA, __DAS,
-    __DIV, __HLT, __IDIV, __IMUL, __IN, __INC, __INT, __INTO, __IRET, __JA,
+    __DIV, __IDIV, __IMUL, __IN, __INC, __INT, __INTO, __IRET, __JA,
     __JAE, __JB, __JBE, __JC, __JCXZ, __JE, __JG, __JGE, __JL, __JLE,
     __JMP, __JNA, __JNAE, __JNB, __JNBE, __JNC, __JNE, __JNG, __JNGE, __JNL,
     __JNLE, __JNO, __JNP, __JNS, __JNZ, __JO, __JP, __JPE, __JPO, __JS,
@@ -178,7 +178,7 @@ Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* oper
     __REP, __REPE, __REPNE, __REPNZ, __REPZ, __RET, __RETF, __ROL, __ROR, __SAHF,
     __SAL, __SAR, __SBB, __SCASB, __SCASW, __SHL, __SHR, __STC, __STD, __STI,
     __STOSB, __STOSW, __SUB, __TEST, __XCHG, __XLATB, __XOR,
-    __CLRCF, __TGLCF,
+    __CLRCF, __TGLCF, __SHUTS,
     __DECR,
     __CPY, __ADC, __ADD,
     __AND

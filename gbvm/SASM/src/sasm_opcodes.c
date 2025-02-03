@@ -157,9 +157,10 @@ Error __DIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __DIV\n");
     return ERR_OK;
 }
-Error __HLT(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __HLT\n");
+    printf("SHUTing down System\n");
+    setFlag(HALT, cpu, true);
     return ERR_OK;
 }
 Error __IDIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)

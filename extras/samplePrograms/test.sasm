@@ -40,3 +40,4 @@
     CPY AX, 1                                   22
     DECR AX                                     23
     DECR AX                                     24
+    SHUTS                                       25

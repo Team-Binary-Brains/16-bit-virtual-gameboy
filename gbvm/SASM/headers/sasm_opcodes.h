@@ -30,7 +30,6 @@ typedef enum {
     DAA,
     DAS,
     DIV,
-    HLT,
     IDIV,
     IMUL,
     IN,
@@ -127,6 +126,7 @@ typedef enum {
 
     CLRCF,
     TGLCF,
+    SHUTS,
     DECR,
     CPY,
     ADC,
@@ -166,7 +166,7 @@ Error __DAA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __DAS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __DIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __HLT(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __IDIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __IMUL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __IN(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
