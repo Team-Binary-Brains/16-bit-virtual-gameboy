@@ -1,54 +1,38 @@
 # immediate data to register
-;
-    MOV AX, 10
-;
-    MOV BX, 20
-;
-    MOV CX, 30
-;
-    MOV DX, 40
-;
+    CPY AX, 10                                   0
+    CPY BX, 20                                   1
+    CPY CX, 30                                   2
+    CPY DX, 40                                   3
 
 # immediate data to address
-;
-    MOV [3], 10
-;
-    MOV [2 3], 20
-;
-    MOV [1 2 3], 30
-;
-    MOV [1 2 3 4], 40  GETS ADDED
-;
+    CPY [3], 10                                  4
+    CPY [2 3], 20                                5
+    CPY [1 2 3], 30                              6
+    CPY [1 2 3 4], 40                            7
 
 # register to register
-    MOV CX, AX
-;
-    MOV DX, BX
-;
+    CPY CX, AX                                   8
+    CPY DX, BX                                   9
 
 # register to address
-    MOV [2], AX
-;
+    CPY [2], AX                                 10
 
 # address to address
-    MOV [3], [2]
-;
+    CPY [3], [2]                                11
+
 
 # address to register
-    MOV BX, [2]
-;
+    CPY BX, [2]                                 12
 
 # testing flags
-; PARITY
-MOV BX, 100
-MOV AX, 201
-ADC AX, BX
-; ZERO
-MOV AX, 0
-ADC AX, 0
-; PARITY
-MOV AX,32767
-ADC AX,0
-; OVERFLOW CARRY SIGN PARITY
-ADC AX,BX
-;
+    CPY AX, 32767                               13
+    ADD AX, 0                                   14
+
+    CPY BX, 100                                 15
+    ADD AX, BX                                  16
+
+    CLRC                                        17
+    CPY AX, 201                                 18
+    ADC AX, BX                                  19
+
+    ADC AX, 0                                   20

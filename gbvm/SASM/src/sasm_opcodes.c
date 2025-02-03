@@ -23,7 +23,7 @@ Error __AAS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    // printf("\nBefore : %d, %d", *operand1, *operand2);
+    printf("\nBefore : %d, %d", *operand1, *operand2);
 
     bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
     bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
@@ -37,12 +37,12 @@ Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     setFlag(AUX, cpu, auxiliary);
     checkAndSetParity(cpu, *operand1);
 
-    // printf("\nAfter  : %d\n", *operand1);
+    printf("\nAfter  : %d\n", *operand1);
     return ERR_OK;
 }
 Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    // printf("\nBefore : %d, %d", *operand1, *operand2);
+    printf("\nBefore : %d, %d", *operand1, *operand2);
 
     bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
     bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
@@ -55,12 +55,12 @@ Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     setFlag(AUX, cpu, auxiliary);
     checkAndSetParity(cpu, *operand1);
 
-    // printf("\nAfter  : %d\n", *operand1);
+    printf("\nAfter  : %d\n", *operand1);
     return ERR_OK;
 }
 Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    // printf("\nBefore : %d, %d", *operand1, *operand2);
+    printf("\nBefore : %d, %d", *operand1, *operand2);
 
     *operand1 = *operand1 & *operand2;
 
@@ -68,7 +68,7 @@ Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     setFlag(SIGN, cpu, (*operand1 < 0));
     checkAndSetParity(cpu, *operand1);
 
-    // printf("\nAfter  : %d\n", *operand1);
+    printf("\nAfter  : %d\n", *operand1);
     return ERR_OK;
 }
 Error __CALL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
@@ -81,9 +81,11 @@ Error __CBW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __CBW\n");
     return ERR_OK;
 }
-Error __CLC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+Error __CLRC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __CLC\n");
+    printf("\nBefore : %d", getFlag(CARRY, cpu));
+    setFlag(CARRY, cpu, false);
+    printf("\nAfter  : %d\n", getFlag(CARRY, cpu));
     return ERR_OK;
 }
 Error __CLD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
@@ -396,11 +398,11 @@ Error __LOOPZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __LOOPZ\n");
     return ERR_OK;
 }
-Error __MOV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+Error __CPY(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    // printf("\nBefore : %d, %d", *operand1, *operand2);
+    printf("\nBefore : %d, %d", *operand1, *operand2);
     *operand1 = *operand2;
-    // printf("\nAfter  : %d\n", *operand1);
+    printf("\nAfter  : %d\n", *operand1);
     return ERR_OK;
 }
 Error __MOVSB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)

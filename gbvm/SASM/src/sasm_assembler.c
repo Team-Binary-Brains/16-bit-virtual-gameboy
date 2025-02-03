@@ -47,7 +47,7 @@ Instruction processLine(String* line)
     }
     Opcode op = strAsOpcode(&opStr);
 
-    if (op < MOV) {
+    if (op < CPY) {
         return (Instruction) { .type = op };
     }
 
@@ -172,7 +172,7 @@ void writeProgramToFile(const Program* prog, const char* filePath)
         Instruction inst = prog->instructions[i];
         String op = opcodeAsStr(&inst.type);
         fwrite(op.data, op.length, 1, f);
-        if (inst.type >= MOV) {
+        if (inst.type >= CPY) {
             fwrite(" ", 1, 1, f);
             char buf[32];
             sprintf(buf, "%d %d %d", inst.operand, inst.operand2, inst.registerMode);

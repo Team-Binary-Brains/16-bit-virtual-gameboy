@@ -21,7 +21,6 @@ typedef enum {
     AAS,
     CALL,
     CBW,
-    CLC,
     CLD,
     CLI,
     CMC,
@@ -128,7 +127,8 @@ typedef enum {
     XLATB,
     XOR,
 
-    MOV,
+    CLRC,
+    CPY,
     ADC,
     ADD,
     AND,
@@ -154,7 +154,7 @@ Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CALL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CBW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __CLC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __CLRC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CLD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CLI(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CMC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
@@ -217,7 +217,7 @@ Error __LOOPE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __LOOPNE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __LOOPNZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __LOOPZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __MOV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __CPY(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __MOVSB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __MOVSW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __MUL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
