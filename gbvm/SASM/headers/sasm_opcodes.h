@@ -29,7 +29,6 @@ typedef enum {
     CWD,
     DAA,
     DAS,
-    DEC,
     DIV,
     HLT,
     IDIV,
@@ -128,6 +127,7 @@ typedef enum {
 
     CLRCF,
     TGLCF,
+    DECR,
     CPY,
     ADC,
     ADD,
@@ -164,7 +164,7 @@ Error __CMPSW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CWD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __DAA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __DAS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __DEC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __DIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __HLT(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __IDIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);

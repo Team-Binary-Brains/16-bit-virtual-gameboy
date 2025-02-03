@@ -47,7 +47,7 @@ Instruction processLine(String* line)
     }
     Opcode op = strAsOpcode(&opStr);
 
-    if (op < CPY) {
+    if (op < DECR) {
         return (Instruction) { .type = op };
     }
 
@@ -73,7 +73,9 @@ Instruction processLine(String* line)
     } else {
         assert(0 && "ERROR ");
     }
-
+    if (op < CPY) {
+        return (Instruction) { .type = op, .operand = operand, .registerMode = registerMode };
+    }
     splitStr(line, ',');
     *line = trim(*line);
     debugMessageDisplay(line);

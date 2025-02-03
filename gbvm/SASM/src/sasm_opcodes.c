@@ -135,9 +135,21 @@ Error __DAS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __DAS\n");
     return ERR_OK;
 }
-Error __DEC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __DEC\n");
+    printf("\nBefore : %d", *operand1);
+
+    bool overflow = *operand1 == (-MAX_WORD);
+    bool auxiliary = (((*operand1 & 0x0F) + (-1 & 0x0f)) > 0x0f);
+    *operand1 = *operand1 + -1;
+
+    setFlag(OVERFLOW, cpu, overflow);
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    setFlag(AUX, cpu, auxiliary);
+    checkAndSetParity(cpu, *operand1);
+
+    printf("\nAfter  : %d\n", *operand1);
     return ERR_OK;
 }
 Error __DIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)

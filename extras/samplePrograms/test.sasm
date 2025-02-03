@@ -37,3 +37,6 @@
 
     ADC AX, 0                                   20
     TGLCF                                       21
+    CPY AX, 1                                   22
+    DECR AX                                     23
+    DECR AX                                     24
