@@ -37,7 +37,6 @@ typedef enum {
     INT,
     INTO,
     IRET,
-    JC,
     JCXZ,
     JE,
     JG,
@@ -178,7 +177,6 @@ Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);

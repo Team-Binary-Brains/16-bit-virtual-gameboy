@@ -39,7 +39,7 @@
     TGLCF                                       21
     CPY AX, 1                                   22
     DECR AX                                     23
-    JBE 26                                     24
-    JB 27                                       25
+    DECR 26                                     24
+    JC 27                                       25
     DONOP                                       26
     SHUTS                                       27
