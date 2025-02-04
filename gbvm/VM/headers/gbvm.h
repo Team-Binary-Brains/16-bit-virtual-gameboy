@@ -49,6 +49,8 @@ void dumpStack(FILE* stream, const Vm* vm);
  */
 void dumpFlags(FILE* stream, CPU* cpu);
 
+void dumpDetails(FILE* stream, String* operation, Word lineNumber, Instruction* inst);
+
 /**
  * Executes the program loaded in the virtual machine.
  *

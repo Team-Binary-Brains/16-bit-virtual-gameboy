@@ -5,7 +5,7 @@
 
 void dumpStack(FILE* stream, const Vm* vm)
 {
-    fprintf(stream, "-------------------------------STACK------------------------------------------");
+    fprintf(stream, "\n-------------------------------STACK------------------------------------------");
     Word SP = vm->cpu.registers.SP;
 
     Word start = (SP < 5) ? 0 : SP - 5;
@@ -18,7 +18,7 @@ void dumpStack(FILE* stream, const Vm* vm)
     for (i = len; i < start + 5; i++)
         fprintf(stream, "\n\t[X]  ");
 
-    fprintf(stream, "\n-------------------------------STACK------------------------------------------ \n\n");
+    fprintf(stream, "\n-------------------------------STACK------------------------------------------ \n");
 }
 
 void dumpFlags(FILE* stream, CPU* cpu)
@@ -28,11 +28,25 @@ void dumpFlags(FILE* stream, CPU* cpu)
                     "\n  Sign : %d\tCarry    : %d                                                     "
                     "\n  Zero : %d\tParity   : %d                                                     "
                     "\n  Borrow : %d                                                                  "
-                    "\n-------------------------------FLAGS------------------------------------------ \n\n",
+                    "\n-------------------------------FLAGS------------------------------------------ \n",
         getFlag(HALT, cpu), getFlag(OVERFLOW, cpu),
         getFlag(SIGN, cpu), getFlag(CARRY, cpu),
         getFlag(ZERO, cpu), getFlag(PARITY, cpu),
         getFlag(BORROW, cpu));
+}
+
+void dumpDetails(FILE* stream, String* operation, Word lineNumber, Instruction* inst)
+{
+    fprintf(stream, "\n------------------------------DETAILS-----------------------------------------"
+                    "\n  Instruction Number :\t%d                                                    "
+                    "\n  Instruction :\t\t%.*s                                                       "
+                    "\n  Operand1 : \t\t%d                                                           "
+                    "\n  Operand2 : \t\t%d                                                           "
+                    "\n------------------------------DETAILS----------------------------------------- \n",
+        lineNumber,
+        (int)operation->length, operation->data,
+        inst->operand,
+        inst->operand2);
 }
 
 void loadProgram(Vm* vm, char* inputFile)
@@ -58,21 +72,17 @@ void executeProgram(Vm* vm, int debug, int i)
     case 2:
         scanf("%*c");
         system("clear");
-        error = executeInst(prog, mem, cpu);
-        printf("\nInstruction Number :\t%d\nInstruction :\t\t", i);
-        printString(operation);
-        printf("Operand1 : \t\t%d\nOperand2 : \t\t%d\n", inst->operand, inst->operand2);
+        dumpDetails(stdout, &operation, vm->cpu.registers.IP, inst);
         dumpFlags(stdout, cpu);
-        dumpStack(stdout, vm);
+        // dumpStack(stdout, vm);
+        error = executeInst(prog, mem, cpu);
         break;
     case 1:
         scanf("%*c");
         system("clear");
+        dumpDetails(stdout, &operation, vm->cpu.registers.IP, inst);
+        // dumpStack(stdout, vm);
         error = executeInst(prog, mem, cpu);
-        printf("\nInstruction Number :\t%d\nInstruction :\t\t", i);
-        printString(operation);
-        printf("Operand1 : \t\t%d\nOperand2 : \t\t%d\n", inst->operand, inst->operand2);
-        dumpStack(stdout, vm);
         break;
     default:
         error = executeInst(prog, mem, cpu);
