@@ -15,6 +15,31 @@
  * @brief Enumeration of opcodes for SASM instructions.
  */
 typedef enum {
+
+    DONOP,
+    CLRCF,
+    TGLCF,
+    SHUTS,
+
+    DECR,
+    NEG,
+    GOTO,
+    JA,
+    JAE,
+    JB,
+    JBE,
+    JCXZ,
+    JE,
+    JG,
+    JGE,
+    JL,
+    JLE,
+
+    CPY,
+    ADC,
+    ADD,
+    AND,
+
     AAA,
     AAD,
     AAM,
@@ -37,11 +62,6 @@ typedef enum {
     INT,
     INTO,
     IRET,
-    JE,
-    JG,
-    JGE,
-    JL,
-    JLE,
     JNA,
     JNAE,
     JNB,
@@ -114,23 +134,6 @@ typedef enum {
     XCHG,
     XLATB,
     XOR,
-
-    DONOP,
-    CLRCF,
-    TGLCF,
-    SHUTS,
-    DECR,
-    NEG,
-    GOTO,
-    JA,
-    JAE,
-    JB,
-    JBE,
-    JCXZ,
-    CPY,
-    ADC,
-    ADD,
-    AND,
 } Opcode;
 
 /**

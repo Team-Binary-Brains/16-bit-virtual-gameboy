@@ -111,31 +111,6 @@ Error __IRET(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __IRET\n");
     return ERR_OK;
 }
-Error __JE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JE\n");
-    return ERR_OK;
-}
-Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JG\n");
-    return ERR_OK;
-}
-Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JGE\n");
-    return ERR_OK;
-}
-Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JL\n");
-    return ERR_OK;
-}
-Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JLE\n");
-    return ERR_OK;
-}
 Error __JNA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __JNA\n");
@@ -622,7 +597,6 @@ Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     if (!getFlag(CARRY, cpu) && !getFlag(ZERO, cpu)) {
         cpu->registers.IP = *operand1;
     }
-
     return ERR_OK;
 }
 Error __JAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
@@ -653,6 +627,46 @@ Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __JCXZ\n");
     if (cpu->registers.CX.full == 0) {
+        cpu->registers.IP = *operand1;
+    }
+    return ERR_OK;
+}
+Error __JE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("CALLED __JE\n");
+    if (getFlag(ZERO, cpu)) {
+        cpu->registers.IP = *operand1;
+    }
+    return ERR_OK;
+}
+Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("CALLED __JG\n");
+    if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu) && !getFlag(ZERO, cpu)) {
+        cpu->registers.IP = *operand1;
+    }
+    return ERR_OK;
+}
+Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("CALLED __JGE\n");
+    if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu)) {
+        cpu->registers.IP = *operand1;
+    }
+    return ERR_OK;
+}
+Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("CALLED __JL\n");
+    if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu)) {
+        cpu->registers.IP = *operand1;
+    }
+    return ERR_OK;
+}
+Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("CALLED __JLE\n");
+    if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu) && getFlag(ZERO, cpu)) {
         cpu->registers.IP = *operand1;
     }
     return ERR_OK;
