@@ -21,56 +21,6 @@ Error __AAS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __AAS\n");
     return ERR_OK;
 }
-Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d, %d", *operand1, *operand2);
-
-    bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
-    bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
-    *operand1 = *operand1 + *operand2;
-    *operand1 = *operand1 + (getFlag(CARRY, cpu) ? 1 : 0);
-
-    setFlag(CARRY, cpu, overflow);
-    setFlag(OVERFLOW, cpu, overflow);
-    setFlag(ZERO, cpu, (*operand1 == 0));
-    setFlag(SIGN, cpu, (*operand1 < 0));
-    setFlag(AUX, cpu, auxiliary);
-    checkAndSetParity(cpu, *operand1);
-
-    printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
-}
-Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d, %d", *operand1, *operand2);
-
-    bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
-    bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
-    *operand1 = *operand1 + *operand2;
-
-    setFlag(CARRY, cpu, overflow);
-    setFlag(OVERFLOW, cpu, overflow);
-    setFlag(ZERO, cpu, (*operand1 == 0));
-    setFlag(SIGN, cpu, (*operand1 < 0));
-    setFlag(AUX, cpu, auxiliary);
-    checkAndSetParity(cpu, *operand1);
-
-    printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
-}
-Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d, %d", *operand1, *operand2);
-
-    *operand1 = *operand1 & *operand2;
-
-    setFlag(ZERO, cpu, (*operand1 == 0));
-    setFlag(SIGN, cpu, (*operand1 < 0));
-    checkAndSetParity(cpu, *operand1);
-
-    printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
-}
 Error __CALL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __CALL\n");
@@ -81,13 +31,6 @@ Error __CBW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __CBW\n");
     return ERR_OK;
 }
-Error __CLRCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d", getFlag(CARRY, cpu));
-    setFlag(CARRY, cpu, false);
-    printf("\nAfter  : %d\n", getFlag(CARRY, cpu));
-    return ERR_OK;
-}
 Error __CLD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __CLD\n");
@@ -96,13 +39,6 @@ Error __CLD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 Error __CLI(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __CLI\n");
-    return ERR_OK;
-}
-Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d", getFlag(CARRY, cpu));
-    setFlag(CARRY, cpu, !getFlag(CARRY, cpu));
-    printf("\nAfter  : %d\n", getFlag(CARRY, cpu));
     return ERR_OK;
 }
 Error __CMP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
@@ -135,32 +71,9 @@ Error __DAS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __DAS\n");
     return ERR_OK;
 }
-Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d", *operand1);
-
-    bool overflow = *operand1 == (-MAX_WORD);
-    bool auxiliary = (((*operand1 & 0x0F) + (-1 & 0x0f)) > 0x0f);
-    *operand1 = *operand1 + -1;
-
-    setFlag(OVERFLOW, cpu, overflow);
-    setFlag(ZERO, cpu, (*operand1 == 0));
-    setFlag(SIGN, cpu, (*operand1 < 0));
-    setFlag(AUX, cpu, auxiliary);
-    checkAndSetParity(cpu, *operand1);
-
-    printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
-}
 Error __DIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __DIV\n");
-    return ERR_OK;
-}
-Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("SHUTing down System\n");
-    setFlag(HALT, cpu, true);
     return ERR_OK;
 }
 Error __IDIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
@@ -251,11 +164,6 @@ Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __JLE\n");
-    return ERR_OK;
-}
-Error __JMP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JMP\n");
     return ERR_OK;
 }
 Error __JNA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
@@ -413,13 +321,6 @@ Error __LOOPZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __LOOPZ\n");
     return ERR_OK;
 }
-Error __CPY(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d, %d", *operand1, *operand2);
-    *operand1 = *operand2;
-    printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
-}
 Error __MOVSB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __MOVSB\n");
@@ -433,16 +334,6 @@ Error __MOVSW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 Error __MUL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __MUL\n");
-    return ERR_OK;
-}
-Error __NEG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __NEG\n");
-    return ERR_OK;
-}
-Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("DO No OPeration");
     return ERR_OK;
 }
 Error __NOT(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
@@ -633,5 +524,125 @@ Error __XLATB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 Error __XOR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __XOR\n");
+    return ERR_OK;
+}
+
+Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("DO No OPeration");
+    return ERR_OK;
+}
+
+Error __CLRCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d", getFlag(CARRY, cpu));
+    setFlag(CARRY, cpu, false);
+    printf("\nAfter  : %d\n", getFlag(CARRY, cpu));
+    return ERR_OK;
+}
+
+Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d", getFlag(CARRY, cpu));
+    setFlag(CARRY, cpu, !getFlag(CARRY, cpu));
+    printf("\nAfter  : %d\n", getFlag(CARRY, cpu));
+    return ERR_OK;
+}
+
+Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("SHUTing down System\n");
+    setFlag(HALT, cpu, true);
+    return ERR_OK;
+}
+
+Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d", *operand1);
+
+    bool overflow = *operand1 == (-MAX_WORD);
+    bool auxiliary = (((*operand1 & 0x0F) + (-1 & 0x0f)) > 0x0f);
+    *operand1 = *operand1 + -1;
+
+    setFlag(OVERFLOW, cpu, overflow);
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    setFlag(AUX, cpu, auxiliary);
+    checkAndSetParity(cpu, *operand1);
+
+    printf("\nAfter  : %d\n", *operand1);
+    return ERR_OK;
+}
+
+Error __NEG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("CALLED __NEG\n");
+    return ERR_OK;
+}
+
+Error __CPY(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d, %d", *operand1, *operand2);
+    *operand1 = *operand2;
+    printf("\nAfter  : %d\n", *operand1);
+    return ERR_OK;
+}
+
+Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d, %d", *operand1, *operand2);
+
+    bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
+    bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
+    *operand1 = *operand1 + *operand2;
+    *operand1 = *operand1 + (getFlag(CARRY, cpu) ? 1 : 0);
+
+    setFlag(CARRY, cpu, overflow);
+    setFlag(OVERFLOW, cpu, overflow);
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    setFlag(AUX, cpu, auxiliary);
+    checkAndSetParity(cpu, *operand1);
+
+    printf("\nAfter  : %d\n", *operand1);
+    return ERR_OK;
+}
+
+Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d, %d", *operand1, *operand2);
+
+    bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
+    bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
+    *operand1 = *operand1 + *operand2;
+
+    setFlag(CARRY, cpu, overflow);
+    setFlag(OVERFLOW, cpu, overflow);
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    setFlag(AUX, cpu, auxiliary);
+    checkAndSetParity(cpu, *operand1);
+
+    printf("\nAfter  : %d\n", *operand1);
+    return ERR_OK;
+}
+
+Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d, %d", *operand1, *operand2);
+
+    *operand1 = *operand1 & *operand2;
+
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    checkAndSetParity(cpu, *operand1);
+
+    printf("\nAfter  : %d\n", *operand1);
+    return ERR_OK;
+}
+Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("Unconditional Jump to %d\n", *operand1);
+    cpu->registers.IP = *operand1;
     return ERR_OK;
 }

@@ -12,29 +12,33 @@ typedef struct {
 TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
 */
 static OpcodeString OpcodeStringMap[] = {
+    { DONOP, 5, "DONOP" },
+    { CLRCF, 5, "CLRCF" },
+    { TGLCF, 5, "TGLCF" },
+    { SHUTS, 5, "SHUTS" },
+    { DECR, 4, "DECR" },
+    { NEG, 3, "NEG" },
+    { GOTO, 4, "GOTO" },
     { CPY, 3, "CPY" },
+    { ADC, 3, "ADC" },
+    { ADD, 3, "ADD" },
+    { AND, 3, "AND" },
+
     { AAA, 3, "AAA" },
     { AAD, 3, "AAD" },
     { AAM, 3, "AAM" },
     { AAS, 3, "AAS" },
-    { ADC, 3, "ADC" },
-    { ADD, 3, "ADD" },
-    { AND, 3, "AND" },
     { CALL, 4, "CALL" },
     { CBW, 3, "CBW" },
-    { CLRCF, 5, "CLRCF" },
     { CLD, 3, "CLD" },
     { CLI, 3, "CLI" },
-    { TGLCF, 5, "TGLCF" },
     { CMP, 3, "CMP" },
     { CMPSB, 5, "CMPSB" },
     { CMPSW, 5, "CMPSW" },
     { CWD, 3, "CWD" },
     { DAA, 3, "DAA" },
     { DAS, 3, "DAS" },
-    { DECR, 4, "DECR" },
     { DIV, 3, "DIV" },
-    { SHUTS, 5, "SHUTS" },
     { IDIV, 4, "IDIV" },
     { IMUL, 4, "IMUL" },
     { IN, 2, "IN" },
@@ -53,7 +57,6 @@ static OpcodeString OpcodeStringMap[] = {
     { JGE, 3, "JGE" },
     { JL, 2, "JL" },
     { JLE, 3, "JLE" },
-    { JMP, 3, "JMP" },
     { JNA, 3, "JNA" },
     { JNAE, 4, "JNAE" },
     { JNB, 3, "JNB" },
@@ -88,8 +91,6 @@ static OpcodeString OpcodeStringMap[] = {
     { MOVSB, 5, "MOVSB" },
     { MOVSW, 5, "MOVSW" },
     { MUL, 3, "MUL" },
-    { NEG, 3, "NEG" },
-    { DONOP, 5, "DONOP" },
     { NOT, 3, "NOT" },
     { OR, 2, "OR" },
     { OUT, 3, "OUT" },
@@ -170,7 +171,7 @@ Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* oper
     __CLD, __CLI, __CMP, __CMPSB, __CMPSW, __CWD, __DAA, __DAS,
     __DIV, __IDIV, __IMUL, __IN, __INC, __INT, __INTO, __IRET, __JA,
     __JAE, __JB, __JBE, __JC, __JCXZ, __JE, __JG, __JGE, __JL, __JLE,
-    __JMP, __JNA, __JNAE, __JNB, __JNBE, __JNC, __JNE, __JNG, __JNGE, __JNL,
+    __JNA, __JNAE, __JNB, __JNBE, __JNC, __JNE, __JNG, __JNGE, __JNL,
     __JNLE, __JNO, __JNP, __JNS, __JNZ, __JO, __JP, __JPE, __JPO, __JS,
     __JZ, __LAHF, __LDS, __LEA, __LES, __LODSB, __LODSW, __LOOP, __LOOPE,
     __LOOPNE, __LOOPNZ, __LOOPZ, __MOVSB, __MOVSW, __MUL, __NOT,
@@ -178,8 +179,9 @@ Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* oper
     __REP, __REPE, __REPNE, __REPNZ, __REPZ, __RET, __RETF, __ROL, __ROR, __SAHF,
     __SAL, __SAR, __SBB, __SCASB, __SCASW, __SHL, __SHR, __STC, __STD, __STI,
     __STOSB, __STOSW, __SUB, __TEST, __XCHG, __XLATB, __XOR,
+
     __DONOP, __CLRCF, __TGLCF, __SHUTS,
-    __DECR, __NEG,
+    __DECR, __NEG, __GOTO,
     __CPY, __ADC, __ADD,
     __AND
 };
@@ -249,6 +251,8 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
             // printf("DST Data : %d \tMode : Register DX\n", cpu->registers.DX.full);
             break;
         }
+    } else {
+        operand1 = &inst.operand;
     }
 
     Error err = instructionFuncPtrs[inst.type](cpu, mem, operand1, operand2);

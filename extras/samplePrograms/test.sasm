@@ -1,7 +1,7 @@
 # immediate data to register
     CPY AX, 10                                   0
     CPY BX, 20                                   1
-    CPY CX, 30                                   2
+    GOTO 13                                      2
     CPY DX, 40                                   3
 
 # immediate data to address

@@ -48,7 +48,6 @@ typedef enum {
     JGE,
     JL,
     JLE,
-    JMP,
     JNA,
     JNAE,
     JNB,
@@ -128,6 +127,7 @@ typedef enum {
     SHUTS,
     DECR,
     NEG,
+    GOTO,
     CPY,
     ADC,
     ADD,
@@ -185,7 +185,7 @@ Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JMP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JNA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JNAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JNB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);

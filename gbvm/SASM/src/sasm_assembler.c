@@ -71,7 +71,10 @@ Instruction processLine(String* line)
             operand = 4;
         registerMode = registerMode | o1_reg;
     } else {
-        assert(0 && "ERROR ");
+        // assert(0 && "ERROR ");
+        // TODO : Improve the label handling logic
+        operand = strToInt(*line) - 1;
+        registerMode = registerMode | o1_imm;
     }
     if (op < CPY) {
         return (Instruction) { .type = op, .operand = operand, .registerMode = registerMode };
@@ -121,8 +124,8 @@ Program parseAsmIntoProgram(String* src)
 
         Instruction tmp = processLine(&line);
 
-        //if (tmp.type == DONOP) {
-            //continue;
+        // if (tmp.type == DONOP) {
+        // continue;
         //}
 
         if (prog.instruction_count >= PROGRAM_CAPACITY) {

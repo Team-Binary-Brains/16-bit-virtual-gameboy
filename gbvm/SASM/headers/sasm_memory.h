@@ -27,6 +27,7 @@ typedef enum {
     o2_mem = 1 << 2,
     o2_reg = 1 << 3,
     o2_imm = 1 << 4,
+    o1_imm = 1 << 5,
 } modes;
 typedef struct {
     Register AX; /**< Accumulator register */
