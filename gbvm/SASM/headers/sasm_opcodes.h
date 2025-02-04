@@ -25,15 +25,22 @@ typedef enum {
     NEG,
     GOTO,
     JA,
-    JAE,
-    JB,
+    JNC,
+    JC,
     JBE,
     JCXZ,
-    JE,
+    JZ,
     JG,
     JGE,
     JL,
     JLE,
+    JNZ,
+    JNO,
+    JNP,
+    JNS,
+    JO,
+    JP,
+    JS,
 
     CPY,
     ADC,
@@ -62,17 +69,6 @@ typedef enum {
     INT,
     INTO,
     IRET,
-    JNE,
-    JNO,
-    JNP,
-    JNS,
-    JNZ,
-    JO,
-    JP,
-    JPE,
-    JPO,
-    JS,
-    JZ,
     LAHF,
     LDS,
     LEA,
@@ -138,28 +134,51 @@ typedef struct {
     Byte registerMode;
 } Instruction;
 
+Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __CLRCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+
+Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JNC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JNZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JNO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JNP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JNS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __JS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+
+Error __CPY(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+
 Error __AAA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __AAD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __AAM(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __AAS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CALL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CBW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __CLRCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CLD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CLI(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CMP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CMPSB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CMPSW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __CWD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __DAA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __DAS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __DIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __IDIV(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __IMUL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __IN(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
@@ -167,28 +186,6 @@ Error __INC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __INT(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __INTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __IRET(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JPE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JPO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __LAHF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __LDS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __LEA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
@@ -200,12 +197,10 @@ Error __LOOPE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __LOOPNE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __LOOPNZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __LOOPZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __CPY(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __MOVSB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __MOVSW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __MUL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __NEG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __NOT(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __OR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __OUT(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);

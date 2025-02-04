@@ -73,7 +73,7 @@ Instruction processLine(String* line)
     } else {
         // assert(0 && "ERROR ");
         // TODO : Improve the label handling logic
-        operand = strToInt(*line) - 1;
+        operand = strToInt(*line);
         registerMode = registerMode | o1_imm;
     }
     if (op < CPY) {

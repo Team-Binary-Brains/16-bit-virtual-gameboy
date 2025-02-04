@@ -111,61 +111,6 @@ Error __IRET(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __IRET\n");
     return ERR_OK;
 }
-Error __JNE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNE\n");
-    return ERR_OK;
-}
-Error __JNO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNO\n");
-    return ERR_OK;
-}
-Error __JNP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNP\n");
-    return ERR_OK;
-}
-Error __JNS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNS\n");
-    return ERR_OK;
-}
-Error __JNZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNZ\n");
-    return ERR_OK;
-}
-Error __JO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JO\n");
-    return ERR_OK;
-}
-Error __JP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JP\n");
-    return ERR_OK;
-}
-Error __JPE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JPE\n");
-    return ERR_OK;
-}
-Error __JPO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JPO\n");
-    return ERR_OK;
-}
-Error __JS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JS\n");
-    return ERR_OK;
-}
-Error __JZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JZ\n");
-    return ERR_OK;
-}
 Error __LAHF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __LAHF\n");
@@ -429,7 +374,7 @@ Error __XOR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 
 Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("DO No OPeration");
+    printf("\nDO No OPeration\n");
     return ERR_OK;
 }
 
@@ -451,7 +396,7 @@ Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 
 Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("SHUTing down System\n");
+    printf("\nSHUTing down System\n");
     setFlag(HALT, cpu, true);
     return ERR_OK;
 }
@@ -477,6 +422,166 @@ Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 Error __NEG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __NEG\n");
+    return ERR_OK;
+}
+
+Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nUnconditional Jump to %d\n", *operand1);
+    cpu->registers.IP = *operand1 - 1;
+    return ERR_OK;
+}
+
+Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(CARRY, cpu) && !getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JA / __JNBE \n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JNC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(CARRY, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JAE / __JNB / __JNC\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(CARRY, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JB /__JNAE / __JC\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(CARRY, cpu) || getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JBE / __JNA\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (cpu->registers.CX.full == 0) {
+        printf("\nJUMPING TO %d\nREASON : __JCXZ\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JE / __JZ\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu) && !getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JG / __JNLE\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JGE / __JNL\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JL / __JNGE\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu) || getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JLE / __JNG\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JNZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JNE / __JNZ\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JNO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(OVERFLOW, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JNO\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JNP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(PARITY, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JNP / __JPO\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JNS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(SIGN, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JNS\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(OVERFLOW, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JO\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(PARITY, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JP / __JPE\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(SIGN, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JS\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
     return ERR_OK;
 }
 
@@ -538,91 +643,5 @@ Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     checkAndSetParity(cpu, *operand1);
 
     printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
-}
-Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("Unconditional Jump to %d\n", *operand1);
-    cpu->registers.IP = *operand1;
-    return ERR_OK;
-}
-Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JA / __JNBE \n");
-    if (!getFlag(CARRY, cpu) && !getFlag(ZERO, cpu)) {
-        cpu->registers.IP = *operand1;
-    }
-    return ERR_OK;
-}
-Error __JAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JAE / __JNB / __JNC\n");
-    if (!getFlag(CARRY, cpu)) {
-        cpu->registers.IP = *operand1;
-    }
-    return ERR_OK;
-}
-Error __JB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JB /__JNAE / __JC\n");
-    if (getFlag(CARRY, cpu)) {
-        cpu->registers.IP = *operand1;
-    }
-    return ERR_OK;
-}
-Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JBE / __JNA\n");
-    if (getFlag(CARRY, cpu) && getFlag(ZERO, cpu)) {
-        cpu->registers.IP = *operand1;
-    }
-    return ERR_OK;
-}
-Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JCXZ\n");
-    if (cpu->registers.CX.full == 0) {
-        cpu->registers.IP = *operand1;
-    }
-    return ERR_OK;
-}
-Error __JE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JE\n");
-    if (getFlag(ZERO, cpu)) {
-        cpu->registers.IP = *operand1;
-    }
-    return ERR_OK;
-}
-Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JG / __JNLE\n");
-    if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu) && !getFlag(ZERO, cpu)) {
-        cpu->registers.IP = *operand1;
-    }
-    return ERR_OK;
-}
-Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JGE / __JNL\n");
-    if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu)) {
-        cpu->registers.IP = *operand1;
-    }
-    return ERR_OK;
-}
-Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JL / __JNGE\n");
-    if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu)) {
-        cpu->registers.IP = *operand1;
-    }
-    return ERR_OK;
-}
-Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JLE / __JNG\n");
-    if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu) && getFlag(ZERO, cpu)) {
-        cpu->registers.IP = *operand1;
-    }
     return ERR_OK;
 }
