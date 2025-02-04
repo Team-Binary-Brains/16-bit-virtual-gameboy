@@ -111,11 +111,6 @@ Error __IRET(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __IRET\n");
     return ERR_OK;
 }
-Error __JAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JAE\n");
-    return ERR_OK;
-}
 Error __JB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __JB\n");
@@ -648,5 +643,13 @@ Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
         cpu->registers.IP = *operand1;
     }
 
+    return ERR_OK;
+}
+Error __JAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("CALLED __JAE\n");
+    if (!getFlag(CARRY, cpu)) {
+        cpu->registers.IP = *operand1;
+    }
     return ERR_OK;
 }
