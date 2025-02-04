@@ -36,10 +36,10 @@
     ADC AX, BX                                  19
 
     ADC AX, 0                                   20
-    CLRCF                                       21
+    TGLCF                                       21
     CPY AX, 1                                   22
     DECR AX                                     23
-    JAE 26                                      24
-    JA 27                                       25
+    JBE 26                                     24
+    JB 27                                       25
     DONOP                                       26
     SHUTS                                       27
