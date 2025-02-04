@@ -111,54 +111,9 @@ Error __IRET(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __IRET\n");
     return ERR_OK;
 }
-Error __JNA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNA\n");
-    return ERR_OK;
-}
-Error __JNAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNAE\n");
-    return ERR_OK;
-}
-Error __JNB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNB\n");
-    return ERR_OK;
-}
-Error __JNBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNBE\n");
-    return ERR_OK;
-}
-Error __JNC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNC\n");
-    return ERR_OK;
-}
 Error __JNE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __JNE\n");
-    return ERR_OK;
-}
-Error __JNG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNG\n");
-    return ERR_OK;
-}
-Error __JNGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNGE\n");
-    return ERR_OK;
-}
-Error __JNL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNL\n");
-    return ERR_OK;
-}
-Error __JNLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JNLE\n");
     return ERR_OK;
 }
 Error __JNO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
@@ -593,7 +548,7 @@ Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __JA\n");
+    printf("CALLED __JA / __JNBE \n");
     if (!getFlag(CARRY, cpu) && !getFlag(ZERO, cpu)) {
         cpu->registers.IP = *operand1;
     }
@@ -601,7 +556,7 @@ Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __JAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __JAE\n");
+    printf("CALLED __JAE / __JNB / __JNC\n");
     if (!getFlag(CARRY, cpu)) {
         cpu->registers.IP = *operand1;
     }
@@ -609,7 +564,7 @@ Error __JAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __JB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __JB / __JC\n");
+    printf("CALLED __JB /__JNAE / __JC\n");
     if (getFlag(CARRY, cpu)) {
         cpu->registers.IP = *operand1;
     }
@@ -617,7 +572,7 @@ Error __JB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __JBE\n");
+    printf("CALLED __JBE / __JNA\n");
     if (getFlag(CARRY, cpu) && getFlag(ZERO, cpu)) {
         cpu->registers.IP = *operand1;
     }
@@ -641,7 +596,7 @@ Error __JE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __JG\n");
+    printf("CALLED __JG / __JNLE\n");
     if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu) && !getFlag(ZERO, cpu)) {
         cpu->registers.IP = *operand1;
     }
@@ -649,7 +604,7 @@ Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __JGE\n");
+    printf("CALLED __JGE / __JNL\n");
     if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu)) {
         cpu->registers.IP = *operand1;
     }
@@ -657,7 +612,7 @@ Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __JL\n");
+    printf("CALLED __JL / __JNGE\n");
     if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu)) {
         cpu->registers.IP = *operand1;
     }
@@ -665,7 +620,7 @@ Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 }
 Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __JLE\n");
+    printf("CALLED __JLE / __JNG\n");
     if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu) && getFlag(ZERO, cpu)) {
         cpu->registers.IP = *operand1;
     }

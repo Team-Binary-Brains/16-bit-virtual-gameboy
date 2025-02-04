@@ -62,16 +62,7 @@ typedef enum {
     INT,
     INTO,
     IRET,
-    JNA,
-    JNAE,
-    JNB,
-    JNBE,
-    JNC,
     JNE,
-    JNG,
-    JNGE,
-    JNL,
-    JNLE,
     JNO,
     JNP,
     JNS,
@@ -187,16 +178,7 @@ Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNAE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JNE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JNO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JNP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __JNS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
