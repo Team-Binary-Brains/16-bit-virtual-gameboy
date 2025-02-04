@@ -111,11 +111,6 @@ Error __IRET(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __IRET\n");
     return ERR_OK;
 }
-Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __JCXZ\n");
-    return ERR_OK;
-}
 Error __JE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __JE\n");
@@ -650,6 +645,14 @@ Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
     printf("CALLED __JBE\n");
     if (getFlag(CARRY, cpu) && getFlag(ZERO, cpu)) {
+        cpu->registers.IP = *operand1;
+    }
+    return ERR_OK;
+}
+Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("CALLED __JCXZ\n");
+    if (cpu->registers.CX.full == 0) {
         cpu->registers.IP = *operand1;
     }
     return ERR_OK;

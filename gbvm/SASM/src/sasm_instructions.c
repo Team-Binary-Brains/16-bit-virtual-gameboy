@@ -25,6 +25,7 @@ static OpcodeString OpcodeStringMap[] = {
     { JB, 2, "JB" },
     { JBE, 3, "JBE" },
     { JB, 2, "JC" },
+    { JCXZ, 4, "JCXZ" },
 
     { CPY, 3, "CPY" },
     { ADC, 3, "ADC" },
@@ -53,7 +54,6 @@ static OpcodeString OpcodeStringMap[] = {
     { INT, 3, "INT" },
     { INTO, 4, "INTO" },
     { IRET, 4, "IRET" },
-    { JCXZ, 4, "JCXZ" },
     { JE, 2, "JE" },
     { JG, 2, "JG" },
     { JGE, 3, "JGE" },
@@ -172,7 +172,7 @@ Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* oper
     __AAA, __AAD, __AAM, __AAS, __CALL, __CBW,
     __CLD, __CLI, __CMP, __CMPSB, __CMPSW, __CWD, __DAA, __DAS,
     __DIV, __IDIV, __IMUL, __IN, __INC, __INT, __INTO, __IRET,
-    __JCXZ, __JE, __JG, __JGE, __JL, __JLE,
+    __JE, __JG, __JGE, __JL, __JLE,
     __JNA, __JNAE, __JNB, __JNBE, __JNC, __JNE, __JNG, __JNGE, __JNL,
     __JNLE, __JNO, __JNP, __JNS, __JNZ, __JO, __JP, __JPE, __JPO, __JS,
     __JZ, __LAHF, __LDS, __LEA, __LES, __LODSB, __LODSW, __LOOP, __LOOPE,
@@ -184,6 +184,7 @@ Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* oper
 
     __DONOP, __CLRCF, __TGLCF, __SHUTS,
     __DECR, __NEG, __GOTO, __JA, __JAE, __JB, __JBE,
+    __JCXZ,
     __CPY, __ADC, __ADD,
     __AND
 };
