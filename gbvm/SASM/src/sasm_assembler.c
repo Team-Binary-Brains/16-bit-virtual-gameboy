@@ -36,22 +36,71 @@ void assembleProgramIntoBytecode(const Program* prog, const char* filePath)
 Instruction processLine(String* line)
 {
     *line = trim(*line);
+    /*
+    TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
+    */
 
     String opStr = splitStr(line, ' ');
     if (opStr.length == 0) {
-        return (Instruction) { .type = NOP };
+        return (Instruction) { .type = DONOP };
     }
     Opcode op = strAsOpcode(&opStr);
 
-    if (op < PSH) {
+    if (op < DECR) {
         return (Instruction) { .type = op };
     }
 
     *line = trim(*line);
-    Word operand = strToInt(splitStr(line, ' '));
-    // printf("Operand :%d\n", operand);
+    debugMessageDisplay(line);
 
-    return (Instruction) { .type = op, .operand = operand };
+    Byte registerMode = 0;
+    Word operand = -1, operand2 = -1;
+
+    if (*line->data == '[') {
+        operand = resolveImmediateAddress(line);
+        registerMode = registerMode | o1_mem;
+    } else if ((*line->data >= 'A' && *line->data < 'E')) {
+        if (0 == strncmp(line->data, "AX", 2))
+            operand = 1;
+        else if (0 == strncmp(line->data, "BX", 2))
+            operand = 2;
+        else if (0 == strncmp(line->data, "CX", 2))
+            operand = 3;
+        else if (0 == strncmp(line->data, "DX", 2))
+            operand = 4;
+        registerMode = registerMode | o1_reg;
+    } else {
+        // assert(0 && "ERROR ");
+        // TODO : Improve the label handling logic
+        operand = strToInt(*line);
+        registerMode = registerMode | o1_imm;
+    }
+    if (op < CPY) {
+        return (Instruction) { .type = op, .operand = operand, .registerMode = registerMode };
+    }
+    splitStr(line, ',');
+    *line = trim(*line);
+    debugMessageDisplay(line);
+
+    if (*line->data == '[') {
+        operand2 = resolveImmediateAddress(line);
+        registerMode = registerMode | o2_mem;
+    } else if ((*line->data >= 'A' && *line->data < 'E')) {
+        if (0 == strncmp(line->data, "AX", 2))
+            operand2 = 1;
+        else if (0 == strncmp(line->data, "BX", 2))
+            operand2 = 2;
+        else if (0 == strncmp(line->data, "CX", 2))
+            operand2 = 3;
+        else if (0 == strncmp(line->data, "DX", 2))
+            operand2 = 4;
+        registerMode = registerMode | o2_reg;
+    } else {
+        operand2 = strToInt(splitStr(line, ' '));
+        registerMode = registerMode | o2_imm;
+    }
+
+    return (Instruction) { .type = op, .operand = operand, .operand2 = operand2, .registerMode = registerMode };
 }
 
 Program parseAsmIntoProgram(String* src)
@@ -60,7 +109,6 @@ Program parseAsmIntoProgram(String* src)
     prog.instruction_count = 0;
     while (src->length > 0) {
         String line = trim(splitStr(src, '\n'));
-        // printf("Line : %.*s\n", (int)(line.length), line.data);
 
         if (line.length == 0) {
             continue;
@@ -71,12 +119,13 @@ Program parseAsmIntoProgram(String* src)
             debugCommentDisplay(&line);
             continue;
         }
+        debugMessageDisplay(&line);
 
         Instruction tmp = processLine(&line);
 
-        if (tmp.type == NOP) {
-            continue;
-        }
+        // if (tmp.type == DONOP) {
+        // continue;
+        //}
 
         if (prog.instruction_count >= PROGRAM_CAPACITY) {
             displayMsgWithExit("Program LOC capacity exceeded");
@@ -118,14 +167,19 @@ String loadFileIntoString(const char* filePath)
 void writeProgramToFile(const Program* prog, const char* filePath)
 {
     FILE* f = openFile(filePath, "w");
+
+    /*
+    TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
+    */
+
     for (Word i = 0; i < prog->instruction_count; i++) {
         Instruction inst = prog->instructions[i];
         String op = opcodeAsStr(&inst.type);
         fwrite(op.data, op.length, 1, f);
-        if (inst.type >= PSH) {
+        if (inst.type >= CPY) {
             fwrite(" ", 1, 1, f);
             char buf[32];
-            sprintf(buf, "%d", inst.operand);
+            sprintf(buf, "%d %d %d", inst.operand, inst.operand2, inst.registerMode);
             fwrite(buf, strlen(buf), 1, f);
         }
         fwrite("\n", 1, 1, f);

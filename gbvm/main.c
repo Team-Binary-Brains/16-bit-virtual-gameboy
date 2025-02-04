@@ -71,7 +71,7 @@ void menu(int ch)
     }
 
     loadProgram(&vm, inputFile);
-
+    vm.cpu.registers.IP = 0;
     executeProgram(&vm, ch - 3, 0);
     printf("Program completed\n");
 }

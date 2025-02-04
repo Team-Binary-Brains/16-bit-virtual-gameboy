@@ -15,15 +15,18 @@
 #include <ctype.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define EXECUTION_LIMIT 1024  /**< The maximum number of instructions that can be executed. */
-#define PROGRAM_CAPACITY 1024 /**< The maximum capacity of the program memory. */
-#define STACK_CAPACITY 1024   /**< The maximum capacity of the stack memory. */
-#define MAX_WORD 32767        /**< The maximum value that can be stored in a Word type. */
+#define EXECUTION_LIMIT 1024      /**< The maximum number of instructions that can be executed. */
+#define PROGRAM_CAPACITY 1024     /**< The maximum capacity of the program memory. */
+#define STACK_CAPACITY 1024       /**< The maximum capacity of the stack memory. */
+#define MAX_WORD 32767            /**< The maximum value that can be stored in a Word type. */
+#define ADDRESS_RANGE_LOW 0X0000  /**< The lower bound of the memory address range. */
+#define ADDRESS_RANGE_HIGH 0XFFFF /**< The upper bound of the memory address range. */
 
 typedef char Byte;               /**< Represents a single byte. */
 typedef short int Word;          /**< Represents a 16-bit word. */
