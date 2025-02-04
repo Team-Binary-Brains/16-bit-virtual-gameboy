@@ -440,9 +440,9 @@ Error __NEG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
     printf("CALLED __NEG\n");
     return ERR_OK;
 }
-Error __NOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
 {
-    printf("CALLED __NOP\n");
+    printf("DO No OPeration");
     return ERR_OK;
 }
 Error __NOT(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)

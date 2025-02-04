@@ -43,7 +43,7 @@ Instruction processLine(String* line)
 
     String opStr = splitStr(line, ' ');
     if (opStr.length == 0) {
-        return (Instruction) { .type = NOP };
+        return (Instruction) { .type = DONOP };
     }
     Opcode op = strAsOpcode(&opStr);
 
@@ -121,9 +121,9 @@ Program parseAsmIntoProgram(String* src)
 
         Instruction tmp = processLine(&line);
 
-        if (tmp.type == NOP) {
-            continue;
-        }
+        //if (tmp.type == DONOP) {
+            //continue;
+        //}
 
         if (prog.instruction_count >= PROGRAM_CAPACITY) {
             displayMsgWithExit("Program LOC capacity exceeded");

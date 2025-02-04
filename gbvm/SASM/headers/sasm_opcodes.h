@@ -83,8 +83,6 @@ typedef enum {
     MOVSB,
     MOVSW,
     MUL,
-    NEG,
-    NOP,
     NOT,
     OR,
     OUT,
@@ -124,10 +122,12 @@ typedef enum {
     XLATB,
     XOR,
 
+    DONOP,
     CLRCF,
     TGLCF,
     SHUTS,
     DECR,
+    NEG,
     CPY,
     ADC,
     ADD,
@@ -222,7 +222,7 @@ Error __MOVSB(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __MOVSW(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __MUL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __NEG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __NOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __NOT(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __OR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __OUT(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);

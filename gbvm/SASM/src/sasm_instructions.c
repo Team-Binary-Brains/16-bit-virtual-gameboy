@@ -89,7 +89,7 @@ static OpcodeString OpcodeStringMap[] = {
     { MOVSW, 5, "MOVSW" },
     { MUL, 3, "MUL" },
     { NEG, 3, "NEG" },
-    { NOP, 3, "NOP" },
+    { DONOP, 5, "DONOP" },
     { NOT, 3, "NOT" },
     { OR, 2, "OR" },
     { OUT, 3, "OUT" },
@@ -158,7 +158,7 @@ Opcode strAsOpcode(const String* s)
     }
 
     displayStringMessageError("Unknown instruction detected and was ignored", *s);
-    return NOP;
+    return DONOP;
 }
 
 /*
@@ -173,13 +173,13 @@ Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* oper
     __JMP, __JNA, __JNAE, __JNB, __JNBE, __JNC, __JNE, __JNG, __JNGE, __JNL,
     __JNLE, __JNO, __JNP, __JNS, __JNZ, __JO, __JP, __JPE, __JPO, __JS,
     __JZ, __LAHF, __LDS, __LEA, __LES, __LODSB, __LODSW, __LOOP, __LOOPE,
-    __LOOPNE, __LOOPNZ, __LOOPZ, __MOVSB, __MOVSW, __MUL, __NEG, __NOP, __NOT,
+    __LOOPNE, __LOOPNZ, __LOOPZ, __MOVSB, __MOVSW, __MUL, __NOT,
     __OR, __OUT, __POP, __POPA, __POPF, __PUSH, __PUSHA, __PUSHF, __RCL, __RCR,
     __REP, __REPE, __REPNE, __REPNZ, __REPZ, __RET, __RETF, __ROL, __ROR, __SAHF,
     __SAL, __SAR, __SBB, __SCASB, __SCASW, __SHL, __SHR, __STC, __STD, __STI,
     __STOSB, __STOSW, __SUB, __TEST, __XCHG, __XLATB, __XOR,
-    __CLRCF, __TGLCF, __SHUTS,
-    __DECR,
+    __DONOP, __CLRCF, __TGLCF, __SHUTS,
+    __DECR, __NEG,
     __CPY, __ADC, __ADD,
     __AND
 };
