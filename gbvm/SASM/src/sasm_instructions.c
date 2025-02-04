@@ -1,6 +1,5 @@
 #include "sasm_instructions.h"
-#include "sasm_flags.h"
-#include "sasm_alu.h"
+#include "sasm_memory.h"
 #include "univ_defs.h"
 typedef struct {
     Opcode type;
@@ -12,126 +11,19 @@ typedef struct {
 TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
 */
 static OpcodeString OpcodeStringMap[] = {
-    { DONOP, 5, "DONOP" },
-    { CLRCF, 5, "CLRCF" },
-    { TGLCF, 5, "TGLCF" },
-    { SHUTS, 5, "SHUTS" },
+    { DONOP, 5, "DONOP" }, { CLRCF, 5, "CLRCF" }, { TGLCF, 5, "TGLCF" }, { SHUTS, 5, "SHUTS" },
 
-    { DECR, 4, "DECR" },
-    { NEG, 3, "NEG" },
-    { GOTO, 4, "GOTO" },
-    { JA, 2, "JA" },
-    { JA, 4, "JNBE" },
-    { JNC, 3, "JAE" },
-    { JNC, 3, "JNC" },
-    { JNC, 3, "JNB" },
-    { JC, 2, "JB" },
-    { JC, 2, "JC" },
-    { JC, 4, "JNAE" },
-    { JBE, 3, "JBE" },
-    { JBE, 3, "JNA" },
-    { JCXZ, 4, "JCXZ" },
-    { JZ, 2, "JE" },
-    { JZ, 2, "JZ" },
-    { JG, 2, "JG" },
-    { JG, 4, "JNLE" },
-    { JGE, 3, "JGE" },
-    { JGE, 3, "JNL" },
-    { JL, 2, "JL" },
-    { JL, 4, "JNGE" },
-    { JLE, 3, "JLE" },
-    { JLE, 3, "JNG" },
-    { JNZ, 3, "JNE" },
-    { JNZ, 3, "JNZ" },
-    { JNO, 3, "JNO" },
-    { JNP, 3, "JNP" },
-    { JNP, 3, "JPO" },
-    { JNS, 3, "JNS" },
-    { JO, 2, "JO" },
-    { JP, 2, "JP" },
-    { JP, 3, "JPE" },
-    { JS, 2, "JS" },
+    { DECR, 4, "DECR" }, { NEG, 3, "NEG" }, { GOTO, 4, "GOTO" }, { JA, 2, "JA    " }, { JA, 4, "JNBE" },
+    { JNC, 3, "JAE  " }, { JNC, 3, "JNC" }, { JNC, 3, "JNB  " }, { JC, 2, "JB    " }, { JC, 2, "JC  " },
+    { JC, 4, "JNAE  " }, { JBE, 3, "JBE" }, { JBE, 3, "JNA  " }, { JCXZ, 4, "JCXZ" }, { JZ, 2, "JE  " },
+    { JZ, 2, "JZ    " }, { JG, 2, "JG  " }, { JG, 4, "JNLE  " }, { JGE, 3, "JGE  " }, { JGE, 3, "JNL" },
+    { JL, 2, "JL    " }, { JL, 4, "JNGE" }, { JLE, 3, "JLE  " }, { JLE, 3, "JNG  " }, { JNZ, 3, "JNE" },
+    { JNZ, 3, "JNZ  " }, { JNO, 3, "JNO" }, { JNP, 3, "JNP  " }, { JNP, 3, "JPO  " }, { JNS, 3, "JNS" },
+    { JO, 2, "JO    " }, { JP, 2, "JP  " }, { JP, 3, "JPE   " }, { JS, 2, "JS    " },
 
-    { CPY, 3, "CPY" },
-    { ADC, 3, "ADC" },
-    { ADD, 3, "ADD" },
-    { AND, 3, "AND" },
-
-    { AAA, 3, "AAA" },
-    { AAD, 3, "AAD" },
-    { AAM, 3, "AAM" },
-    { AAS, 3, "AAS" },
-    { CALL, 4, "CALL" },
-    { CBW, 3, "CBW" },
-    { CLD, 3, "CLD" },
-    { CLI, 3, "CLI" },
-    { CMP, 3, "CMP" },
-    { CMPSB, 5, "CMPSB" },
-    { CMPSW, 5, "CMPSW" },
-    { CWD, 3, "CWD" },
-    { DAA, 3, "DAA" },
-    { DAS, 3, "DAS" },
-    { DIV, 3, "DIV" },
-    { IDIV, 4, "IDIV" },
-    { IMUL, 4, "IMUL" },
-    { IN, 2, "IN" },
-    { INC, 3, "INC" },
-    { INT, 3, "INT" },
-    { INTO, 4, "INTO" },
-    { IRET, 4, "IRET" },
-    { LAHF, 4, "LAHF" },
-    { LDS, 3, "LDS" },
-    { LEA, 3, "LEA" },
-    { LES, 3, "LES" },
-    { LODSB, 5, "LODSB" },
-    { LODSW, 5, "LODSW" },
-    { LOOP, 4, "LOOP" },
-    { LOOPE, 5, "LOOPE" },
-    { LOOPNE, 6, "LOOPNE" },
-    { LOOPNZ, 6, "LOOPNZ" },
-    { LOOPZ, 5, "LOOPZ" },
-    { MOVSB, 5, "MOVSB" },
-    { MOVSW, 5, "MOVSW" },
-    { MUL, 3, "MUL" },
-    { NOT, 3, "NOT" },
-    { OR, 2, "OR" },
-    { OUT, 3, "OUT" },
-    { POP, 3, "POP" },
-    { POPA, 4, "POPA" },
-    { POPF, 4, "POPF" },
-    { PUSH, 4, "PUSH" },
-    { PUSHA, 5, "PUSHA" },
-    { PUSHF, 5, "PUSHF" },
-    { RCL, 3, "RCL" },
-    { RCR, 3, "RCR" },
-    { REP, 3, "REP" },
-    { REPE, 4, "REPE" },
-    { REPNE, 5, "REPNE" },
-    { REPNZ, 5, "REPNZ" },
-    { REPZ, 4, "REPZ" },
-    { RET, 3, "RET" },
-    { RETF, 4, "RETF" },
-    { ROL, 3, "ROL" },
-    { ROR, 3, "ROR" },
-    { SAHF, 4, "SAHF" },
-    { SAL, 3, "SAL" },
-    { SAR, 3, "SAR" },
-    { SBB, 3, "SBB" },
-    { SCASB, 5, "SCASB" },
-    { SCASW, 5, "SCASW" },
-    { SHL, 3, "SHL" },
-    { SHR, 3, "SHR" },
-    { STC, 3, "STC" },
-    { STD, 3, "STD" },
-    { STI, 3, "STI" },
-    { STOSB, 5, "STOSB" },
-    { STOSW, 5, "STOSW" },
-    { SUB, 3, "SUB" },
-    { TEST, 4, "TEST" },
-    { XCHG, 4, "XCHG" },
-    { XLATB, 5, "XLATB" },
-    { XOR, 3, "XOR" }
+    { CPY, 3, "CPY" }, { ADC, 3, "ADC" }, { ADD, 3, "ADD" }, { AND, 3, "AND" }
 };
+
 String opcodeAsStr(const Opcode* type)
 {
     size_t len = sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]);
@@ -172,17 +64,7 @@ Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* oper
     __DONOP, __CLRCF, __TGLCF, __SHUTS,
     __DECR, __NEG, __GOTO, __JA, __JNC, __JC, __JBE, __JCXZ, __JZ, __JG,
     __JGE, __JL, __JLE, __JNZ, __JNO, __JNP, __JNS, __JO, __JP, __JS,
-    __CPY, __ADC, __ADD, __AND,
-
-    __AAA, __AAD, __AAM, __AAS, __CALL, __CBW,
-    __CLD, __CLI, __CMP, __CMPSB, __CMPSW, __CWD, __DAA, __DAS,
-    __DIV, __IDIV, __IMUL, __IN, __INC, __INT, __INTO, __IRET,
-    __LAHF, __LDS, __LEA, __LES, __LODSB, __LODSW, __LOOP, __LOOPE,
-    __LOOPNE, __LOOPNZ, __LOOPZ, __MOVSB, __MOVSW, __MUL, __NOT,
-    __OR, __OUT, __POP, __POPA, __POPF, __PUSH, __PUSHA, __PUSHF, __RCL, __RCR,
-    __REP, __REPE, __REPNE, __REPNZ, __REPZ, __RET, __RETF, __ROL, __ROR, __SAHF,
-    __SAL, __SAR, __SBB, __SCASB, __SCASW, __SHL, __SHR, __STC, __STD, __STI,
-    __STOSB, __STOSW, __SUB, __TEST, __XCHG, __XLATB, __XOR
+    __CPY, __ADC, __ADD, __AND
 };
 Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
 {
@@ -261,5 +143,279 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
     }
 
     cpu->registers.IP += 1;
+    return ERR_OK;
+}
+
+Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nDO No OPeration\n");
+    return ERR_OK;
+}
+
+Error __CLRCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d", getFlag(CARRY, cpu));
+    setFlag(CARRY, cpu, false);
+    printf("\nAfter  : %d\n", getFlag(CARRY, cpu));
+    return ERR_OK;
+}
+
+Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d", getFlag(CARRY, cpu));
+    setFlag(CARRY, cpu, !getFlag(CARRY, cpu));
+    printf("\nAfter  : %d\n", getFlag(CARRY, cpu));
+    return ERR_OK;
+}
+
+Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nSHUTing down System\n");
+    setFlag(HALT, cpu, true);
+    return ERR_OK;
+}
+
+Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d", *operand1);
+
+    bool overflow = *operand1 == (-MAX_WORD);
+    bool auxiliary = (((*operand1 & 0x0F) + (-1 & 0x0f)) > 0x0f);
+    *operand1 = *operand1 + -1;
+
+    setFlag(OVERFLOW, cpu, overflow);
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    setFlag(AUX, cpu, auxiliary);
+    checkAndSetParity(cpu, *operand1);
+
+    printf("\nAfter  : %d\n", *operand1);
+    return ERR_OK;
+}
+
+Error __NEG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("CALLED __NEG\n");
+    return ERR_OK;
+}
+
+Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nUnconditional Jump to %d\n", *operand1);
+    cpu->registers.IP = *operand1 - 1;
+    return ERR_OK;
+}
+
+Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(CARRY, cpu) && !getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JA / __JNBE \n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JNC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(CARRY, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JAE / __JNB / __JNC\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(CARRY, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JB /__JNAE / __JC\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(CARRY, cpu) || getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JBE / __JNA\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (cpu->registers.CX.full == 0) {
+        printf("\nJUMPING TO %d\nREASON : __JCXZ\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JE / __JZ\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu) && !getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JG / __JNLE\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JGE / __JNL\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JL / __JNGE\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu) || getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JLE / __JNG\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JNZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(ZERO, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JNE / __JNZ\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JNO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(OVERFLOW, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JNO\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JNP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(PARITY, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JNP / __JPO\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JNS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (!getFlag(SIGN, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JNS\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(OVERFLOW, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JO\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(PARITY, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JP / __JPE\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __JS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    if (getFlag(SIGN, cpu)) {
+        printf("\nJUMPING TO %d\nREASON : __JS\n", *operand1);
+        cpu->registers.IP = *operand1 - 1;
+    }
+    return ERR_OK;
+}
+
+Error __CPY(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d, %d", *operand1, *operand2);
+    *operand1 = *operand2;
+    printf("\nAfter  : %d\n", *operand1);
+    return ERR_OK;
+}
+
+Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d, %d", *operand1, *operand2);
+
+    bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
+    bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
+    *operand1 = *operand1 + *operand2;
+    *operand1 = *operand1 + (getFlag(CARRY, cpu) ? 1 : 0);
+
+    setFlag(CARRY, cpu, overflow);
+    setFlag(OVERFLOW, cpu, overflow);
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    setFlag(AUX, cpu, auxiliary);
+    checkAndSetParity(cpu, *operand1);
+
+    printf("\nAfter  : %d\n", *operand1);
+    return ERR_OK;
+}
+
+Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d, %d", *operand1, *operand2);
+
+    bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
+    bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
+    *operand1 = *operand1 + *operand2;
+
+    setFlag(CARRY, cpu, overflow);
+    setFlag(OVERFLOW, cpu, overflow);
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    setFlag(AUX, cpu, auxiliary);
+    checkAndSetParity(cpu, *operand1);
+
+    printf("\nAfter  : %d\n", *operand1);
+    return ERR_OK;
+}
+
+Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
+{
+    printf("\nBefore : %d, %d", *operand1, *operand2);
+
+    *operand1 = *operand1 & *operand2;
+
+    setFlag(ZERO, cpu, (*operand1 == 0));
+    setFlag(SIGN, cpu, (*operand1 < 0));
+    checkAndSetParity(cpu, *operand1);
+
+    printf("\nAfter  : %d\n", *operand1);
     return ERR_OK;
 }

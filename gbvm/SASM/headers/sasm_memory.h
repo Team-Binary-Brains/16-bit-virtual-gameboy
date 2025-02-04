@@ -21,6 +21,7 @@ typedef union {
     Word full;
     Byte data[2];
 } Register;
+
 typedef enum {
     o1_mem = 1 << 0,
     o1_reg = 1 << 1,
@@ -29,6 +30,16 @@ typedef enum {
     o2_imm = 1 << 4,
     o1_imm = 1 << 5,
 } modes;
+typedef enum {
+    HALT = 1 << 0,         // 1
+    SIGN = 1 << 1,         // 2
+    OVERFLOW = 1 << 2,     // 4
+    CARRY = 1 << 3,        // 8
+    BORROW = 1 << 4,       // 16
+    PARITY = 1 << 5,       // 32
+    ZERO = 1 << 6,         // 64
+    AUX = 1 << 7           // 128
+} Flags;
 typedef struct {
     Register AX; /**< Accumulator register */
     Register BX; /**< Base register */
@@ -67,3 +78,31 @@ typedef struct {
 void writeToMemory(Memory* memory, Word address, Word data);
 
 Byte readFromMemory(Memory* memory, Word address);
+
+/**
+ * @brief Evaluates the value of a register.
+ *
+ * This function evaluates the value of a register based on the given CPU and temporary string.
+ *
+ * @param cpu The CPU structure.
+ * @param tmp The temporary string.
+ * @return The value of the register.
+ */
+Word evalRegister(CPU* cpu, String tmp);
+
+/**
+ * @brief Resolves the address based on the given  string.
+ *
+ * @param cpu The CPU structure.
+ * @param s The string containing the address.
+ * @return The resolved address.
+ */
+Word resolveAddress(CPU* cpu, String* s);
+
+Word resolveImmediateAddress(String* s);
+
+void setFlag(Flags f, CPU* cpu, bool state);
+
+bool getFlag(Flags f, const CPU* cpu);
+
+void checkAndSetParity(CPU* cpu, Word num);

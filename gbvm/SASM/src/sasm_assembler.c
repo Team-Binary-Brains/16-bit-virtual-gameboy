@@ -1,7 +1,6 @@
 #include "univ_defs.h"
 #include "sasm_assembler.h"
 #include "univ_fileops.h"
-#include "sasm_addresser.h"
 
 Program disassembleBytecodeIntoProgram(const char* filePath)
 {

@@ -1,7 +1,7 @@
 #include "gbvm.h"
 #include "sasm_assembler.h"
 #include "sasm_instructions.h"
-#include "sasm_flags.h"
+#include "sasm_memory.h"
 
 void dumpStack(FILE* stream, const Vm* vm)
 {

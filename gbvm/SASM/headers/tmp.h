@@ -11,41 +11,7 @@
 #include "univ_defs.h"
 #include "sasm_memory.h"
 
-/**
- * @brief Enumeration of opcodes for SASM instructions.
- */
 typedef enum {
-
-    DONOP,
-    CLRCF,
-    TGLCF,
-    SHUTS,
-
-    DECR,
-    NEG,
-    GOTO,
-    JA,
-    JNC,
-    JC,
-    JBE,
-    JCXZ,
-    JZ,
-    JG,
-    JGE,
-    JL,
-    JLE,
-    JNZ,
-    JNO,
-    JNP,
-    JNS,
-    JO,
-    JP,
-    JS,
-
-    CPY,
-    ADC,
-    ADD,
-    AND,
 
     AAA,
     AAD,
@@ -123,46 +89,43 @@ typedef enum {
     XOR,
 } Opcode;
 
-/**
- * @brief Structure representing an instruction in the SASM assembly language.
- */
+Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* operand2) = {
+
+    __AAA, __AAD, __AAM, __AAS, __CALL, __CBW, __CLD, __CLI, __CMP, __CMPSB,
+    __CMPSW, __CWD, __DAA, __DAS, __DIV, __IDIV, __IMUL, __IN, __INC, __INT,
+    __INTO, __IRET, __LAHF, __LDS, __LEA, __LES, __LODSB, __LODSW, __LOOP, __LOOPE,
+    __LOOPNE, __LOOPNZ, __LOOPZ, __MOVSB, __MOVSW, __MUL, __NOT, __OR, __OUT, __POP,
+    __POPA, __POPF, __PUSH, __PUSHA, __PUSHF, __RCL, __RCR, __REP, __REPE, __REPNE,
+    __REPNZ, __REPZ, __RET, __RETF, __ROL, __ROR, __SAHF, __SAL, __SAR, __SBB,
+    __SCASB, __SCASW, __SHL, __SHR, __STC, __STD, __STI, __STOSB, __STOSW, __SUB,
+    __TEST, __XCHG, __XLATB, __XOR
+};
 typedef struct {
-    Opcode type;  /**< The opcode of the instruction */
-    Word operand; /**< The operand of the instruction */
-    Word operand2;
-    // TODO : DISCARD USE OF THIS FLAG
-    Byte registerMode;
-} Instruction;
+    Opcode type;
+    size_t size;
+    char* name;
+} OpcodeString;
+static OpcodeString OpcodeStringMap[] = {
 
-Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __CLRCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-
-Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-
-Error __CPY(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+    { POP, 3, "POP    " }, { POPA, 4, "POPA  " }, { POPF, 4, "POPF    " }, { PUSH, 4, "PUSH    " }, { PUSHA, 5, "PUSHA" }, { PUSHF, 5, "PUSHF" },
+    { LAHF, 4, "LAHF  " }, { LDS, 3, "LDS    " }, { LEA, 3, "LEA      " }, { LES, 3, "LES      " }, { LODSB, 5, "LODSB" }, { LODSW, 5, "LODSW" },
+    { LOOP, 4, "LOOP  " }, { LOOPE, 5, "LOOPE" }, { LOOPNE, 6, "LOOPNE" }, { LOOPNZ, 6, "LOOPNZ" }, { LOOPZ, 5, "LOOPZ" },
+    { AAA, 3, "AAA    " }, { AAD, 3, "AAD    " }, { AAM, 3, "AAM      " }, { AAS, 3, "AAS      " }, { DAA, 3, "DAA    " }, { DAS, 3, "DAS    " },
+    { CMP, 3, "CMP    " }, { CMPSB, 5, "CMPSB" }, { CMPSW, 5, "CMPSW  " }, { SCASB, 5, "SCASB  " }, { SCASW, 5, "SCASW" },
+    { REP, 3, "REP    " }, { REPE, 4, "REPE  " }, { REPNE, 5, "REPNE  " }, { REPNZ, 5, "REPNZ  " }, { REPZ, 4, "REPZ  " },
+    { CALL, 4, "CALL  " }, { RET, 3, "RET    " }, { RETF, 4, "RETF    " }, { IRET, 4, "IRET    " },
+    { DIV, 3, "DIV    " }, { IDIV, 4, "IDIV  " }, { MUL, 3, "MUL      " }, { IMUL, 4, "IMUL    " },
+    { CBW, 3, "CBW    " }, { CWD, 3, "CWD    " }, { CLD, 3, "CLD      " }, { CLI, 3, "CLI      " },
+    { IN, 2, "IN      " }, { OUT, 3, "OUT    " }, { INT, 3, "INT      " }, { INTO, 4, "INTO    " },
+    { ROL, 3, "ROL    " }, { ROR, 3, "ROR    " }, { RCL, 3, "RCL      " }, { RCR, 3, "RCR      " },
+    { SAL, 3, "SAL    " }, { SAR, 3, "SAR    " }, { SHL, 3, "SHL      " }, { SHR, 3, "SHR      " },
+    { SAHF, 4, "SAHF  " }, { STOSB, 5, "STOSB" }, { STOSW, 5, "STOSW  " },
+    { TEST, 4, "TEST  " }, { XCHG, 4, "XCHG  " }, { XLATB, 5, "XLATB  " },
+    { STC, 3, "STC    " }, { STD, 3, "STD    " }, { STI, 3, "STI      " },
+    { SUB, 3, "SUB    " }, { SBB, 3, "SBB    " }, { INC, 3, "INC      " },
+    { NOT, 3, "NOT    " }, { OR, 2, "OR      " }, { XOR, 3, "XOR      " },
+    { MOVSB, 5, "MOVSB" }, { MOVSW, 5, "MOVSW" }
+};
 
 Error __AAA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
 Error __AAD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
