@@ -1,33 +1,43 @@
 /* ---------- ORIN GRAMMAR ---------- */
 
-PROGRAM -> STATEMENT_LIST
+Program 
+    -> StatementList
 
-STATEMENT_LIST -> STATEMENT STATEMENT_LIST
-               | ε
+StatementList 
+    -> Statement StatementList 
+    | ε
 
-STATEMENT -> DECLARATION
-           | ASSIGNMENT
-           | EXIT_STATEMENT
+Statement 
+    -> Declaration 
+    | Assignment 
+    | ExitStatement
 
-DECLARATION -> "int" IDENTIFIER "=" EXPRESSION ";"
+Declaration 
+    -> "int" Identifier [ "=" Expression ] ";"
 
-ASSIGNMENT -> IDENTIFIER "=" EXPRESSION ";"
+Assignment 
+    -> Identifier "=" Expression ";"
 
-EXIT_STATEMENT -> "exit" "(" EXPRESSION ")" ";"
+ExitStatement 
+    -> "exit" "(" Expression ")" ";"
 
-EXPRESSION -> TERM EXPRESSION_TAIL
+Expression 
+    -> RelationalExpression 
+    | ArithmeticExpression
 
-EXPRESSION_TAIL -> "+" TERM EXPRESSION_TAIL
-                 | "-" TERM EXPRESSION_TAIL
-                 | ε
+RelationalExpression 
+    -> ArithmeticExpression { RelationalOperator ArithmeticExpression }
 
-TERM -> FACTOR TERM_TAIL
+ArithmeticExpression 
+    -> AdditiveExpression
 
-TERM_TAIL -> "*" FACTOR TERM_TAIL
-           | "/" FACTOR TERM_TAIL
-           | "%" FACTOR TERM_TAIL
-           | ε
+AdditiveExpression 
+    -> MultiplicativeExpression { ("+" | "-") MultiplicativeExpression }
 
-FACTOR -> "(" EXPRESSION ")"
-        | IDENTIFIER
-        | INT_L
+MultiplicativeExpression 
+    -> PrimaryExpression { ("*" | "/" | "%") PrimaryExpression }
+
+PrimaryExpression 
+    -> "(" Expression ")" 
+    | Identifier 
+    | INT_L

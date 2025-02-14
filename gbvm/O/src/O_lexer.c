@@ -4,7 +4,7 @@
 #include "O_lexer.h"
 #include "O_token_types.h"
 
-size_t lineNumber = 0;
+size_t lineNumber = 1;
 HashTable *OpAndSepTokenMap;
 HashTable *KeywordTokenMap;
 
@@ -88,8 +88,8 @@ void generateOpAndSepToken(char* current, int* currentIndex, Token* token){
     char* value = malloc(sizeof(char)*3);
     value[0] = current[*currentIndex];
     if(current[(*currentIndex)+1] == '='){
-        currentIndex++;
-        value[1] = current[*currentIndex];
+        *currentIndex +=1 ;
+        value[1] = current[(*currentIndex)];
         value[2] = '\0';
     }else{
         value = realloc(value, sizeof(char)*2);

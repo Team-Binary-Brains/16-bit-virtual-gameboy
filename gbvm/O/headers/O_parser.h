@@ -11,10 +11,16 @@ ParseTreeNode* parseDeclaration(Token**, SymbolTable*);
 
 ParseTreeNode* parseAssignment(Token**, SymbolTable*);
 
-ParseTreeNode* parseExpression(Token**, SymbolTable*);
+ParseTreeNode* parsePrimaryExpr(Token** currentToken, SymbolTable* symTable);
 
-ParseTreeNode* parseTerm(Token**, SymbolTable*);
+ParseTreeNode* parseMultiplicativeExpr(Token** currentToken, SymbolTable* symTable);
 
-ParseTreeNode* parseFactor(Token**, SymbolTable*);
+ParseTreeNode* parseAdditiveExpr(Token** currentToken, SymbolTable* symTable);
+
+ParseTreeNode* parseRelationalExpr(Token** currentToken, SymbolTable* symTable);
+
+ParseTreeNode* parseExpression(Token** currentToken, SymbolTable* symTable);
 
 ParseTreeNode* parseExitStatement(Token**, SymbolTable*);
+
+
