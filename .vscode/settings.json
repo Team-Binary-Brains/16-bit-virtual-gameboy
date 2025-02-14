@@ -5,7 +5,8 @@
     "univ_cmdutils.h": "c",
     "univ_hashmap.h": "c",
     "o_lexer.h": "c",
-    "o_parser.h": "c"
+    "o_parser.h": "c",
+    "o_token_types.h": "c"
   },
   "clang-format.executable": "C:\\Users\\OMKAR VIJAY JAGTAP\\Documents\\4th Sem\\PBL\\16-bit-virtual-gameboy\\.clang-format"
 }

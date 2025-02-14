@@ -44,6 +44,49 @@ typedef enum {
     END_OF_TOKENS,
 } TokenType;
 
+static char* StrTokenType[] = {
+    "BEGINNING",
+    "INT",
+    "FLOAT",
+    "VOID",
+    "STRING",
+    "CHAR",
+    "INT_L",
+    "FLOAT_L",
+    "STR_L",
+    "CHAR_L",
+    "CONSTANT",
+    "IF",
+    "ELSE",
+    "WHILE",
+    "FOR",
+    "RETURN",
+    "LPAREN",
+    "RPAREN",
+    "LBRACE",
+    "RBRACE",
+    "SEMICOLON",
+    "COMMA",
+    "PLUS",
+    "MINUS",
+    "STAR",
+    "SLASH",
+    "MOD",
+    "EQUAL",
+    "LT",
+    "LE",
+    "GT",
+    "GE",
+    "EQ",
+    "NEQ",
+    "IDENTIFIER",
+    "COMP",
+    "EXIT",
+    "WRITE",
+    "UNKNOWN",
+    "END_OF_TOKENS",
+};
+
 typedef struct {
     TokenType type;
     char* value;
@@ -90,3 +133,5 @@ static Token KeywordTokens[] = {
 };
 
 void __printToken(Token);
+
+void __printTokens(Token* tokens, size_t tokensIndex);

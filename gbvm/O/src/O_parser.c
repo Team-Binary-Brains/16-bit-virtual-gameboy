@@ -2,17 +2,10 @@
 #pragma GCC diagnostic ignored "-Wswitch"
 
 #include "univ_defs.h"
+#include "O_parser.h"
 #include "O_token_types.h"
 #include "O_parse_tree.h"
 #include "O_symbol_table.h"
-
-// Forward declarations for parsing functions with symbol table usage.
-ParseTreeNode* parseExpression(Token** currentToken, SymbolTable* symTable);
-ParseTreeNode* parseTerm(Token** currentToken, SymbolTable* symTable);
-ParseTreeNode* parseFactor(Token** currentToken, SymbolTable* symTable);
-ParseTreeNode* parseDeclaration(Token** currentToken, SymbolTable* symTable);
-ParseTreeNode* parseAssignment(Token** currentToken, SymbolTable* symTable);
-ParseTreeNode* parseExitStatement(Token** currentToken, SymbolTable* symTable);
 
 // Match function: verifies that the current token matches the expected type.
 Token* match(Token** currentToken, TokenType expectedType) {
@@ -220,7 +213,6 @@ ParseTreeNode* parser(Token* tokens) {
     }
     
     // Optionally, print the parse tree and symbol table for debugging.
-    printf("Parse Tree:\n");
     printParseTree(root, NULL, 0);
     printf("\n");
     printSymbolTable(symTable);

@@ -51,15 +51,18 @@ void destroySymbolTable(SymbolTable *symTable) {
 
 // A Pretty Way to print the symbol table.
 void printSymbolTable(SymbolTable *symTable) {
-    printf("---------- Symbol Table ----------\n");
+    printf("------------------------------------------------------------------------\n");
+    printf("| %-15s | %-10s | %-5s | %-18s | %-8s |\n", "Identifier", "Type", "Scope", "Address", "Value");
+    printf("------------------------------------------------------------------------\n");
     for (size_t i = 0; i < symTable->size; i++) {
         Entry *entry = symTable->entries[i];
         while (entry) {
             SymbolEntry *symEntry = (SymbolEntry *)entry->value;
-            printf("Identifier: %-15s | Type: %-3d | Scope: %-2d | Address: %p | Value: %d\n", 
-                   (char *)entry->key, symEntry->type, symEntry->scopeLevel, symEntry->memAddress, symEntry->value);
+            printf("| %-15s | %-10s | %-5d | %-18p | %-8d |\n", 
+                   (char *)entry->key, StrTokenType[symEntry->type], symEntry->scopeLevel, symEntry->memAddress, symEntry->value);
             entry = entry->next;
         }
     }
-    printf("----------------------------------\n");
+    printf("------------------------------------------------------------------------\n");
 }
+

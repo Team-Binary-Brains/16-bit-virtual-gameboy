@@ -196,9 +196,7 @@ Token* lexer(FILE* file, char* inputFile){
 
     tokens[tokensIndex].value = "\0";
     tokens[tokensIndex].type = END_OF_TOKENS;
-    for(int i=0; i<tokensIndex+1; i++){
-        __printToken(tokens[i]);
-    }
+    __printTokens(tokens, tokensIndex);
     destroyHashTable(OpAndSepTokenMap);
     destroyHashTable(KeywordTokenMap);
     return tokens;
