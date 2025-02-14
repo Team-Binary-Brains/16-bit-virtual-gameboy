@@ -29,4 +29,8 @@ ParseTreeNode* parseBlock(Token**, SymbolTable*);
 
 ParseTreeNode* parseStatement(Token**, SymbolTable*);
 
+ParseTreeNode* parseWhileStatement(Token**, SymbolTable*);
 
+ParseTreeNode* parseForStatement(Token**, SymbolTable*);
+
+ParseTreeNode* parseAssignmentExpr(Token**, SymbolTable*);

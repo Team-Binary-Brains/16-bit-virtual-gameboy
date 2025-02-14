@@ -51,6 +51,7 @@ void destroySymbolTable(SymbolTable *symTable) {
 
 // A Pretty Way to print the symbol table.
 void printSymbolTable(SymbolTable *symTable) {
+    printf("\nSymbol Table: \n");
     printf("------------------------------------------------------------------------\n");
     printf("| %-15s | %-10s | %-5s | %-18s | %-8s |\n", "Identifier", "Type", "Scope", "Address", "Value");
     printf("------------------------------------------------------------------------\n");

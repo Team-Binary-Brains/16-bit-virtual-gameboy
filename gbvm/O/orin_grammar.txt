@@ -12,6 +12,8 @@ Statement
     | Assignment 
     | ExitStatement 
     | IfStatement 
+    | WhileStatement 
+    | ForStatement 
     | Block
 
 Declaration 
@@ -26,6 +28,21 @@ ExitStatement
 IfStatement 
     -> "if" "(" Expression ")" Statement [ "else" Statement ]
 
+WhileStatement 
+    -> "while" "(" Expression ")" Statement
+
+ForStatement 
+    -> "for" "(" [ForInit] ";" Expression ";" [ForUpdate] ")" Statement
+
+ForInit 
+    -> Declaration | Assignment | ε
+
+ForUpdate 
+    -> AssignmentExpr | Expression | ε
+
+AssignmentExpr 
+    -> Identifier "=" Expression
+
 Block 
     -> "{" StatementList "}"
 
@@ -34,7 +51,7 @@ Expression
 
 RelationalExpression 
     -> AdditiveExpression { RelationalOperator AdditiveExpression }
-    
+
 RelationalOperator 
     -> "==" | "!=" | "<" | "<=" | ">" | ">="
 
