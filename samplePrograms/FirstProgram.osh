@@ -1,14 +1,18 @@
-int a = 10;             
-int b = 20;              
-int c = a + b; 
-int d = b;               
-int e;                   
-e = 10 > 20;           
-int f = a == 10;      
-int g = (a + b) * 2;  
-int h = a + (b * 3) - 5;
-int i = a < b;        
-int j = a != b;
-int k = a >= b;
-int l = a <= b;
-exit((3 + 4) * 2);
+int a = 10;
+int b = 20;
+int c = a + b;
+
+if (a < b) c = a;
+else c = b;
+
+int d;
+d = c * 2;
+
+if (d >= 40) {
+    int e = 100;
+    d = e;
+} else
+    d = 0;
+
+exit(d);
+

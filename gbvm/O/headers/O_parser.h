@@ -23,4 +23,10 @@ ParseTreeNode* parseExpression(Token** currentToken, SymbolTable* symTable);
 
 ParseTreeNode* parseExitStatement(Token**, SymbolTable*);
 
+ParseTreeNode* parseIfStatement(Token**, SymbolTable*);
+
+ParseTreeNode* parseBlock(Token**, SymbolTable*);
+
+ParseTreeNode* parseStatement(Token**, SymbolTable*);
+
 

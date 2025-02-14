@@ -10,7 +10,9 @@ StatementList
 Statement 
     -> Declaration 
     | Assignment 
-    | ExitStatement
+    | ExitStatement 
+    | IfStatement 
+    | Block
 
 Declaration 
     -> "int" Identifier [ "=" Expression ] ";"
@@ -21,12 +23,20 @@ Assignment
 ExitStatement 
     -> "exit" "(" Expression ")" ";"
 
+IfStatement 
+    -> "if" "(" Expression ")" Statement [ "else" Statement ]
+
+Block 
+    -> "{" StatementList "}"
+
 Expression 
-    -> RelationalExpression 
-    | ArithmeticExpression
+    -> RelationalExpression | ArithmeticExpression
 
 RelationalExpression 
-    -> ArithmeticExpression { RelationalOperator ArithmeticExpression }
+    -> AdditiveExpression { RelationalOperator AdditiveExpression }
+    
+RelationalOperator 
+    -> "==" | "!=" | "<" | "<=" | ">" | ">="
 
 ArithmeticExpression 
     -> AdditiveExpression
