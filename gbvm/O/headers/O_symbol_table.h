@@ -2,26 +2,34 @@
 #include "univ_hashmap.h"
 #include "O_token_types.h"
 
-typedef HashTable SymbolTable;
-
+/*
+    Symbol entry structure. There is no need to maintain the scope variable
+    as the symbol table will have pointer to parent symbol table.
+*/
 typedef struct {
     char *identifier;   // Name of the variable or function
     TokenType type;     // Data type (e.g., INT, etc.)
-    int scopeLevel;     // Scope level (0 = global, >0 = local)
     void *memAddress;   // Memory address of the variable (if allocated)
     int value;          // Value of the variable (if known, e.g., for constant propagation)
 } SymbolEntry;
 
-SymbolTable *createSymbolTable();
+// Symbol table structure.
+typedef struct SymbolTable {
+    HashTable *table;           // Hash table for storing symbols
+    struct SymbolTable *parent; // Pointer to the parent scope (NULL for global scope)
+} SymbolTable;
 
-void insertSymbol(SymbolTable *symTable, const char *name, TokenType type, int scope, void *memAddress, int value);
+// Scope management functions
+SymbolTable* createSymbolTable(SymbolTable* parent);
 
-SymbolEntry *lookupSymbol(SymbolTable *symTable, const char *name);
+void destroySymbolTable(SymbolTable* symTable);
 
-void updateSymbol(SymbolTable *symTable, const char *name, void *memAddress, int value);
+SymbolEntry* lookupSymbol(SymbolTable* currentScope, const char* name);
 
-void deleteSymbol(SymbolTable *symTable, const char *name);
+// Symbol management functions
+void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, void* memAddress, int value);
 
-void destroySymbolTable(SymbolTable *symTable);
+void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress, int value);
 
-void printSymbolTable(SymbolTable *symTable);
+// Debugging function
+void printCurrentScope(SymbolTable* currentScope);

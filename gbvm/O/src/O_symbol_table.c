@@ -1,69 +1,94 @@
 #include "univ_defs.h"
 #include "O_symbol_table.h"
 
-// Helper function to free a SymbolEntry
-static void symbolEntryDestroy(void *value) {
-    SymbolEntry *entry = (SymbolEntry *)value;
-    free(entry->identifier);
-    free(entry);
+// Create a new symbol table, linking it to a parent scope (or NULL if global)
+SymbolTable* createSymbolTable(SymbolTable* parent) {
+    SymbolTable* symTable = malloc(sizeof(SymbolTable));
+    symTable->table = createHashTable(100, stringHashFunc, stringKeyCompare, stringKeyDestroy, free);
+    symTable->parent = parent;
+    return symTable;
 }
 
-// Create a new symbol table with an initial size and custom destroy functions.
-SymbolTable *createSymbolTable() {
-    // Initial table size is 100.
-    return createHashTable(100, stringHashFunc, stringKeyCompare, stringKeyDestroy, symbolEntryDestroy);
+// Destroy a symbol table (but does NOT free parent scope)
+void destroySymbolTable(SymbolTable* symTable) {
+    destroyHashTable(symTable->table);
+    free(symTable);
 }
 
-// Insert a new symbol into the table.
-void insertSymbol(SymbolTable *symTable, const char *name, TokenType type, int scope, void *memAddress, int value) {
-    SymbolEntry *entry = malloc(sizeof(SymbolEntry));
+// Insert a symbol into the **current scope only**
+void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, void* memAddress, int value) {
+    if (!currentScope) {
+        printf("Error: No active scope for insertion\n");
+        exit(1);
+    }
+
+    // Check if symbol already exists in the current scope
+    if (retrieve(currentScope->table, name)) {
+        printf("Semantic error: Redeclaration of '%s' in the same scope\n", name);
+        exit(1);
+    }
+
+    // Create symbol entry
+    SymbolEntry* entry = malloc(sizeof(SymbolEntry));
     entry->identifier = strdup(name);
     entry->type = type;
-    entry->scopeLevel = scope;
     entry->memAddress = memAddress;
     entry->value = value;
-    insert(symTable, entry->identifier, entry);
+
+    insert(currentScope->table, entry->identifier, entry);
 }
 
-// Retrieve a symbol entry from the table based on its name.
-SymbolEntry *lookupSymbol(SymbolTable *symTable, const char *name) {
-    return (SymbolEntry *)retrieve(symTable, name);
-}
-
-// Update a symbol's memory address and value.
-void updateSymbol(SymbolTable *symTable, const char *name, void *memAddress, int value) {
-    SymbolEntry *entry = lookupSymbol(symTable, name);
-    if (entry) {
-        entry->memAddress = memAddress;
-        entry->value = value;
+// Lookup a symbol in the current scope or any parent scope (recursive search)
+SymbolEntry* lookupSymbol(SymbolTable* currentScope, const char* name) {
+    SymbolTable* scope = currentScope;
+    while (scope) {
+        SymbolEntry* entry = retrieve(scope->table, name);
+        if (entry) {
+            return entry;
+        }
+        scope = scope->parent; // Move to parent scope
     }
+    return NULL; // Not found
 }
 
-// Delete a symbol entry from the table.
-void deleteSymbol(SymbolTable *symTable, const char *name) {
-    deletePair(symTable, name);
+// Update a symbol in the closest scope where it is declared
+void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress, int value) {
+    SymbolTable* scope = currentScope;
+    while (scope) {
+        SymbolEntry* entry = retrieve(scope->table, name);
+        if (entry) {
+            entry->memAddress = memAddress;
+            entry->value = value;
+            return;
+        }
+        scope = scope->parent; // Move to parent scope
+    }
+    printf("Semantic error: '%s' is not declared\n", name);
+    exit(1);
 }
 
-// Destroy the symbol table and free all associated memory.
-void destroySymbolTable(SymbolTable *symTable) {
-    destroyHashTable(symTable);
-}
+// ------------------- Debugging Functions -------------------
 
-// A Pretty Way to print the symbol table.
-void printSymbolTable(SymbolTable *symTable) {
-    printf("\nSymbol Table: \n");
-    printf("------------------------------------------------------------------------\n");
-    printf("| %-15s | %-10s | %-5s | %-18s | %-8s |\n", "Identifier", "Type", "Scope", "Address", "Value");
-    printf("------------------------------------------------------------------------\n");
-    for (size_t i = 0; i < symTable->size; i++) {
-        Entry *entry = symTable->entries[i];
+// Print the current scope for debugging
+void printCurrentScope(SymbolTable* currentScope) {
+    if (!currentScope) {
+        printf("\nNo active scope available\n");
+        return;
+    }
+
+    printf("----------------------------------------------------------------\n");
+    printf("| %-15s | %-10s | %-18s | %-8s |\n", "Identifier", "Type", "Address", "Value");
+    printf("----------------------------------------------------------------\n");
+
+    for (size_t i = 0; i < currentScope->table->size; i++) {
+        Entry* entry = currentScope->table->entries[i];
         while (entry) {
-            SymbolEntry *symEntry = (SymbolEntry *)entry->value;
-            printf("| %-15s | %-10s | %-5d | %-18p | %-8d |\n", 
-                   (char *)entry->key, StrTokenType[symEntry->type], symEntry->scopeLevel, symEntry->memAddress, symEntry->value);
+            SymbolEntry* symEntry = (SymbolEntry*)entry->value;
+            printf("| %-15s | %-10s | %-18p | %-8d |\n", 
+                   symEntry->identifier, StrTokenType[symEntry->type], symEntry->memAddress, symEntry->value);
             entry = entry->next;
         }
     }
-    printf("------------------------------------------------------------------------\n");
-}
 
+    printf("----------------------------------------------------------------\n");
+}

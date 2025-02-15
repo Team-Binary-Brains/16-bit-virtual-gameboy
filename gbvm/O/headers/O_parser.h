@@ -17,8 +17,6 @@ ParseTreeNode* parseMultiplicativeExpr(Token** currentToken, SymbolTable* symTab
 
 ParseTreeNode* parseAdditiveExpr(Token** currentToken, SymbolTable* symTable);
 
-ParseTreeNode* parseRelationalExpr(Token** currentToken, SymbolTable* symTable);
-
 ParseTreeNode* parseExpression(Token** currentToken, SymbolTable* symTable);
 
 ParseTreeNode* parseExitStatement(Token**, SymbolTable*);
