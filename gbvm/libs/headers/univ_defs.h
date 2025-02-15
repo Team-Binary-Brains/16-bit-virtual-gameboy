@@ -5,6 +5,7 @@
  * This header file contains various universal definitions used in the GBVM library.
  * It includes necessary standard C libraries and defines several constants and types.
  *
+
  * @authors Soham Metha, Omkar Jagtap
  * @date January 2025
  */

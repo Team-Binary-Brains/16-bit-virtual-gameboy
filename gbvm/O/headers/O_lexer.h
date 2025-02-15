@@ -1,3 +1,11 @@
+/**
+ * @file O_lexer.h
+ * @brief MISSING DOCUMENTATION.
+ *
+ * @author Omkar Jagtap
+ * @date January 2025
+ */
+
 #pragma once
 #include "univ_defs.h"
 #include "O_token_types.h"
