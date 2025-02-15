@@ -11,9 +11,7 @@
  * @cite Tsoding Playlist specified in readme
  */
 
-#pragma once
-
-#include "univ_defs.h"
+ #pragma once
 
 /**
  * @brief Opens a file with the specified file path and mode.

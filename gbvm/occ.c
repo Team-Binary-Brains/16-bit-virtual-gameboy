@@ -1,5 +1,4 @@
 #pragma GCC diagnostic ignored "-Wswitch-enum"
-#include "O_codegenerator.h"
 #include "O_lexer.h"
 #include "O_parser.h"
 #include "univ_cmdutils.h"
@@ -33,9 +32,11 @@ int main(int argc, char* argv[])
 
     FILE* file = openFile(inputFile, "r");
 
-    Node* root = parser(lexer(file));
+    Token* tokens = lexer(file, inputFile);
 
-    generateCode(root, outputFile);
+    ParseTreeNode* root = parser(tokens);
+
+    // generateCode(root, outputFile);
 
     // FILE *assembly_file = fopen("gbvmasm.asm", "r");
     // if(!assembly_file){

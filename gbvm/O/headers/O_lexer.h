@@ -8,33 +8,16 @@
 
 #pragma once
 #include "univ_defs.h"
+#include "O_token_types.h"
 
-typedef enum {
-    BEGINNING,
-    INT,
-    KEYWORD,
-    SEPARATOR,
-    OPERATOR,
-    IDENTIFIER,
-    STRING,
-    COMP,
-    END_OF_TOKENS,
-} TokenType;
+Token* initToken(TokenType);
 
-typedef struct {
-    TokenType type;
-    char* value;
-    size_t lineNum;
-} Token;
+void generateOpAndSepToken(char*, int*, Token*);
 
-void __printToken(Token);
+void generateIntLToken(char*, int*, Token*);
 
-Token* generateNumber(char*, int*);
+void generateStringLToken(char*, int*, Token*);
 
-Token* generateStringToken(char*, int*);
+void generateKeywordOrIdentifier(char*, int*, Token*);
 
-Token* generateKeywordOrIdentifier(char*, int*);
-
-Token* generateSeperatorOrOperator(char*, int*, TokenType);
-
-Token* lexer(FILE* file);
+Token* lexer(FILE* file, char* inputFile);

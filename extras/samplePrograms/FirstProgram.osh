@@ -1,0 +1,11 @@
+// Target is to generate machine code for below code
+int n;
+scan(n);
+int a = 0;
+int b = 1;
+for (int i = 0; i < n; i = i+1) {
+    print(a);
+    int next = a + b;
+    a = b;
+    b = next;
+}

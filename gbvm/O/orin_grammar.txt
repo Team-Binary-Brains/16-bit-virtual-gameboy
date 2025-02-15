@@ -1,0 +1,78 @@
+/* ---------- ORIN GRAMMAR ---------- */
+
+Program 
+    -> StatementList
+
+StatementList 
+    -> Statement StatementList 
+    | ε
+
+Statement 
+    -> Declaration 
+    | Assignment 
+    | ExitStatement 
+    | PrintStatement
+    | ScanStatement
+    | IfStatement 
+    | WhileStatement 
+    | ForStatement 
+    | Block
+
+Declaration 
+    -> "int" Identifier [ "=" Expression ] ";"
+
+Assignment 
+    -> Identifier "=" Expression ";"
+
+ExitStatement 
+    -> "exit" "(" Expression ")" ";"
+
+PrintStatement 
+    -> "print" "(" Expression ")" ";"
+    
+ScanStatement  
+    -> "scan" "(" Identifier ")" ";"
+
+IfStatement 
+    -> "if" "(" Expression ")" Statement [ "else" Statement ]
+
+WhileStatement 
+    -> "while" "(" Expression ")" Statement
+
+ForStatement 
+    -> "for" "(" [ForInit] ";" Expression ";" [ForUpdate] ")" Statement
+
+ForInit 
+    -> Declaration | Assignment | ε
+
+ForUpdate 
+    -> AssignmentExpr | Expression | ε
+
+AssignmentExpr 
+    -> Identifier "=" Expression
+
+Block 
+    -> "{" StatementList "}"
+
+Expression 
+    -> RelationalExpression | ArithmeticExpression
+
+RelationalExpression 
+    -> AdditiveExpression { RelationalOperator AdditiveExpression }
+
+RelationalOperator 
+    -> "==" | "!=" | "<" | "<=" | ">" | ">="
+
+ArithmeticExpression 
+    -> AdditiveExpression
+
+AdditiveExpression 
+    -> MultiplicativeExpression { ("+" | "-") MultiplicativeExpression }
+
+MultiplicativeExpression 
+    -> PrimaryExpression { ("*" | "/" | "%") PrimaryExpression }
+
+PrimaryExpression 
+    -> "(" Expression ")" 
+    | Identifier 
+    | INT_L

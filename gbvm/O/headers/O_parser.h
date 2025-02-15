@@ -7,22 +7,40 @@
  */
 
 #pragma once
-#include "O_lexer.h"
+#include "O_token_types.h"
+#include "O_parse_tree.h"
+#include "O_symbol_table.h"
 
-typedef struct Node {
-    char* value;
-    TokenType type;
-    struct Node* right;
-    struct Node* left;
-} Node;
+ParseTreeNode* parser(Token*);
 
-Node* parser(Token*);
-void __printTree(Node*, char, int);
-Node* initNode(Node*, char*, TokenType);
-Token* generateOperationNodes(Token*, Node*);
+Token* match(Token** , TokenType);
 
-void printError(char*, size_t);
-void handleTokenErrors(char*, Token*, TokenType);
+ParseTreeNode* parseDeclaration(Token**, SymbolTable*);
 
-Node* handleExitSyscall(Node*, Token*, Node*);
-Node* createVariables(Token*, Node*);
+ParseTreeNode* parseAssignment(Token**, SymbolTable*);
+
+ParseTreeNode* parsePrimaryExpr(Token** currentToken, SymbolTable* symTable);
+
+ParseTreeNode* parseMultiplicativeExpr(Token** currentToken, SymbolTable* symTable);
+
+ParseTreeNode* parseAdditiveExpr(Token** currentToken, SymbolTable* symTable);
+
+ParseTreeNode* parseExpression(Token** currentToken, SymbolTable* symTable);
+
+ParseTreeNode* parseExitStatement(Token**, SymbolTable*);
+
+ParseTreeNode* parsePrintStatement(Token**, SymbolTable*);
+
+ParseTreeNode* parseScanStatement(Token**, SymbolTable*);
+
+ParseTreeNode* parseIfStatement(Token**, SymbolTable*);
+
+ParseTreeNode* parseBlock(Token**, SymbolTable*);
+
+ParseTreeNode* parseStatement(Token**, SymbolTable*);
+
+ParseTreeNode* parseWhileStatement(Token**, SymbolTable*);
+
+ParseTreeNode* parseForStatement(Token**, SymbolTable*);
+
+ParseTreeNode* parseAssignmentExpr(Token**, SymbolTable*);

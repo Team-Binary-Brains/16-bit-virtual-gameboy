@@ -1,360 +1,405 @@
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wswitch"
 #include "univ_defs.h"
-#include "O_lexer.h"
 #include "O_parser.h"
+#include "O_token_types.h"
+#include "O_parse_tree.h"
+#include "O_symbol_table.h"
 
-void printError(char* errorType, size_t lineNumber)
-{
-    printf("ERROR: %s on line number: %zu\n", errorType, lineNumber);
-    exit(1);
-}
-
-void handleTokenErrors(char* errorText, Token* currentToken, TokenType type)
-{
-    if (currentToken->type == END_OF_TOKENS || currentToken->type != type) {
-        printError(errorText, currentToken->lineNum);
-    }
-}
-
-void __printTree(Node* node, char identifier, int indent)
-{
-    if (node == NULL) {
-        return;
-    }
-
-    int i;
-    for (i = 1; i < indent; i++)
-        printf("             ");
-
-    for (int j = 0; j < (indent - i + 1); j++)
-        printf("┗━━━━━━━ (%c) ", identifier);
-
-    printf("'");
-    for (size_t i = 0; node->value[i] != '\0'; i++) {
-        printf("%c", node->value[i]);
-    }
-    printf("'\n");
-    __printTree(node->left, 'L', indent + 1);
-    __printTree(node->right, 'R', indent + 1);
-}
-
-Node* initNode(Node* node, char* value, TokenType type)
-{
-    node = malloc(sizeof(Node));
-    node->value = malloc(sizeof(char) * 2);
-    node->type = (int)type;
-    node->value = value;
-    node->left = NULL;
-    node->right = NULL;
-    return node;
-}
-
-Token* generateOperationNodes(Token* currentToken, Node* currentNode)
-{
-    Node* operNode = malloc(sizeof(Node));
-    operNode = initNode(operNode, currentToken->value, OPERATOR);
-    currentNode->left->left = operNode;
-    currentNode = operNode;
-
-    currentToken--;
-    if (currentToken->type == INT) {
-        Node* exprNode = malloc(sizeof(Node));
-        exprNode = initNode(exprNode, currentToken->value, INT);
-        currentNode->left = exprNode;
-    } else if (currentToken->type == IDENTIFIER) {
-        Node* identifier_node = malloc(sizeof(Node));
-        identifier_node = initNode(identifier_node, currentToken->value, IDENTIFIER);
-        currentNode->left = identifier_node;
+/* match: Verifies that the current token matches the expected type.
+   Advances the token pointer if successful; otherwise, exits with an error.
+*/
+Token* match(Token** currentToken, TokenType expectedType) {
+    if ((*currentToken)->type == expectedType) {
+        Token* matchedToken = *currentToken;
+        (*currentToken)++;
+        return matchedToken;
     } else {
-        printf("ERROR: expected int or identifier\n");
+        printf("Syntax error: Expected token type %s but found %s at line %zu\n",
+               StrTokenType[expectedType], StrTokenType[(*currentToken)->type], (*currentToken)->lineNum);
         exit(1);
     }
+}
 
-    currentToken++;
-    currentToken++;
-    while (currentToken->type == INT || currentToken->type == IDENTIFIER || currentToken->type == OPERATOR) {
-        if (currentToken->type == INT || currentToken->type == IDENTIFIER) {
-            if ((currentToken->type != INT && currentToken->type != IDENTIFIER) || currentToken == NULL) {
-                printf("Syntax Error here\n");
+/* Expression Parsing */
+
+// parsePrimaryExpr: Handles "(" Expression ")" | Identifier | INT_L.
+ParseTreeNode* parsePrimaryExpr(Token** currentToken, SymbolTable *symTable) {
+    if ((*currentToken)->type == LPAREN) {
+        match(currentToken, LPAREN);
+        ParseTreeNode* exprNode = parseExpression(currentToken, symTable);
+        match(currentToken, RPAREN);
+        return exprNode;
+    } else if ((*currentToken)->type == IDENTIFIER) {
+        if (!lookupSymbol(symTable, (*currentToken)->value)) {
+            printf("Semantic error: Undeclared variable '%s' at line %zu\n",
+                   (*currentToken)->value, (*currentToken)->lineNum);
+            exit(1);
+        }
+        return createParseTreeNode(match(currentToken, IDENTIFIER), NULL);
+    } else if ((*currentToken)->type == INT_L) {
+        return createParseTreeNode(match(currentToken, INT_L), NULL);
+    } else {
+        printf("Syntax error: Unexpected token '%s' in primary expression at line %zu\n",
+               (*currentToken)->value, (*currentToken)->lineNum);
+        exit(1);
+    }
+}
+
+// parseMultiplicativeExpr: Handles "*", "/" and "%" operators.
+ParseTreeNode* parseMultiplicativeExpr(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* left = parsePrimaryExpr(currentToken, symTable);
+    while ((*currentToken)->type == STAR || (*currentToken)->type == SLASH ||
+           (*currentToken)->type == MOD) {
+        TokenType opType = (*currentToken)->type;
+        ParseTreeNode* opNode = createParseTreeNode(match(currentToken, opType), NULL);
+        addChild(opNode, left);
+        addChild(opNode, parsePrimaryExpr(currentToken, symTable));
+        left = opNode;
+    }
+    return left;
+}
+
+// parseAdditiveExpr: Handles "+" and "-" operators.
+ParseTreeNode* parseAdditiveExpr(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* left = parseMultiplicativeExpr(currentToken, symTable);
+    while ((*currentToken)->type == PLUS || (*currentToken)->type == MINUS) {
+        TokenType opType = (*currentToken)->type;
+        ParseTreeNode* opNode = createParseTreeNode(match(currentToken, opType), NULL);
+        addChild(opNode, left);
+        addChild(opNode, parseMultiplicativeExpr(currentToken, symTable));
+        left = opNode;
+    }
+    return left;
+}
+
+// parseRelationalExpr: Handles relational operators: "==", "!=", "<", "<=", ">" and ">=".
+ParseTreeNode* parseExpression(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* left = parseAdditiveExpr(currentToken, symTable);
+    while ((*currentToken)->type == EQ || (*currentToken)->type == NEQ ||
+           (*currentToken)->type == LT || (*currentToken)->type == LE ||
+           (*currentToken)->type == GT || (*currentToken)->type == GE) {
+        TokenType opType = (*currentToken)->type;
+        Token* opToken = match(currentToken, opType);
+        ParseTreeNode* opNode = createParseTreeNode(opToken, NULL);
+        addChild(opNode, left);
+        ParseTreeNode* right = parseAdditiveExpr(currentToken, symTable);
+        addChild(opNode, right);
+        left = opNode;
+    }
+    return left;
+}
+
+/* Statement Parsing */
+
+// parseDeclaration: Handles "int Identifier [ "=" Expression ] ";".
+ParseTreeNode* parseDeclaration(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* declNode = createParseTreeNode(&(Token){.value = "DECLARATION", .type = BEGINNING}, NULL);
+    Token* intToken = match(currentToken, INT);
+    addChild(declNode, createParseTreeNode(intToken, NULL));
+    Token* idToken = match(currentToken, IDENTIFIER);
+    if (lookupSymbol(symTable, idToken->value)) {
+        printf("Semantic error: Redeclaration of variable '%s' at line %zu\n",
+               idToken->value, idToken->lineNum);
+        exit(1);
+    }
+    addChild(declNode, createParseTreeNode(idToken, NULL));
+    int initValue = 0;
+    ParseTreeNode* exprNode = NULL;
+    if ((*currentToken)->type == EQUAL) {
+        Token* eqToken = match(currentToken, EQUAL);
+        addChild(declNode, createParseTreeNode(eqToken, NULL));
+        exprNode = parseExpression(currentToken, symTable);
+        addChild(declNode, exprNode);
+    }
+    Token* semicolonToken = match(currentToken, SEMICOLON);
+    addChild(declNode, createParseTreeNode(semicolonToken, NULL));
+    if (exprNode && exprNode->type == INT_L)
+        initValue = atoi(exprNode->value);
+    insertSymbol(symTable, idToken->value, intToken->type, NULL, initValue);
+    return declNode;
+}
+
+// parseAssignment: Handles "Identifier "=" Expression ";".
+ParseTreeNode* parseAssignment(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* assignNode = createParseTreeNode(&(Token){.value = "ASSIGNMENT", .type = BEGINNING}, NULL);
+    Token* idToken = match(currentToken, IDENTIFIER);
+    if (!lookupSymbol(symTable, idToken->value)) {
+        printf("Semantic error: Assignment to undeclared variable '%s' at line %zu\n",
+               idToken->value, idToken->lineNum);
+        exit(1);
+    }
+    addChild(assignNode, createParseTreeNode(idToken, NULL));
+    Token* eqToken = match(currentToken, EQUAL);
+    addChild(assignNode, createParseTreeNode(eqToken, NULL));
+    ParseTreeNode* exprNode = parseExpression(currentToken, symTable);
+    addChild(assignNode, exprNode);
+    Token* semicolonToken = match(currentToken, SEMICOLON);
+    addChild(assignNode, createParseTreeNode(semicolonToken, NULL));
+    if (exprNode && exprNode->type == INT_L) {
+        int newValue = atoi(exprNode->value);
+        updateSymbol(symTable, idToken->value, NULL, newValue);
+    }
+    return assignNode;
+}
+
+// parseExitStatement: Handles "exit" "(" Expression ")" ";".
+ParseTreeNode* parseExitStatement(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* exitNode = createParseTreeNode(&(Token){.value = "EXIT_STATEMENT", .type = BEGINNING}, NULL);
+    Token* exitToken = match(currentToken, EXIT);
+    addChild(exitNode, createParseTreeNode(exitToken, NULL));
+    Token* lpToken = match(currentToken, LPAREN);
+    addChild(exitNode, createParseTreeNode(lpToken, NULL));
+    ParseTreeNode* exprNode = parseExpression(currentToken, symTable);
+    addChild(exitNode, exprNode);
+    Token* rpToken = match(currentToken, RPAREN);
+    addChild(exitNode, createParseTreeNode(rpToken, NULL));
+    Token* semicolonToken = match(currentToken, SEMICOLON);
+    addChild(exitNode, createParseTreeNode(semicolonToken, NULL));
+    return exitNode;
+}
+
+// parsePrintStatement: Handles "print" "(" Expression ")" ";".
+ParseTreeNode* parsePrintStatement(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* printNode = createParseTreeNode(&(Token){.value = "PRINT_STATEMENT", .type = BEGINNING}, NULL);
+    Token* printToken = match(currentToken, PRINT);
+    addChild(printNode, createParseTreeNode(printToken, NULL));
+    match(currentToken, LPAREN);
+    ParseTreeNode* exprNode = parseExpression(currentToken, symTable);
+    addChild(printNode, exprNode);
+    match(currentToken, RPAREN);
+    Token* semicolonToken = match(currentToken, SEMICOLON);
+    addChild(printNode, createParseTreeNode(semicolonToken, NULL));
+    return printNode;
+}
+
+// parseScanStatement: Handles "scan" "(" Identifier ")" ";".
+ParseTreeNode* parseScanStatement(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* scanNode = createParseTreeNode(&(Token){.value = "SCAN_STATEMENT", .type = BEGINNING}, NULL);
+    Token* scanToken = match(currentToken, SCAN);
+    addChild(scanNode, createParseTreeNode(scanToken, NULL));
+    match(currentToken, LPAREN);
+    Token* idToken = match(currentToken, IDENTIFIER);
+    if (!lookupSymbol(symTable, idToken->value)) {
+        printf("Semantic error: Scanned variable '%s' is not declared at line %zu\n",
+               idToken->value, idToken->lineNum);
+        exit(1);
+    }
+    addChild(scanNode, createParseTreeNode(idToken, NULL));
+    match(currentToken, RPAREN);
+    Token* semicolonToken = match(currentToken, SEMICOLON);
+    addChild(scanNode, createParseTreeNode(semicolonToken, NULL));
+    return scanNode;
+}
+
+// parseIfStatement: Handles "if" "(" Expression ")" Statement [ "else" Statement ].
+ParseTreeNode* parseIfStatement(Token** currentToken, SymbolTable *symTable) {
+    SymbolTable* ifScope = createSymbolTable(symTable);
+    ParseTreeNode* ifNode = createParseTreeNode(&(Token){.value = "IF_STATEMENT", .type = BEGINNING}, ifScope);
+    Token* ifToken = match(currentToken, IF);
+    addChild(ifNode, createParseTreeNode(ifToken, NULL));
+    match(currentToken, LPAREN);
+    ParseTreeNode* condExpr = parseExpression(currentToken, symTable);
+    addChild(ifNode, condExpr);
+    match(currentToken, RPAREN);
+    ParseTreeNode* thenStmt = parseStatement(currentToken, ifScope);
+    addChild(ifNode, thenStmt);
+    if ((*currentToken)->type == ELSE) {
+        SymbolTable* elseScope = createSymbolTable(symTable);
+        Token* elseToken = match(currentToken, ELSE);
+        addChild(ifNode, createParseTreeNode(elseToken, elseScope));
+        ParseTreeNode* elseStmt = parseStatement(currentToken, elseScope);
+        addChild(ifNode, elseStmt);
+    }
+    return ifNode;
+}
+
+// parseWhileStatement: Handles "while" "(" Expression ")" Statement.
+ParseTreeNode* parseWhileStatement(Token** currentToken, SymbolTable *symTable) {
+    SymbolTable* whileScope = createSymbolTable(symTable);
+    ParseTreeNode* whileNode = createParseTreeNode(&(Token){.value = "WHILE_STATEMENT", .type = BEGINNING}, whileScope);
+    Token* whileToken = match(currentToken, WHILE);
+    addChild(whileNode, createParseTreeNode(whileToken, NULL));
+    match(currentToken, LPAREN);
+    ParseTreeNode* condExpr = parseExpression(currentToken, symTable);
+    addChild(whileNode, condExpr);
+    match(currentToken, RPAREN);
+    ParseTreeNode* loopStmt = parseStatement(currentToken, whileScope);
+    addChild(whileNode, loopStmt);
+    return whileNode;
+}
+
+/* For-loop Parsing Helpers */
+
+// parseForDeclaration: Similar to parseDeclaration but does not consume a trailing semicolon.
+ParseTreeNode* parseForDeclaration(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* declNode = createParseTreeNode(&(Token){.value = "DECLARATION", .type = BEGINNING}, NULL);
+    Token* intToken = match(currentToken, INT);
+    addChild(declNode, createParseTreeNode(intToken, NULL));
+    Token* idToken = match(currentToken, IDENTIFIER);
+    if (lookupSymbol(symTable, idToken->value)) {
+        printf("Semantic error: Redeclaration of variable '%s' at line %zu\n",
+               idToken->value, idToken->lineNum);
+        exit(1);
+    }
+    addChild(declNode, createParseTreeNode(idToken, NULL));
+    int initValue = 0;
+    ParseTreeNode* exprNode = NULL;
+    if ((*currentToken)->type == EQUAL) {
+        Token* eqToken = match(currentToken, EQUAL);
+        addChild(declNode, createParseTreeNode(eqToken, NULL));
+        exprNode = parseExpression(currentToken, symTable);
+        addChild(declNode, exprNode);
+    }
+    if (exprNode && exprNode->type == INT_L)
+        initValue = atoi(exprNode->value);
+    insertSymbol(symTable, idToken->value, intToken->type, NULL, initValue);
+    return declNode;
+}
+
+// parseForAssignment: Similar to parseAssignment but without consuming a trailing semicolon.
+ParseTreeNode* parseForAssignment(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* assignNode = createParseTreeNode(&(Token){.value = "ASSIGNMENT", .type = BEGINNING}, NULL);
+    Token* idToken = match(currentToken, IDENTIFIER);
+    if (!lookupSymbol(symTable, idToken->value)) {
+        printf("Semantic error: Assignment to undeclared variable '%s' at line %zu\n",
+               idToken->value, idToken->lineNum);
+        exit(1);
+    }
+    addChild(assignNode, createParseTreeNode(idToken, NULL));
+    Token* eqToken = match(currentToken, EQUAL);
+    addChild(assignNode, createParseTreeNode(eqToken, NULL));
+    ParseTreeNode* exprNode = parseExpression(currentToken, symTable);
+    addChild(assignNode, exprNode);
+    if (exprNode && exprNode->type == INT_L) {
+        int newValue = atoi(exprNode->value);
+        updateSymbol(symTable, idToken->value, NULL, newValue);
+    }
+    return assignNode;
+}
+
+// parseForInit: Parses the initializer part of a for-loop.
+ParseTreeNode* parseForInit(Token** currentToken, SymbolTable *symTable) {
+    if ((*currentToken)->type == INT)
+        return parseForDeclaration(currentToken, symTable);
+    else if ((*currentToken)->type == IDENTIFIER && (((*currentToken)+1)->type == EQUAL))
+        return parseForAssignment(currentToken, symTable);
+    else
+        return NULL;
+}
+
+/* Parse an assignment expression (for for-loop update) without a trailing semicolon */
+ParseTreeNode* parseAssignmentExpr(Token** currentToken, SymbolTable *symTable) {
+    Token* idToken = match(currentToken, IDENTIFIER);
+    if (!lookupSymbol(symTable, idToken->value)) {
+        printf("Semantic error: Assignment to undeclared variable '%s' at line %zu\n",
+               idToken->value, idToken->lineNum);
+        exit(1);
+    }
+    Token* eqToken = match(currentToken, EQUAL);
+    ParseTreeNode* exprNode = parseExpression(currentToken, symTable);
+    ParseTreeNode* assignExprNode = createParseTreeNode(&(Token){.value = "ASSIGNMENT_EXPR", .type = BEGINNING}, NULL);
+    addChild(assignExprNode, createParseTreeNode(idToken, NULL));
+    addChild(assignExprNode, createParseTreeNode(eqToken, NULL));
+    addChild(assignExprNode, exprNode);
+    if (exprNode && exprNode->type == INT_L) {
+        int newValue = atoi(exprNode->value);
+        updateSymbol(symTable, idToken->value, NULL, newValue);
+    }
+    return assignExprNode;
+}
+
+// parseForUpdate: Parses the update part of a for-loop.
+ParseTreeNode* parseForUpdate(Token** currentToken, SymbolTable *symTable) {
+    if ((*currentToken)->type != RPAREN) {
+        if ((*currentToken)->type == IDENTIFIER && (((*currentToken)+1)->type == EQUAL))
+            return parseAssignmentExpr(currentToken, symTable);
+        else
+            return parseExpression(currentToken, symTable);
+    } else {
+        return NULL;
+    }
+}
+
+// parseForStatement: Handles "for" "(" [ForInit] ";" Expression ";" [ForUpdate] ")" Statement.
+// A new scope is created for the for-loop.
+ParseTreeNode* parseForStatement(Token** currentToken, SymbolTable *symTable) {
+    SymbolTable *forScope = createSymbolTable(symTable);
+    ParseTreeNode* forNode = createParseTreeNode(&(Token){.value = "FOR_STATEMENT", .type = BEGINNING}, forScope);
+    Token* forToken = match(currentToken, FOR);
+    addChild(forNode, createParseTreeNode(forToken, NULL));
+    match(currentToken, LPAREN);
+    ParseTreeNode* initNode = parseForInit(currentToken, forScope);
+    if (initNode)
+        addChild(forNode, initNode);
+    match(currentToken, SEMICOLON);
+    ParseTreeNode* condNode = parseExpression(currentToken, forScope);
+    addChild(forNode, condNode);
+    match(currentToken, SEMICOLON);
+    ParseTreeNode* updateNode = parseForUpdate(currentToken, forScope);
+    if (updateNode)
+        addChild(forNode, updateNode);
+    match(currentToken, RPAREN);
+    ParseTreeNode* bodyNode = parseStatement(currentToken, forScope);
+    addChild(forNode, bodyNode);
+    return forNode;
+}
+
+/* Block and Statement Parsing */
+
+// parseBlock: Handles "{" StatementList "}" and creates a new scope.
+ParseTreeNode* parseBlock(Token** currentToken, SymbolTable *symTable) {
+    SymbolTable *localScope = createSymbolTable(symTable);
+    ParseTreeNode* blockNode = createParseTreeNode(&(Token){.value = "BLOCK", .type = BEGINNING}, localScope);
+    match(currentToken, LBRACE);
+    while ((*currentToken)->type != RBRACE) {
+        addChild(blockNode, parseStatement(currentToken, localScope));
+    }
+    match(currentToken, RBRACE);
+    return blockNode;
+}
+
+// parseStatement: Determines which kind of statement to parse.
+ParseTreeNode* parseStatement(Token** currentToken, SymbolTable *symTable) {
+    switch ((*currentToken)->type) {
+        case INT:
+            return parseDeclaration(currentToken, symTable);
+        case IDENTIFIER:
+            if (((*currentToken)+1)->type == EQUAL)
+                return parseAssignment(currentToken, symTable);
+            else {
+                printf("Syntax error: Unexpected identifier usage '%s' at line %zu\n",
+                       (*currentToken)->value, (*currentToken)->lineNum);
                 exit(1);
             }
-            currentToken++;
-            if (currentToken->type != OPERATOR) {
-                currentToken--;
-                if (currentToken->type == INT) {
-                    Node* secondExprNode = malloc(sizeof(Node));
-                    secondExprNode = initNode(secondExprNode, currentToken->value, INT);
-                    currentNode->right = secondExprNode;
-                } else if (currentToken->type == IDENTIFIER) {
-                    Node* secondIdentifierNode = malloc(sizeof(Node));
-                    secondIdentifierNode = initNode(secondIdentifierNode, currentToken->value, IDENTIFIER);
-                    currentNode->right = secondIdentifierNode;
-                } else {
-                    printf("ERROR: Expected Integer or Identifier\n");
-                    exit(1);
-                }
-            }
-        }
-        if (currentToken->type == OPERATOR) {
-            Node* nextOperNode = malloc(sizeof(Node));
-            nextOperNode = initNode(nextOperNode, currentToken->value, OPERATOR);
-            currentNode->right = nextOperNode;
-            currentNode = nextOperNode;
-            currentToken--;
-            if (currentToken->type == INT) {
-                Node* secondExprNode = malloc(sizeof(Node));
-                secondExprNode = initNode(secondExprNode, currentToken->value, INT);
-                currentNode->left = secondExprNode;
-            } else if (currentToken->type == IDENTIFIER) {
-                Node* secondIdentifierNode = malloc(sizeof(Node));
-                secondIdentifierNode = initNode(secondIdentifierNode, currentToken->value, IDENTIFIER);
-                currentNode->left = secondIdentifierNode;
-            } else {
-                printf("ERROR: Expected IDENTIFIER or INT\n");
-                exit(1);
-            }
-            currentToken++;
-        }
-        currentToken++;
+        case EXIT:
+            return parseExitStatement(currentToken, symTable);
+        case IF:
+            return parseIfStatement(currentToken, symTable);
+        case WHILE:
+            return parseWhileStatement(currentToken, symTable);
+        case FOR:
+            return parseForStatement(currentToken, symTable);
+        case LBRACE:
+            return parseBlock(currentToken, symTable);
+        case PRINT:
+            return parsePrintStatement(currentToken, symTable);
+        case SCAN:
+            return parseScanStatement(currentToken, symTable);
+        default:
+            printf("Syntax error: Unexpected token '%s' at line %zu\n",
+                   (*currentToken)->value, (*currentToken)->lineNum);
+            exit(1);
     }
-    return currentToken;
 }
 
-Node* handleExitSyscall(Node* root, Token* currentToken, Node* current)
-{
-    Node* exitNode = malloc(sizeof(Node));
-    exitNode = initNode(exitNode, currentToken->value, KEYWORD);
-    current->right = exitNode;
-    current = exitNode;
-    currentToken++;
-
-    handleTokenErrors("Invalid Syntax on OPEN", currentToken, SEPARATOR);
-    if (strcmp(currentToken->value, "(") == 0) {     // Improvement
-        Node* openParenNode = malloc(sizeof(Node));
-        openParenNode = initNode(openParenNode, currentToken->value, SEPARATOR);
-        current->left = openParenNode;
-        currentToken++;
-        if (currentToken->type == END_OF_TOKENS) {
-            printError("Invalid Syntax on INT", currentToken->lineNum);
-        }
-        if (currentToken->type == INT || currentToken->type == IDENTIFIER) {
-            currentToken++;
-            if (currentToken->type == OPERATOR && currentToken != NULL) {
-                currentToken = generateOperationNodes(currentToken, current);
-                currentToken--;
-            } else {
-                currentToken--;
-                Node* exprNode = malloc(sizeof(Node));
-                exprNode = initNode(exprNode, currentToken->value, currentToken->type);
-                current->left->left = exprNode;
-            }
-            currentToken++;
-            handleTokenErrors("Invalid Syntax on CLOSE", currentToken, SEPARATOR);
-            if (strcmp(currentToken->value, ")") == 0) {     // Improvement
-                Node* closeParenNode = malloc(sizeof(Node));
-                closeParenNode = initNode(closeParenNode, currentToken->value, SEPARATOR);
-                current->left->right = closeParenNode;
-                currentToken++;
-
-                handleTokenErrors("Invalid Syntax on SEMI", currentToken, SEPARATOR);
-
-                if (strcmp(currentToken->value, ";") == 0) {
-                    Node* semiNode = malloc(sizeof(Node));
-                    semiNode = initNode(semiNode, currentToken->value, SEPARATOR);
-                    current->right = semiNode;
-                    current = semiNode;
-                } else {
-                    printError("Invalid Syntax on SEMI", currentToken->lineNum);
-                }
-            } else {
-                printError("Invalid Syntax on CLOSE", currentToken->lineNum);
-            }
-        } else {
-            printError("Invalid Syntax on INT", currentToken->lineNum);
-        }
-
-    } else {
-        printError("Invalid Syntax on OPEN", currentToken->lineNum);
-    }
-    return current;
-}
-
-Node* createVariables(Token* currentToken, Node* current)
-{
-    Node* varNode = malloc(sizeof(Node));
-    varNode = initNode(varNode, currentToken->value, KEYWORD);
-    current->left = varNode;
-    current = varNode;
-    currentToken++;
-
-    handleTokenErrors("Invalid syntax after INT", currentToken, IDENTIFIER);     // improvement
-    Node* identifierNode = malloc(sizeof(Node));
-    identifierNode = initNode(identifierNode, currentToken->value, IDENTIFIER);
-    current->left = identifierNode;
-    current = identifierNode;
-    currentToken++;
-
-    handleTokenErrors("Invalid syntax after Identifier", currentToken, OPERATOR);
-    if (strcmp(currentToken->value, "=") != 0) {
-        printError("Error: Invalid Variable Syntax on =", currentToken->lineNum);
-    }
-    Node* equals_node = malloc(sizeof(Node));
-    equals_node = initNode(equals_node, currentToken->value, OPERATOR);
-    current->left = equals_node;
-    current = equals_node;
-    currentToken++;
-
-    if (currentToken->type == END_OF_TOKENS || (currentToken->type != INT && currentToken->type != IDENTIFIER)) {
-        printError("ERROR: Invalid Syntax After Equals", currentToken->lineNum);
-    }
-
-    currentToken++;
-    if (currentToken->type == OPERATOR) {
-        Node* operNode = malloc(sizeof(Node));
-        operNode = initNode(operNode, currentToken->value, OPERATOR);
-        current->left = operNode;
-        current = operNode;
-        currentToken--;
-        if (currentToken->type == INT) {
-            Node* exprNode = malloc(sizeof(Node));
-            exprNode = initNode(exprNode, currentToken->value, INT);
-            currentToken++;
-            currentToken++;
-        } else if (currentToken->type == IDENTIFIER) {
-            Node* identifierNode = malloc(sizeof(Node));
-            identifierNode = initNode(identifierNode, currentToken->value, IDENTIFIER);
-            operNode->left = identifierNode;
-            currentToken++;
-            currentToken++;
-        } else {
-            printError("ERROR: Expected IDENTIFIER or INT", currentToken->lineNum);
-        }
-
-        currentToken++;
-
-        if (currentToken->type == OPERATOR) {
-            Node* operNode = malloc(sizeof(Node));
-            operNode = initNode(operNode, currentToken->value, OPERATOR);
-            current->right = operNode;
-            current = operNode;
-            int operation = 1;
-            currentToken--;
-            currentToken--;
-            while (operation) {
-                currentToken++;
-                if (currentToken->type == INT) {
-                    Node* exprNode = malloc(sizeof(Node));
-                    exprNode = initNode(exprNode, currentToken->value, INT);
-                    current->left = exprNode;
-                } else if (currentToken->type == IDENTIFIER) {
-                    Node* identifier_node = malloc(sizeof(Node));
-                    identifier_node = initNode(identifier_node, currentToken->value, IDENTIFIER);
-                    current->left = identifier_node;
-                } else {
-                    printf("ERROR: Unexpected Token\n");
-                    exit(1);
-                }
-                currentToken++;
-                if (currentToken->type == OPERATOR) {
-                    currentToken++;
-                    currentToken++;
-                    if (currentToken->type != OPERATOR) {
-                        currentToken--;
-                        if (currentToken->type == INT) {
-                            Node* exprNode = malloc(sizeof(Node));
-                            exprNode = initNode(exprNode, currentToken->value, INT);
-                            current->right = exprNode;
-                            currentToken++;
-                        } else if (currentToken->type == IDENTIFIER) {
-                            Node* identifier_node = malloc(sizeof(Node));
-                            identifier_node = initNode(identifier_node, currentToken->value, IDENTIFIER);
-                            current->right = identifier_node;
-                            currentToken++;
-                        } else {
-                            printf("ERROR: UNRECOGNIZED TOKEN!\n");
-                            exit(1);
-                        }
-                        operation = 0;
-                    } else {
-                        currentToken--;
-                        currentToken--;
-                        Node* operNode = malloc(sizeof(Node));
-                        operNode = initNode(operNode, currentToken->value, OPERATOR);
-                        current->right = operNode;
-                        current = operNode;
-                    }
-                } else {
-                    operation = 0;
-                }
-            }
-
-        } else {
-            currentToken--;
-            if (currentToken->type == INT) {
-                Node* exprNode = malloc(sizeof(Node));
-                exprNode = initNode(exprNode, currentToken->value, INT);
-                operNode->right = exprNode;
-            } else if (currentToken->type == IDENTIFIER) {
-                Node* identifier_node = malloc(sizeof(Node));
-                identifier_node = initNode(identifier_node, currentToken->value, IDENTIFIER);
-                operNode->right = identifier_node;
-            }
-            currentToken++;
-        }
-
-    } else {
-        currentToken--;
-        if (currentToken->type == INT) {
-            Node* exprNode = malloc(sizeof(Node));
-            exprNode = initNode(exprNode, currentToken->value, INT);
-            current->left = exprNode;
-            currentToken++;
-        } else if (currentToken->type == IDENTIFIER) {
-            Node* identifier_node = malloc(sizeof(Node));
-            identifier_node = initNode(identifier_node, currentToken->value, IDENTIFIER);
-            current->left = identifier_node;
-            currentToken++;
-        }
-    }
-
-    handleTokenErrors("Invalid Syntax After Expression", currentToken, SEPARATOR);
-
-    current = varNode;
-    if (strcmp(currentToken->value, ";") == 0) {
-        Node* semiNode = malloc(sizeof(Node));
-        semiNode = initNode(semiNode, currentToken->value, SEPARATOR);
-        current->right = semiNode;
-        current = semiNode;
-    }
-    return current;
-}
-
-Node* parser(Token* tokens)
-{
-    Token* currentToken = &tokens[0];
-    Node* root = malloc(sizeof(Node));
-    root = initNode(root, "PROGRAM", BEGINNING);
-
-    Node* current = root;
-
+// Top-level parser: Processes the token stream, builds the parse tree, and manages scope.
+ParseTreeNode* parser(Token* tokens) {
+    Token* currentToken = tokens;
+    SymbolTable *globalScope = createSymbolTable(NULL);
+    ParseTreeNode* root = createParseTreeNode(&(Token){.value = "PROGRAM", .type = BEGINNING}, globalScope);
     while (currentToken->type != END_OF_TOKENS) {
-        if (current == NULL) {
-            break;
-        }
-
-        switch (currentToken->type) {
-        case KEYWORD:
-            if (strcmp(currentToken->value, "EXIT") == 0) {
-                current = handleExitSyscall(root, currentToken, current);
-            } else if (strcmp(currentToken->value, "INT") == 0) {
-                current = createVariables(currentToken, current);
-            }
-            break;
-        }
-        currentToken++;
-        // printf("I am here");
+        addChild(root, parseStatement(&currentToken, globalScope));
     }
-    __printTree(root, 'O', 0);
+    printParseTree(root, NULL, 0);
+    //destroySymbolTable(globalScope);
     return root;
 }

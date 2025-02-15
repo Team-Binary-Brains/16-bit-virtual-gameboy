@@ -20,11 +20,11 @@ CMDIR = ./VM/src
 _A_HEAD = 		sasm_assembler.h	sasm_instructions.c		sasm_memory.h
 _A_CODE = 		sasm_assembler.c	sasm_instructions.c		sasm_memory.c
 
-_G_HEAD = 		univ_cmdutils.h 	univ_errors.h		    univ_fileops.h 		 univ_strings.h			univ_defs.h 
-_G_CODE = 		univ_cmdutils.c		univ_errors.c		    univ_fileops.c 		 univ_strings.c
+_G_HEAD = 		univ_cmdutils.h 	univ_errors.h		    univ_fileops.h		univ_strings.h		univ_hashmap.h		univ_defs.h 
+_G_CODE = 		univ_cmdutils.c		univ_errors.c		    univ_fileops.c 		univ_strings.c		univ_hashmap.c
 
-_C_HEAD =		O_lexer.h			O_parser.h				O_codegenerator.h 	
-_C_CODE = 		O_lexer.c			O_parser.c				O_codegenerator.c 	
+_C_HEAD =		O_lexer.h			O_parser.h				O_token_types.h		O_parse_tree.h		O_symbol_table.h
+_C_CODE = 		O_lexer.c			O_parser.c				O_token_types.c		O_parse_tree.c		O_symbol_table.c
 
 _M_HEAD = 		gbvm.h
 _M_CODE =		gbvm.c
