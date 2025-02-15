@@ -1,7 +1,12 @@
+// This is comment
+/* This is multiline comment
+I can add any thing here 
+it will be ignored
+*/
 int a = 10;
 int b = 20;
 a = a + b;
-print(a);             
+print(a);    // This is also a comment         
 scan(b);
 if (a < b)
     int f = 30;
@@ -14,3 +19,5 @@ while (a < 100) {
 for (int i = 0; i < 5; i = i + 1)
     int x = i;
 exit(a);
+// This is also a comment
+/* This is multiline Comment */

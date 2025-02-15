@@ -163,6 +163,28 @@ Token* lexer(FILE* file, char* inputFile){
             currentIndex++;
             continue;
         }
+
+        if(current[currentIndex] == '/' && current[currentIndex+1] == '/'){
+            while(current[currentIndex] != '\n' && current[currentIndex+1] != '\0'){
+                currentIndex++;
+            }
+            if(current[currentIndex+1] == '\0'){
+                currentIndex++;
+                break;
+            }
+        }
+        
+        if(current[currentIndex] == '/' && current[currentIndex+1] == '*'){
+            while((current[currentIndex] != '*' || current[currentIndex+1] != '/') && current[currentIndex+2] != '\0'){
+                currentIndex++;
+            }
+            if(current[currentIndex+2] == '\0'){
+                currentIndex+=2;
+                break;
+            }
+            currentIndex = currentIndex+2;
+        }
+
         Token* token = malloc(sizeof(Token));
         tokens_size++;
         if (tokens_size > numberOfTokens) {
