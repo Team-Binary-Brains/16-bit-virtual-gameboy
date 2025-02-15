@@ -22,7 +22,7 @@ const char* errorAsCstr(const Error* error)
     case ERR_ILLEGAL_ALU_OPERATION:
         return "ERR_ILLEGAL_ALU_OPERATION";
     default:
-        assert(0 && "error_as_cstr : Unreachable");
+        assert(0 && "univ_errors : errorAsCstr : Unreachable");
     }
 }
 
@@ -60,6 +60,16 @@ void debugCommentDisplay(String* s)
 {
     String seperator = splitStr(s, ' ');
     fprintf(stdout, "\n| %.*s |", 1, seperator.data);
+
+    if (s->length < 125)
+        fprintf(stdout, " %-*.*s |", (int)(124), (int)(s->length), s->data);
+    else
+        fprintf(stdout, " %.*s |", (int)(124), s->data);
+}
+
+void debugMessageDisplay(String* s)
+{
+    fprintf(stdout, "\n| D |");
 
     if (s->length < 125)
         fprintf(stdout, " %-*.*s |", (int)(124), (int)(s->length), s->data);

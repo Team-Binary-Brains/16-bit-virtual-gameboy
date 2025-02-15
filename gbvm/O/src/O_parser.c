@@ -1,6 +1,3 @@
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wswitch"
-
 #include "univ_defs.h"
 #include "O_parser.h"
 #include "O_token_types.h"

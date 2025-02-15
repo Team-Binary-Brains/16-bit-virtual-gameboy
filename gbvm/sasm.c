@@ -13,7 +13,6 @@ int main(int argc, char* argv[])
 {
     char* progName = getNextCmdLineArg(&argc, &argv);
 
-    
     while (argc > 0) {
         char* arg = getNextCmdLineArg(&argc, &argv);
         processFlag(arg, &argc, &argv);
@@ -33,7 +32,6 @@ int main(int argc, char* argv[])
                            "\tAssembly Sample Command    : ./gbasm -i ../prog/fibonacci.pblasm  -o ../prog/fibonacci.pbl\n"
                            "\tDisassembly Sample Command : ./gbasm -o ../prog/fibonacci2.pblasm -i ../prog/fibonacci.pbl -d\n");
     }
-
 
     return mode(inputFile, outputFile);
 }
