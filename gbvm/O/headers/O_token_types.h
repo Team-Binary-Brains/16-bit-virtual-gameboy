@@ -39,7 +39,8 @@ typedef enum {
     IDENTIFIER,
     COMP,
     EXIT,
-    WRITE,
+    PRINT,
+    SCAN,
     UNKNOWN,
     END_OF_TOKENS,
 } TokenType;
@@ -82,7 +83,8 @@ static char* StrTokenType[] = {
     "IDENTIFIER",
     "COMP",
     "EXIT",
-    "WRITE",
+    "PRINT",
+    "SCAN",
     "UNKNOWN",
     "END_OF_TOKENS",
 };
@@ -129,8 +131,8 @@ static Token KeywordTokens[] = {
     { FOR, "for", 0 },
     { RETURN, "return", 0 },
     { EXIT, "exit", 0 },
-    { WRITE, "cwrite", 0 },
-
+    { PRINT, "print", 0 },
+    { SCAN, "scan", 0},
 };
 
 void __printToken(Token);

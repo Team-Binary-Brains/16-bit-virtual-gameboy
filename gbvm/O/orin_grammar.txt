@@ -11,6 +11,8 @@ Statement
     -> Declaration 
     | Assignment 
     | ExitStatement 
+    | PrintStatement
+    | ScanStatement
     | IfStatement 
     | WhileStatement 
     | ForStatement 
@@ -24,6 +26,12 @@ Assignment
 
 ExitStatement 
     -> "exit" "(" Expression ")" ";"
+
+PrintStatement 
+    -> "print" "(" Expression ")" ";"
+    
+ScanStatement  
+    -> "scan" "(" Identifier ")" ";"
 
 IfStatement 
     -> "if" "(" Expression ")" Statement [ "else" Statement ]

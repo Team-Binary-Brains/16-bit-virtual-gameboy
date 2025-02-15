@@ -160,6 +160,39 @@ ParseTreeNode* parseExitStatement(Token** currentToken, SymbolTable *symTable) {
     return exitNode;
 }
 
+// parsePrintStatement: Handles "print" "(" Expression ")" ";".
+ParseTreeNode* parsePrintStatement(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* printNode = createParseTreeNode(&(Token){.value = "PRINT_STATEMENT", .type = BEGINNING}, NULL);
+    Token* printToken = match(currentToken, PRINT);
+    addChild(printNode, createParseTreeNode(printToken, NULL));
+    match(currentToken, LPAREN);
+    ParseTreeNode* exprNode = parseExpression(currentToken, symTable);
+    addChild(printNode, exprNode);
+    match(currentToken, RPAREN);
+    Token* semicolonToken = match(currentToken, SEMICOLON);
+    addChild(printNode, createParseTreeNode(semicolonToken, NULL));
+    return printNode;
+}
+
+// parseScanStatement: Handles "scan" "(" Identifier ")" ";".
+ParseTreeNode* parseScanStatement(Token** currentToken, SymbolTable *symTable) {
+    ParseTreeNode* scanNode = createParseTreeNode(&(Token){.value = "SCAN_STATEMENT", .type = BEGINNING}, NULL);
+    Token* scanToken = match(currentToken, SCAN);
+    addChild(scanNode, createParseTreeNode(scanToken, NULL));
+    match(currentToken, LPAREN);
+    Token* idToken = match(currentToken, IDENTIFIER);
+    if (!lookupSymbol(symTable, idToken->value)) {
+        printf("Semantic error: Scanned variable '%s' is not declared at line %zu\n",
+               idToken->value, idToken->lineNum);
+        exit(1);
+    }
+    addChild(scanNode, createParseTreeNode(idToken, NULL));
+    match(currentToken, RPAREN);
+    Token* semicolonToken = match(currentToken, SEMICOLON);
+    addChild(scanNode, createParseTreeNode(semicolonToken, NULL));
+    return scanNode;
+}
+
 // parseIfStatement: Handles "if" "(" Expression ")" Statement [ "else" Statement ].
 ParseTreeNode* parseIfStatement(Token** currentToken, SymbolTable *symTable) {
     SymbolTable* ifScope = createSymbolTable(symTable);
@@ -350,6 +383,10 @@ ParseTreeNode* parseStatement(Token** currentToken, SymbolTable *symTable) {
             return parseForStatement(currentToken, symTable);
         case LBRACE:
             return parseBlock(currentToken, symTable);
+        case PRINT:
+            return parsePrintStatement(currentToken, symTable);
+        case SCAN:
+            return parseScanStatement(currentToken, symTable);
         default:
             printf("Syntax error: Unexpected token '%s' at line %zu\n",
                    (*currentToken)->value, (*currentToken)->lineNum);
