@@ -14,7 +14,7 @@ Token* initToken(TokenType);
 
 void generateOpAndSepToken(char*, int*, Token*);
 
-void generateIntLToken(char*, int*, Token*);
+void generateIntLorFloatLToken(char*, int*, Token*);
 
 void generateStringLToken(char*, int*, Token*);
 

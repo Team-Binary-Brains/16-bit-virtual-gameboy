@@ -46,7 +46,7 @@ MAKEFLAGS += --no-print-directory
 
 
 CC = gcc
-CFLAGS = -O3 -Wall -Wextra -Werror -Wfatal-errors -Wswitch-enum -std=c99 -pedantic -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
+CFLAGS = -O3 -std=c99 -pedantic -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
 LIBS =
 
 sasm: 	sasm.c $(G_CODE) $(A_CODE)
@@ -56,7 +56,7 @@ sasm: 	sasm.c $(G_CODE) $(A_CODE)
 		@echo -e ""
 
 occ:	occ.c  $(G_CODE) $(C_CODE) 
-		@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
+		@$(CC) -g -o $@ $^   $(CFLAGS) $(LIBS)
 		@echo -e ""
 		@echo -e "COMPILER MADE SUCCESSFULLY"
 		@echo -e ""

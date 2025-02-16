@@ -10,7 +10,6 @@ typedef struct {
     char *identifier;   // Name of the variable or function
     TokenType type;     // Data type (e.g., INT, etc.)
     void *memAddress;   // Memory address of the variable (if allocated)
-    int value;          // Value of the variable (if known, e.g., for constant propagation)
 } SymbolEntry;
 
 // Symbol table structure.
@@ -27,9 +26,9 @@ void destroySymbolTable(SymbolTable* symTable);
 SymbolEntry* lookupSymbol(SymbolTable* currentScope, const char* name);
 
 // Symbol management functions
-void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, void* memAddress, int value);
+void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, void* memAddress);
 
-void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress, int value);
+void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress);
 
 // Debugging function
 void printCurrentScope(SymbolTable* currentScope);

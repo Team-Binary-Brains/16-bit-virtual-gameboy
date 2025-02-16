@@ -12,6 +12,7 @@
  */
 
  #pragma once
+ #include "univ_defs.h"
 
 /**
  * @brief Opens a file with the specified file path and mode.
