@@ -122,7 +122,7 @@ static Token KeywordTokens[] = {
     { INT, "int", 0 },
     { FLOAT, "float", 0 },
     { VOID, "void", 0 },
-    { STRING, "float", 0 },
+    { STRING, "string", 0 },
     { CHAR, "char", 0 },
     { CONSTANT, "const", 0 },
     { IF, "if", 0 },

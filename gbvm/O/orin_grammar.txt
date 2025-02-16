@@ -1,4 +1,4 @@
-/* ---------- ORIN GRAMMAR ---------- */
+/* ---------- UPDATED ORIN GRAMMAR ---------- */
 
 Program 
     -> StatementList
@@ -19,7 +19,10 @@ Statement
     | Block
 
 Declaration 
-    -> "int" Identifier [ "=" Expression ] ";"
+    -> DataType Identifier [ "=" Expression ] ";"
+
+DataType
+    -> "int" | "float" | "char" | "string"
 
 Assignment 
     -> Identifier "=" Expression ";"
@@ -75,4 +78,7 @@ MultiplicativeExpression
 PrimaryExpression 
     -> "(" Expression ")" 
     | Identifier 
-    | INT_L
+    | INT_L 
+    | FLOAT_L
+    | CHAR_L
+    | STR_L
