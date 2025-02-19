@@ -2,6 +2,7 @@
 #include "univ_hashmap.h"
 #include "univ_fileops.h"
 #include "O_lexer.h"
+#include "O_debug_help.h"
 #include "O_token_types.h"
 
 size_t lineNumber = 1;
@@ -50,18 +51,6 @@ void generateKeywordOrIdentifier(char *current, int* currentIndex, Token* token)
 
     token->value = keyword;
 
-    // O(n) operation
-    // size_t len = sizeof(KeywordTokens) / sizeof(KeywordTokens[0]);
-    // for(int i=0; i<len; i++){
-    //     if(strcmp(keyword,KeywordTokens[i].value) == 0){
-    //         token->type = KeywordTokens[i].type;
-    //         //free(keyword);
-    //         return;
-    //     }
-    // }
-    // token->type = IDENTIFIER;
-
-    // O(1) operation
     int *res = retrieve(KeywordTokenMap, keyword);
     if(res == NULL){
         token->type = IDENTIFIER;
@@ -69,19 +58,6 @@ void generateKeywordOrIdentifier(char *current, int* currentIndex, Token* token)
         token->type = *res;
     }
     //free(keyword);
-}
-
-void generateIntLToken(char* current, int* currentIndex, Token* token){
-    char* value = malloc(sizeof(char) * 8);
-    int value_index = 0;
-    while (current[*currentIndex] != '\0' && isdigit(current[*currentIndex])) {
-        value[value_index] = current[*currentIndex];
-        value_index++;
-        *currentIndex += 1;
-    }
-    value[value_index] = '\0';
-    token->value = value;
-    token->type = INT_L;
 }
 
 void generateOpAndSepToken(char* current, int* currentIndex, Token* token){
@@ -96,16 +72,6 @@ void generateOpAndSepToken(char* current, int* currentIndex, Token* token){
         value[1] = '\0';
     }
 
-    // O(n) operation
-    // size_t len = sizeof(OpAndSepTokenMap) / sizeof(OpAndSepTokenMap[0]);
-    // for(int i=0; i<len; i++){
-    //     if(strcmp(value, OpAndSepTokenMap[i].value)){
-    //         token->value = value;
-    //         token->type = OpAndSepTokenMap[i].type;
-    //         return;
-    //     }
-    // }
-
     // O(1) operation
     int *res = retrieve(OpAndSepTokenMap, value);
     if(res != NULL){
@@ -114,18 +80,55 @@ void generateOpAndSepToken(char* current, int* currentIndex, Token* token){
     }
 }
 
+void generateIntLorFloatLToken(char* current, int* currentIndex, Token* token){
+    char* value = malloc(sizeof(char) * 16);
+    int value_index = 0;
+    while (current[*currentIndex] != '\0' && isdigit(current[*currentIndex])) {
+        value[value_index] = current[*currentIndex];
+        value_index++;
+        *currentIndex += 1;
+    }
+    if(current[*currentIndex] == '.'){
+        do{
+            value[value_index] = current[*currentIndex];
+            value_index++;
+            *currentIndex += 1;
+        }while (current[*currentIndex] != '\0' && isdigit(current[*currentIndex]));
+        token->type = FLOAT_L;
+    }else token->type = INT_L;
+    value[value_index] = '\0';
+    token->value = value;
+}
+
 void generateStringLToken(char* current, int* currentIndex, Token* token){
     token->type = STR_L;
     char* value = malloc(sizeof(char) * 64);
     int value_index = 0;
     *currentIndex += 1;
-    while (current[*currentIndex] != '"') {
+    while (current[*currentIndex] != '"' && current[*currentIndex]!='\0') {
         value[value_index] = current[*currentIndex];
         value_index++;
         *currentIndex += 1;
     }
+    if(current[*currentIndex] == '\0'){
+        printf("\nError: String Never Closed");
+        exit(1);
+    }
     value[value_index] = '\0';
-    token->type = STRING;
+    token->value = value;
+}
+
+void generateCharLToken(char* current, int *currentIndex, Token* token){
+    if(current[*currentIndex+2] != '\''){
+        printf("\nError: Character Literal Cannot be of more than one character");
+        exit(1);
+    }
+    token->type = CHAR_L;
+    char* value = malloc(sizeof(char) * 2);
+    *currentIndex+=1;
+    value[0] = current[*currentIndex];
+    value[1] = '\0';
+    *currentIndex+=1;
     token->value = value;
 }
 
@@ -200,9 +203,11 @@ Token* lexer(FILE* file, char* inputFile){
             if(current[currentIndex] == '"'){
                 generateStringLToken(current, &currentIndex, token);
             }else if (isdigit(current[currentIndex])) {
-                generateIntLToken(current, &currentIndex, token);
+                generateIntLorFloatLToken(current, &currentIndex, token);
                 currentIndex--;
-            } else if (isalpha(current[currentIndex])) {
+            } else if (current[currentIndex] == '\''){
+                generateCharLToken(current, &currentIndex, token);
+            }else if (isalpha(current[currentIndex])) {
                 generateKeywordOrIdentifier(current, &currentIndex, token);
                 currentIndex--;
             }else{

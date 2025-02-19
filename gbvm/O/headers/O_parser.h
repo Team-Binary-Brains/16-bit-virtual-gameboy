@@ -15,9 +15,9 @@ ParseTreeNode* parser(Token*);
 
 Token* match(Token** , TokenType);
 
-ParseTreeNode* parseDeclaration(Token**, SymbolTable*);
+ParseTreeNode* parseDeclaration(Token**, SymbolTable*, int flag);
 
-ParseTreeNode* parseAssignment(Token**, SymbolTable*);
+ParseTreeNode* parseAssignment(Token**, SymbolTable*, int flag);
 
 ParseTreeNode* parsePrimaryExpr(Token** currentToken, SymbolTable* symTable);
 

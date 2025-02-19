@@ -16,7 +16,7 @@ void destroySymbolTable(SymbolTable* symTable) {
 }
 
 // Insert a symbol into the **current scope only**
-void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, void* memAddress, int value) {
+void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, void* memAddress) {
     if (!currentScope) {
         printf("Error: No active scope for insertion\n");
         exit(1);
@@ -33,7 +33,6 @@ void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, v
     entry->identifier = strdup(name);
     entry->type = type;
     entry->memAddress = memAddress;
-    entry->value = value;
 
     insert(currentScope->table, entry->identifier, entry);
 }
@@ -52,43 +51,16 @@ SymbolEntry* lookupSymbol(SymbolTable* currentScope, const char* name) {
 }
 
 // Update a symbol in the closest scope where it is declared
-void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress, int value) {
+void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress) {
     SymbolTable* scope = currentScope;
     while (scope) {
         SymbolEntry* entry = retrieve(scope->table, name);
         if (entry) {
             entry->memAddress = memAddress;
-            entry->value = value;
             return;
         }
         scope = scope->parent; // Move to parent scope
     }
     printf("Semantic error: '%s' is not declared\n", name);
     exit(1);
-}
-
-// ------------------- Debugging Functions -------------------
-
-// Print the current scope for debugging
-void printCurrentScope(SymbolTable* currentScope) {
-    if (!currentScope) {
-        printf("\nNo active scope available\n");
-        return;
-    }
-
-    printf("----------------------------------------------------------------\n");
-    printf("| %-15s | %-10s | %-18s | %-8s |\n", "Identifier", "Type", "Address", "Value");
-    printf("----------------------------------------------------------------\n");
-
-    for (size_t i = 0; i < currentScope->table->size; i++) {
-        Entry* entry = currentScope->table->entries[i];
-        while (entry) {
-            SymbolEntry* symEntry = (SymbolEntry*)entry->value;
-            printf("| %-15s | %-10s | %-18p | %-8d |\n", 
-                   symEntry->identifier, StrTokenType[symEntry->type], symEntry->memAddress, symEntry->value);
-            entry = entry->next;
-        }
-    }
-
-    printf("----------------------------------------------------------------\n");
 }

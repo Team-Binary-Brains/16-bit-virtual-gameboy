@@ -1,6 +1,7 @@
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 #include "O_lexer.h"
 #include "O_parser.h"
+#include "O_codegenerator.h"
 #include "univ_cmdutils.h"
 #include "univ_defs.h"
 #include "univ_errors.h"
@@ -27,7 +28,7 @@ int main(int argc, char* argv[])
     if (!inputFile || !outputFile) {
         displayMsgWithExit("\nMissing Files"
                            "\nUsage : gbasm -i <input file> -o <output file> -l [lang] "
-                           "\tSample Command    : ./gbasm -i ./prog/FirstProgram.osh  -o ./prog/example.pblasm\n");
+                           "\tSample Command    : ./occ -i ../extras/samplePrograms/FirstProgram.osh -o ../samplePrograms/example.pblasm/n");
     }
 
     FILE* file = openFile(inputFile, "r");
@@ -35,6 +36,8 @@ int main(int argc, char* argv[])
     Token* tokens = lexer(file, inputFile);
 
     ParseTreeNode* root = parser(tokens);
+
+    intermediateCodeGen(root);
 
     // generateCode(root, outputFile);
 
