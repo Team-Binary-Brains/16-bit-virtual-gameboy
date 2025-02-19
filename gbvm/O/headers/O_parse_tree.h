@@ -14,6 +14,4 @@ ParseTreeNode* createParseTreeNode(Token*, SymbolTable*);
 
 void addChild(ParseTreeNode*, ParseTreeNode*);
 
-void printParseTree(ParseTreeNode*, char*, int);
-
 void freeParseTree(ParseTreeNode*);
