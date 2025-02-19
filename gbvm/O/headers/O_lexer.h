@@ -18,6 +18,8 @@ void generateIntLorFloatLToken(char*, int*, Token*);
 
 void generateStringLToken(char*, int*, Token*);
 
+void generateCharLToken(char* current, int *currentIndex, Token* token);
+
 void generateKeywordOrIdentifier(char*, int*, Token*);
 
 Token* lexer(FILE* file, char* inputFile);
