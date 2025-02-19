@@ -134,7 +134,3 @@ static Token KeywordTokens[] = {
     { PRINT, "print", 0 },
     { SCAN, "scan", 0},
 };
-
-void __printToken(Token);
-
-void __printTokens(Token* tokens, size_t tokensIndex);

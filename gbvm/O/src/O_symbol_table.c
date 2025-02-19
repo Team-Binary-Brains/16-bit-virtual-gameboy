@@ -64,29 +64,3 @@ void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress)
     printf("Semantic error: '%s' is not declared\n", name);
     exit(1);
 }
-
-// ------------------- Debugging Functions -------------------
-
-// Print the current scope for debugging
-void printCurrentScope(SymbolTable* currentScope) {
-    if (!currentScope) {
-        printf("\nNo active scope available\n");
-        return;
-    }
-
-    printf("-----------------------------------------------------\n");
-    printf("| %-15s | %-10s | %-18s |\n", "Identifier", "Type", "Address");
-    printf("-----------------------------------------------------\n");
-
-    for (size_t i = 0; i < currentScope->table->size; i++) {
-        Entry* entry = currentScope->table->entries[i];
-        while (entry) {
-            SymbolEntry* symEntry = (SymbolEntry*)entry->value;
-            printf("| %-15s | %-10s | %-18p |\n", 
-                   symEntry->identifier, StrTokenType[symEntry->type], symEntry->memAddress);
-            entry = entry->next;
-        }
-    }
-
-    printf("-----------------------------------------------------\n");
-}

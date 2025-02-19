@@ -21,14 +21,14 @@ typedef struct SymbolTable {
 // Scope management functions
 SymbolTable* createSymbolTable(SymbolTable* parent);
 
+// Destroy the symbol table
 void destroySymbolTable(SymbolTable* symTable);
 
+// Search for a symbol
 SymbolEntry* lookupSymbol(SymbolTable* currentScope, const char* name);
 
-// Symbol management functions
+// Insert the symbol
 void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, void* memAddress);
 
+// Update the symbol
 void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress);
-
-// Debugging function
-void printCurrentScope(SymbolTable* currentScope);
