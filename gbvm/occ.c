@@ -1,11 +1,11 @@
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 #include "O_lexer.h"
 #include "O_parser.h"
-#include "O_codegenerator.h"
 #include "univ_cmdutils.h"
 #include "univ_defs.h"
 #include "univ_errors.h"
 #include "univ_fileops.h"
+#include "O_inter_codegen.h"
 
 char* inputFile = NULL;
 char* outputFile = NULL;
@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
 
     ParseTreeNode* root = parser(tokens);
 
-    intermediateCodeGen(root);
+    generateIntermediateCode(root);
 
     // generateCode(root, outputFile);
 
