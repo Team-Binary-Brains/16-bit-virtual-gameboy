@@ -99,6 +99,8 @@ void printParseTree(ParseTreeNode* node, char* prefix, int is_last) {
 // Print TAC instructions.
 void printIntermediateCode(TACInstruction* tacHead) {
     TACInstruction* inst = tacHead;
+    printf("\nIntermediate Code (Three Address Code Method):\n");
+    printf("--------------------------------------\n");
     while (inst != NULL) {
         switch (inst->op) {
             case TAC_ASSIGN:
