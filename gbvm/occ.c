@@ -6,6 +6,8 @@
 #include "univ_defs.h"
 #include "univ_errors.h"
 #include "univ_fileops.h"
+#include "O_inter_codegen.h"
+#include "O_inter_code_optimizer.h"
 
 char* inputFile = NULL;
 char* outputFile = NULL;
@@ -33,13 +35,21 @@ int main(int argc, char* argv[])
 
     FILE* file = openFile(inputFile, "r");
 
+    // Phase 1: Lexical Analysis
     Token* tokens = lexer(file, inputFile);
 
+    // Phase 2: Syntax Analysis
     ParseTreeNode* root = parser(tokens);
 
-    intermediateCodeGen(root);
+    // Phase 3: Semantics Analysis
+    // Basis Semantic analysis already implemented in previous phase
+    // TODO: Write seperate semantic analysis along with error handler
 
-    // generateCode(root, outputFile);
+    // Phase 4: Intermediate Code generation
+    TACInstruction** tacList = generateIntermediateCode(root);
+
+    // Phase 5: Code optimizer
+    optimizeCode(tacList);
 
     // FILE *assembly_file = fopen("gbvmasm.asm", "r");
     // if(!assembly_file){
@@ -47,7 +57,7 @@ int main(int argc, char* argv[])
     //     exit(1);
     // }
 
-    printf("Compiler Ready!!!\n");
+    printf("\nCompiler Ready!!!\n");
 
     /*
     TODO: inputting assembly file to assembler
