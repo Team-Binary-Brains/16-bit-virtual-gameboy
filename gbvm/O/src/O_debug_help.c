@@ -2,7 +2,6 @@
 #include "O_token_types.h"
 #include "O_parse_tree.h"
 #include "O_symbol_table.h"
-#include "O_inter_codegen.h"
 
 void __printTokens(Token* tokens, size_t tokensIndex) {
     printf("+--------------------------+--------------------------+\n");
@@ -94,72 +93,4 @@ void printParseTree(ParseTreeNode* node, char* prefix, int is_last) {
     }
 
     free(new_prefix);
-}
-
-// Print TAC instructions.
-void printIntermediateCode(TACInstruction* tacHead) {
-    TACInstruction* inst = tacHead;
-    printf("\nIntermediate Code (Three Address Code Method):\n");
-    printf("--------------------------------------\n");
-    while (inst != NULL) {
-        switch (inst->op) {
-            case TAC_ASSIGN:
-                printf("%s = %s\n", inst->result, inst->arg1);
-                break;
-            case TAC_ADD:
-                printf("%s = %s + %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_SUB:
-                printf("%s = %s - %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_MUL:
-                printf("%s = %s * %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_DIV:
-                printf("%s = %s / %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_MOD:
-                printf("%s = %s %% %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_EQ:
-                printf("%s = %s == %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_NE:
-                printf("%s = %s != %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_LT:
-                printf("%s = %s < %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_LE:
-                printf("%s = %s <= %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_GT:
-                printf("%s = %s > %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_GE:
-                printf("%s = %s >= %s\n", inst->result, inst->arg1, inst->arg2);
-                break;
-            case TAC_LABEL:
-                printf("%s:\n", inst->result);
-                break;
-            case TAC_GOTO:
-                printf("goto %s\n", inst->arg1);
-                break;
-            case TAC_IF:
-                printf("if %s goto %s\n", inst->arg1, inst->arg2);
-                break;
-            case TAC_PRINT:
-                printf("print %s\n", inst->arg1);
-                break;
-            case TAC_SCAN:
-                printf("scan %s\n", inst->arg1);
-                break;
-            case TAC_EXIT:
-                printf("exit %s\n", inst->arg1);
-                break;
-            default:
-                printf("Unknown TAC operation.\n");
-        }
-        inst = inst->next;
-    }
 }
