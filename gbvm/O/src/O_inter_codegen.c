@@ -8,6 +8,8 @@
 static TACInstruction* tacHead = NULL;
 static TACInstruction* tacTail = NULL;
 
+static TACInstruction* res[2];
+
 // Counters for unique temporary variables and labels.
 static int tempCount = 0;
 static int labelCount = 0;
@@ -254,13 +256,16 @@ static char* generateExpression(ParseTreeNode* node) {
 }
 
 //---------------------------------------------------------------------
-void generateIntermediateCode(ParseTreeNode* root) {
+TACInstruction** generateIntermediateCode(ParseTreeNode* root) {
     // Reset state.
     tempCount = 0;
     labelCount = 0;
     tacHead = tacTail = NULL;
     generateCode(root);
     printIntermediateCode(tacHead);
+    res[0] = tacHead;
+    res[1] = tacTail;
+    return res;
 }
 
 // Free the TAC instruction list.

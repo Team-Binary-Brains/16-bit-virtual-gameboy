@@ -44,7 +44,7 @@ typedef struct TACInstruction {
 } TACInstruction;
 
 // Interface for generating and printing intermediate code.
-void generateIntermediateCode(ParseTreeNode* root);
+TACInstruction** generateIntermediateCode(ParseTreeNode* root);
 
 static char* generateExpression(ParseTreeNode* node);
 
