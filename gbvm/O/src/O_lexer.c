@@ -2,8 +2,8 @@
 #include "univ_hashmap.h"
 #include "univ_fileops.h"
 #include "O_lexer.h"
-#include "O_debug_help.h"
 #include "O_token_types.h"
+#include "O_debug_help.h"
 
 size_t lineNumber = 1;
 HashTable *OpAndSepTokenMap;

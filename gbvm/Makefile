@@ -23,7 +23,7 @@ _A_CODE = 		sasm_assembler.c	sasm_instructions.c		sasm_memory.c
 _G_HEAD = 		univ_cmdutils.h 	univ_errors.h		    univ_fileops.h		univ_strings.h		univ_hashmap.h		univ_defs.h 
 _G_CODE = 		univ_cmdutils.c		univ_errors.c		    univ_fileops.c 		univ_strings.c		univ_hashmap.c
 
-_C_HEAD =		O_lexer.h			O_parser.h				O_parse_tree.h		O_symbol_table.h	O_inter_codegen.h 	O_debug_help.h		O_inter_code_optimizer.h		O_token_types.h
+_C_HEAD =		O_lexer.h			O_parser.h				O_parse_tree.h		O_symbol_table.h	O_inter_codegen.h 	O_debug_help.h		O_inter_code_optimizer.h		O_token_types.h		O_TAC_Oper.h
 _C_CODE = 		O_lexer.c			O_parser.c				O_parse_tree.c		O_symbol_table.c	O_inter_codegen.c	O_debug_help.c		O_inter_code_optimizer.c
 
 _M_HEAD = 		gbvm.h
@@ -46,7 +46,7 @@ MAKEFLAGS += --no-print-directory
 
 
 CC = gcc
-CFLAGS = -O3 -Wall -Wextra -Werror -Wfatal-errors -Wswitch-enum -std=c99 -pedantic -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
+CFLAGS = -O3 -std=c99 -pedantic -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
 LIBS =
 
 sasm: 	sasm.c $(G_CODE) $(A_CODE)

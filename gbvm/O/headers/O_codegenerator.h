@@ -10,7 +10,7 @@
 
 #pragma once
 #include "univ_defs.h"
-#include "O_parse_tree.h"
+#include "O_inter_codegen.h"
 #include "O_debug_help.h"
 
 void intermediateCodeGen(ParseTreeNode*);

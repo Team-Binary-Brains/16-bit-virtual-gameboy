@@ -1,8 +1,6 @@
 #pragma once
-#include "O_inter_codegen.h"
-
 // Main driver: runs all optimization passes.
-void optimizeCode(TACInstruction**);
+TACInstruction** optimizeCode(TACInstruction**);
 
 // Local optimizations.
 void peepholeOptimization(void);

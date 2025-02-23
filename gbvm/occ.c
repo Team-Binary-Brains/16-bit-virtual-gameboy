@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     TACInstruction** tacList = generateIntermediateCode(root);
 
     // Phase 5: Code optimizer
-    optimizeCode(tacList);
+    tacList = optimizeCode(tacList);
 
     // FILE *assembly_file = fopen("gbvmasm.asm", "r");
     // if(!assembly_file){

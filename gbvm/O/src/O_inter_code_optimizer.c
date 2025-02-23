@@ -1,6 +1,7 @@
 #include "univ_defs.h"
 #include "O_inter_codegen.h"
 #include "O_inter_code_optimizer.h"
+#include "O_TAC_Oper.h"
 #include "O_debug_help.h"
 
 // Global TAC instruction list pointers.
@@ -312,7 +313,7 @@ void codeLayoutOptimization(void) {
 
 //---------------------------------------------------------------------
 // Main driver: optimizeCode calls all passes.
-void optimizeCode(TACInstruction** tacList) {
+TACInstruction** optimizeCode(TACInstruction** tacList) {
     printf("\n--------------------------------------");
     printf("\nOptimized Code\n");
     printf("--------------------------------------\n");
@@ -339,4 +340,7 @@ void optimizeCode(TACInstruction** tacList) {
     codeLayoutOptimization();
 
     printIntermediateCode(tacHead);
+    tacList[0] = tacHead;
+    tacList[1] = tacTail;
+    return tacList;
 }
