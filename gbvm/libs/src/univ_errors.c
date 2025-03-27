@@ -19,8 +19,14 @@ const char* errorAsCstr(const Error* error)
         return "ERR_ILLEGAL_INST_ACCESS";
     case ERR_ILLEGAL_OPERAND:
         return "ERR_ILLEGAL_OPERAND";
-    case ERR_ILLEGAL_ALU_OPERATION:
-        return "ERR_ILLEGAL_ALU_OPERATION";
+    case ERR_NULL_CALL:
+        return "ERR_NULL_CALL";
+    case ERR_ILLEGAL_MEMORY_ACCESS:
+        return "ERR_ILLEGAL_MEMORY_ACCESS";
+    case ERR_NAN:
+        return "ERR_NAN";
+    case ERR_ALREADY_BOUND:
+        return "ERR_ALREADY_BOUND";
     default:
         assert(0 && "univ_errors : errorAsCstr : Unreachable");
     }
@@ -75,4 +81,10 @@ void debugMessageDisplay(String* s)
         fprintf(stdout, " %-*.*s |", (int)(124), (int)(s->length), s->data);
     else
         fprintf(stdout, " %.*s |", (int)(124), s->data);
+}
+
+void displayErrorDetailsWithExit(String filePath, int lineNo)
+{
+    fprintf(stderr, str_Fmt ":%d\n", str_Arg(filePath), lineNo);
+    exit(1);
 }

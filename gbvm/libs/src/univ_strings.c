@@ -1,5 +1,13 @@
 #include "univ_strings.h"
 
+String cstrToStr(const char* cstr)
+{
+    return (String) {
+        .length = strlen(cstr),
+        .data = (cstr)
+    };
+}
+
 String ltrim(String s)
 {
     size_t i = 0;
@@ -36,6 +44,7 @@ String splitStr(String* s, char c)
         i++;
     }
     String res = {
+
         .length = i,
         .data = s->data
     };
@@ -51,9 +60,9 @@ String splitStr(String* s, char c)
     return res;
 }
 
-int strToInt(String s)
+uint64_t strToInt(String s)
 {
-    Word val = 0;
+    uint64_t val = 0;
     size_t i = 0;
 
     while (i < s.length && isdigit(s.data[i])) {
@@ -66,4 +75,37 @@ int strToInt(String s)
 void printString(String s)
 {
     printf("%.*s\n", (int)(s.length), s.data);
+}
+
+bool strEqu(String a, String b)
+{
+    if (a.length != b.length) {
+        return false;
+    } else {
+        return memcmp(a.data, b.data, a.length) == 0;
+    }
+}
+
+// TODO: add ability to process hex inputs
+
+bool strParseHex(String str, uint64_t* output)
+{
+    uint64_t result = 0;
+
+    for (size_t i = 0; i < str.length; ++i) {
+        const char x = str.data[i];
+        result = result * 0x10;
+
+        if ('0' <= x && x <= '9')
+            result = result + (uint64_t)(x - '0');
+        else if ('A' <= x && x <= 'F')
+            result = result + (uint64_t)(x + 10 - 'A');
+        else
+            return false;
+    }
+
+    if (output)
+        *output = result;
+
+    return true;
 }

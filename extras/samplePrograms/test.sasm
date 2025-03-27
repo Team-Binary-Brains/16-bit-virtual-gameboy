@@ -1,105 +1,245 @@
-JA 2                                         0
-    DONOP                                    1
-;
-JNBE 4                                       2
-    DONOP                                    3
-;
-JAE 6                                        4
-    DONOP                                    5
-;
-JNC 8                                        6
-    DONOP                                    7
-;
-JNB 10                                       8
-    DONOP                                    9
-;
-TGLCF                                       10
-JB 13                                       11
-    DONOP                                   12
-;
-JC 15                                       13
-    DONOP                                   14
-;
-JNAE 17                                     15
-    DONOP                                   16
-;
-DECR 1                                      17
-JBE 20                                      18
-    DONOP                                   19
-;
-JNA 22                                      20
-    DONOP                                   21
-;
-JCXZ 24                                     22
-    DONOP                                   23
-;
-JE 26                                       24
-    DONOP                                   25 
-;
-JZ 28                                       26
-    DONOP                                   27
-;
-CLRCF                                       28
-ADC AX,1                                    29
-JG 32                                       30
-    DONOP                                   31
-;
-JNLE 34                                     32
-    DONOP                                   33
-;
-JGE 36                                      34
-    DONOP                                   35
-;
-JNL 38                                      36
-    DONOP                                   37
-;
-DECR 0                                      38
-JL 41                                       39 
-    DONOP                                   40
-;
-JNGE 43                                     41 
-    DONOP                                   42
-;
-DECR 1                                      43
-JLE 46                                      44 
-    DONOP                                   45
-;
-JNG 48                                      46 
-    DONOP                                   47
-;
-DECR 2                                      48 
-JNE 51                                      49 
-    DONOP                                   50
-;
-JNZ 53                                      51 
-    DONOP                                   52
-;
-JNO 55                                      53
-    DONOP                                   54
-;
-ADD 0, 0                                    55
-JNP 58                                      56
-    DONOP                                   57
-;
-JPO 60                                      58
-    DONOP                                   59
-;
-JNS 62                                      60
-    DONOP                                   61
-;
-CPY AX, 32767                               62
-CPY BX, 100                                 63
-ADD AX, BX                                  64
-JO 67                                       65
-    DONOP                                   66
-;
-JP 69                                       67
-    DONOP                                   68
-;
-JPE 71                                      69
-    DONOP                                   70
-;
-JS 73                                       71
-    DONOP                                   72
-;
-SHUTS                                       73
+%include "./calls.smh"
+
+%bind hello " Hello, World"                  ; 12
+%bind msg0 " THIS IS A SAMPLE SASM CODE"     ; 26
+%bind msg1 " ADDING FLOATS"                  ; 13
+%bind msg2 " ADDING INTS"                    ; 11
+%bind msg3 " ALLOCATE AND DEALLOCATE MEMORY" ; 30
+%bind msg4 " BITS OF NUMBER 30"              ; 17
+%bind msg5 " TYPECASTING"                    ; 11
+%bind msg6 " FIBONACCI SEQUENCE, 30 NUMBERS" ; 30
+%bind msg7 " SERIES 1 TO N"                  ; 13
+
+%bind MEMORY_SIZE 1600
+%bind N 30
+%bind M 256
+
+    JMPU main
+
+main:
+    PUSH 32
+    CALLF set_color
+
+    CALLN append_newline_all_messages
+
+    PUSH msg0
+    PUSH 28
+    CALLF write
+
+    PUSH hello      ; PUSH address of "hello world"
+    PUSH 13         ; PUSH the length of string
+    ADDI            ; add 12 to the memory address
+    PUSH 10         ; newline
+    WRITE1          ; write 1 byte to memory
+    
+
+    PUSH hello      ; fetch memory address of string
+    PUSH 14         ; new length
+    CALLF write     ; print 13 characters
+
+    PUSH 41
+    CALLF set_color
+   ;SHUTS
+
+f123:
+    PUSH msg1
+    PUSH 15
+    CALLF write
+
+    PUSH 1.0
+    PUSH 2.0
+    PUSH 3.0
+    ADDF
+    ADDF
+    CALLF print_f64
+    ;SHUTS
+
+i123:
+    PUSH msg2
+    PUSH 13
+    CALLF write
+
+    PUSH 1
+    PUSH 2
+    PUSH 3
+    ADDI
+    ADDI
+    CALLF print_i64
+    ;SHUTS
+
+allocation:
+    PUSH msg3
+    PUSH 32
+    CALLF write
+
+    PUSH MEMORY_SIZE
+    CALLF alloc
+    DUP 0
+    CALLF print_ptr
+    CALLF free
+    ;SHUTS
+
+bits:
+    PUSH msg4
+    PUSH 19
+    CALLF write
+
+    PUSH N
+loop:
+    DUP 0
+    PUSH 1
+    ANDB
+    CALLF print_u64
+
+    PUSH 1
+    SHR
+
+    DUP 0
+    PUSH 0
+    EQI
+    NOT
+
+    JMPC loop
+
+    ;SHUTS
+
+cast:
+    PUSH msg5
+    PUSH 13
+    CALLF write
+
+    PUSH 3.1415
+    F2I
+    CALLF print_i64
+
+    PUSH 3.1415
+    F2U
+    CALLF print_u64
+
+    PUSH -1.0
+    F2I
+    CALLF print_i64
+
+    PUSH -1.0
+    F2U
+    CALLF print_u64
+
+    PUSH 2
+    I2F
+    CALLF print_f64
+
+    PUSH -1
+    I2F
+    CALLF print_f64
+
+    PUSH 48
+    U2F
+    CALLF print_f64
+
+    ;SHUTS
+
+fibo:
+    PUSH msg6
+    PUSH 32
+    CALLF write
+    PUSH 0                       ; F_0
+    PUSH 1                       ; F_1
+    PUSH N                       ; N - the amount of iterations
+loopfib:
+    SWAP 2
+    DUP 0
+    CALLF print_i64
+    DUP 1
+    ADDI
+    SWAP 1
+    SWAP 2
+    PUSH 1
+    SUBI
+
+    DUP 0
+    PUSH 0
+    EQI
+
+    NOT
+
+    JMPC loopfib
+    ;SHUTS
+
+memtest:
+    PUSH msg7
+    PUSH 15
+    CALLF write
+    PUSH 0      ; i
+loopmem:
+   DUP 0
+   DUP 0
+   WRITE1
+
+   PUSH 1
+   ADDI
+
+   DUP 0
+   PUSH M
+   EQI
+   NOT
+
+   JMPC loopmem
+
+   PUSH 0
+   PUSH M
+   CALLF dump_memory
+    PUSH 0
+    CALLF set_color
+    SHUTS
+
+append_newline_all_messages:
+
+    PUSH msg0
+    PUSH 27
+    ADDI
+    PUSH 10
+    WRITE1
+
+    PUSH msg1
+    PUSH 14
+    ADDI
+    PUSH 10
+    WRITE1
+
+    PUSH msg2
+    PUSH 12
+    ADDI
+    PUSH 10
+    WRITE1
+
+    PUSH msg3
+    PUSH 31
+    ADDI
+    PUSH 10
+    WRITE1
+
+    PUSH msg4
+    PUSH 18
+    ADDI
+    PUSH 10
+    WRITE1
+
+    PUSH msg5
+    PUSH 12
+    ADDI
+    PUSH 10
+    WRITE1
+
+    PUSH msg6
+    PUSH 31
+    ADDI
+    PUSH 10
+    WRITE1
+
+    PUSH msg7
+    PUSH 14
+    ADDI
+    PUSH 10
+    WRITE1
+
+    RETRN

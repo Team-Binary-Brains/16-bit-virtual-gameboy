@@ -14,6 +14,8 @@
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
+#include <inttypes.h>
+#include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -21,14 +23,30 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define EXECUTION_LIMIT 1024      /**< The maximum number of instructions that can be executed. */
-#define PROGRAM_CAPACITY 1024     /**< The maximum capacity of the program memory. */
-#define STACK_CAPACITY 1024       /**< The maximum capacity of the stack memory. */
-#define MAX_WORD 32767            /**< The maximum value that can be stored in a Word type. */
-#define ADDRESS_RANGE_LOW 0X0000  /**< The lower bound of the memory address range. */
-#define ADDRESS_RANGE_HIGH 0XFFFF /**< The upper bound of the memory address range. */
+#define STACK_CAPACITY 1024
+#define LABELS_CAPACITY 1024
+#define MEMORY_CAPACITY 65536
+#define PROGRAM_CAPACITY 1024
+#define BINDINGS_CAPACITY 1024
+#define INTERNAL_VMCALLS_CAPACITY 1024
+#define EXTERNAL_VMCALLS_CAPACITY 1024
+#define MAX_INCLUDE_LEVEL 10
+#define COMMENT_SYMBOL ';'
+#define PREP_SYMBOL '%'
 
-typedef char Byte;               /**< Represents a single byte. */
-typedef short int Word;          /**< Represents a 16-bit word. */
-typedef int Double_Word;         /**< Represents a 32-bit double word. */
-typedef long long int Quad_Word; /**< Represents a 64-bit quad word. */
+typedef uint8_t Byte;
+typedef uint16_t Word;
+typedef uint32_t DoubleWord;
+
+typedef uint64_t DataEntry;
+typedef uint64_t InstAddr;
+typedef uint64_t MemoryAddr;
+typedef uint64_t StackAddr;
+typedef uint64_t NativeID;
+
+typedef union {
+    uint64_t as_u64;
+    int64_t as_i64;
+    double as_f64;
+    void* as_ptr;
+} QuadWord;

@@ -12,24 +12,15 @@
 
 #include "univ_defs.h"
 #include "univ_strings.h"
+#include "sasm_assembler.h"
 
+#pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
 /**
  * @brief Structure representing the registers of the CPU.
  */
 
-typedef union {
-    Word full;
-    Byte data[2];
-} Register;
+typedef QuadWord Register;
 
-typedef enum {
-    o1_mem = 1 << 0,
-    o1_reg = 1 << 1,
-    o2_mem = 1 << 2,
-    o2_reg = 1 << 3,
-    o2_imm = 1 << 4,
-    o1_imm = 1 << 5,
-} modes;
 typedef enum {
     HALT = 1 << 0,         // 1
     SIGN = 1 << 1,         // 2
@@ -40,44 +31,47 @@ typedef enum {
     ZERO = 1 << 6,         // 64
     AUX = 1 << 7           // 128
 } Flags;
+
 typedef struct {
     Register AX; /**< Accumulator register */
     Register BX; /**< Base register */
     Register CX; /**< Counter register */
     Register DX; /**< Data register */
 
-    Word CS; /**< Points at current code segment */
-    Word IP; /**< Instruction pointer register */
+    QuadWord CS; /**< Points at current code segment */
+    QuadWord IP; /**< Instruction pointer register */
 
-    Word SS; /**< Points at current stack segment */
-    Word SP; /**< Stack pointer register */
+    QuadWord SS; /**< Points at current stack segment */
+    QuadWord SP; /**< Stack pointer register */
 
-    Word SI; /**< Source index register */
-    Word DI; /**< Destination index register */
-    Word DS; /**< Points at current data segment */
+    QuadWord SI; /**< Source index register */
+    QuadWord DI; /**< Destination index register */
+    QuadWord DS; /**< Points at current data segment */
 
-    Word ES; /**< Extra segment */
-    Word EP; /**< Extra pointer register */
+    QuadWord ES; /**< Extra segment */
+    QuadWord EP; /**< Extra pointer register */
 } Registers;
 
 /**
  * @brief Structure representing the CPU.
  */
 typedef struct {
-    Registers registers; /**< CPU registers */
-    volatile Word flags; /**< CPU flags */
+    Registers registers;  /**< CPU registers */
+    volatile short flags; /**< CPU flags */
 } CPU;
 
 /**
  * @brief Structure representing the memory of the system.
  */
 typedef struct {
-    Word stack[STACK_CAPACITY]; /**< Stack memory */
+    QuadWord stack[STACK_CAPACITY]; /**< Stack memory */
+    Byte memory[MEMORY_CAPACITY];
+    size_t expectedMemorySize;
 } Memory;
 
-void writeToMemory(Memory* memory, Word address, Word data);
+void writeToMemory(Memory* memory, MemoryAddr address, DataEntry data);
 
-Byte readFromMemory(Memory* memory, Word address);
+DataEntry readFromMemory(Memory* memory, MemoryAddr address);
 
 /**
  * @brief Evaluates the value of a register.
@@ -88,7 +82,7 @@ Byte readFromMemory(Memory* memory, Word address);
  * @param tmp The temporary string.
  * @return The value of the register.
  */
-Word evalRegister(CPU* cpu, String tmp);
+uint64_t evalRegister(CPU* cpu, String tmp);
 
 /**
  * @brief Resolves the address based on the given  string.
@@ -97,12 +91,14 @@ Word evalRegister(CPU* cpu, String tmp);
  * @param s The string containing the address.
  * @return The resolved address.
  */
-Word resolveAddress(CPU* cpu, String* s);
+MemoryAddr resolveAddress(CPU* cpu, String* s);
 
-Word resolveImmediateAddress(String* s);
+MemoryAddr resolveImmediateAddress(Sasm* sasm, String* s);
 
 void setFlag(Flags f, CPU* cpu, bool state);
 
 bool getFlag(Flags f, const CPU* cpu);
 
-void checkAndSetParity(CPU* cpu, Word num);
+void checkAndSetParity(CPU* cpu, uint64_t num);
+
+bool evaluateAddressingMode(Memory* mem, CPU* cpu, AddrMode mode, QuadWord* val, QuadWord* out);

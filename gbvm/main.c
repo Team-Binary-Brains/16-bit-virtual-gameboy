@@ -1,94 +1,45 @@
 #include "gbvm.h"
-#include "univ_strings.h"
-#include "univ_defs.h"
+#include "gbvm_assembler.h"
+#include "univ_malloc.h"
+#include "univ_cmdutils.h"
 
-Vm vm = { 0 };
+void processFlag(const char* program, const char* flag, int* argc, char*** argv);
+const char* inputFile = NULL;
+int limit = -1;
 
-char cmd[256];
-char inputFile[100];
-char outputFile[100];
-
-void getInput()
+int main(int argc, char** argv)
 {
-    printf("Enter input file : ");
-    scanf("%99s", inputFile);
-}
-void getOutput()
-{
-    printf("Enter output file : ");
-    scanf("%99s", outputFile);
-}
+    static Vm vm = { 0 };
 
-void getAssemblerCmd()
-{
-    char mode;
-    printf("Select mode : \n");
-    printf("a Assembly    \n");
-    printf("d Disassembly \n");
-    printf("Enter choice : ");
+    const char* program = getNextCmdLineArg(&argc, &argv);
 
-    while (getchar() != '\n')
-        ;
-
-    scanf("%c", &mode);
-
-    snprintf(cmd, sizeof(cmd), "./sasm -i %s -o %s -%c", inputFile, outputFile, mode);
-}
-
-void getCompilerCmd()
-{
-    snprintf(cmd, sizeof(cmd), "./occ -i %s -o %s", inputFile, outputFile);
-}
-
-void runner(int ch)
-{
-    getOutput();
-
-    if (ch == 0) {
-        getAssemblerCmd();
-    } else {
-        getCompilerCmd();
+    while (argc > 0) {
+        const char* flag = getNextCmdLineArg(&argc, &argv);
+        processFlag(program, flag, &argc, &argv);
     }
 
-    if (system(cmd) != 0) {
-        displayMsgWithExit("Task Failed");
+    if (inputFile == NULL) {
+        fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-h]\n", program);
+        displayMsgWithExit("ERROR: input was not provided\n");
     }
-
-    printf("Task Completed\n");
-}
-
-void menu(int ch)
-{
-    if (ch == 0) {
-        return;
-    }
-
-    getInput();
-
-    if (ch < 3) {
-        runner(ch - 1);
-        return;
-    }
-
     loadProgram(&vm, inputFile);
-    vm.cpu.registers.IP = 0;
-    executeProgram(&vm, ch - 3, 0);
-    printf("Program completed\n");
+    loadStandardCalls(&vm);
+    executeProgram(&vm, 0, limit);
+
+    return 0;
 }
-
-int main()
+void processFlag(const char* program, const char* flag, int* argc, char*** argv)
 {
-    int ch = 0;
-    do {
-        printf("\n0. Exit"
-               "\n1. Run Assembler"
-               "\n2. Run Compiler"
-               "\n3. Run ASSEMBLY Program"
-               "\n4. Debug ASSEMBLY Program - with stack"
-               "\n5. Debug ASSEMBLY Program - with stack and flags"
-               "\nEnter choice : ");
-        scanf("%d", &ch);
-        menu(ch);
 
-    } while (ch != 0);
+    switch (flag[1]) {
+    case 'i':
+        inputFile = getNextCmdLineArg(argc, argv);
+        return;
+    case 'l':
+        limit = atoi(getNextCmdLineArg(argc, argv));
+        return;
+    default:
+        fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-h]\n", program);
+        displayMsgWithExit("Unknown option provided.");
+    }
 }

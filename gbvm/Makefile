@@ -20,14 +20,14 @@ CMDIR = ./VM/src
 _A_HEAD = 		sasm_assembler.h	sasm_instructions.c		sasm_memory.h
 _A_CODE = 		sasm_assembler.c	sasm_instructions.c		sasm_memory.c
 
-_G_HEAD = 		univ_cmdutils.h 	univ_errors.h		    univ_fileops.h 		 univ_strings.h			univ_defs.h 
-_G_CODE = 		univ_cmdutils.c		univ_errors.c		    univ_fileops.c 		 univ_strings.c
+_G_HEAD = 		univ_cmdutils.h 	univ_errors.h			univ_fileops.h 		univ_strings.h		univ_malloc.h	univ_defs.h 
+_G_CODE = 		univ_cmdutils.c		univ_errors.c			univ_fileops.c 		univ_strings.c		univ_malloc.c
 
 _C_HEAD =		O_lexer.h			O_parser.h				O_codegenerator.h 	
 _C_CODE = 		O_lexer.c			O_parser.c				O_codegenerator.c 	
 
-_M_HEAD = 		gbvm.h
-_M_CODE =		gbvm.c
+_M_HEAD = 		gbvm_assembler.h	gbvm.h					gbvm_vmcalls.h
+_M_CODE =		gbvm_assembler.c	gbvm.c					gbvm_vmcalls.c
 
 G_HEAD = 		$(patsubst %, 		$(IGDIR)/%,				$(_G_HEAD))
 G_CODE = 		$(patsubst %, 		$(CGDIR)/%,				$(_G_CODE))
@@ -46,7 +46,7 @@ MAKEFLAGS += --no-print-directory
 
 
 CC = gcc
-CFLAGS = -O3 -Wall -Wextra -Werror -Wfatal-errors -Wswitch-enum -std=c99 -pedantic -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
+CFLAGS = -O3 -Wall -Wextra -Werror -Wfatal-errors -Wswitch-enum -std=c2x -pedantic -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
 LIBS =
 
 sasm: 	sasm.c $(G_CODE) $(A_CODE)

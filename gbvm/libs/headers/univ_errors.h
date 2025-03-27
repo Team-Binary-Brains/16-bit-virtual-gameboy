@@ -15,14 +15,17 @@
 #include "univ_strings.h"
 
 typedef enum {
-    ERR_OK = 0,                /**< No error */
-    ERR_STACK_OVERFLOW,        /**< Stack overflow error */
-    ERR_STACK_UNDERFLOW,       /**< Stack underflow error */
-    ERR_DIV_BY_ZERO,           /**< Division by zero error */
-    ERR_ILLEGAL_INST,          /**< Illegal instruction error */
-    ERR_ILLEGAL_INST_ACCESS,   /**< Illegal instruction access error */
-    ERR_ILLEGAL_OPERAND,       /**< Illegal operand error */
-    ERR_ILLEGAL_ALU_OPERATION, /**< Illegal ALU operation error */
+    ERR_OK = 0,              /**< No error */
+    ERR_STACK_OVERFLOW,      /**< Stack overflow error */
+    ERR_STACK_UNDERFLOW,     /**< Stack underflow error */
+    ERR_DIV_BY_ZERO,         /**< Division by zero error */
+    ERR_ILLEGAL_INST,        /**< Illegal instruction error */
+    ERR_ILLEGAL_INST_ACCESS, /**< Illegal instruction access error */
+    ERR_ILLEGAL_OPERAND,     /**< Illegal operand error */
+    ERR_NULL_CALL,           /**< called NULL vmcall */
+    ERR_ILLEGAL_MEMORY_ACCESS,
+    ERR_NAN,
+    ERR_ALREADY_BOUND
 } Error;
 
 /**
@@ -93,3 +96,5 @@ void displayStringMessageError(const char*, String);
 void debugCommentDisplay(String*);
 
 void debugMessageDisplay(String* s);
+
+void displayErrorDetailsWithExit(String filePath, int lineNo);
