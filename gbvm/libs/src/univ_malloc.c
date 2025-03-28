@@ -34,33 +34,34 @@ void* regionAllocAligned(Region* region, size_t size, size_t alignment)
     Partition* cur = region->last;
     while (true) {
 
-        char* ptr = (char*)(((uintptr_t)(cur->buffer + cur->size + (alignment - 1))) & ~(alignment - 1));
-        size_t realSize = (size_t)((ptr + size) - (cur->buffer + cur->size));
+        uintptr_t tmp = (uintptr_t)(cur->buffer + cur->size + (alignment - 1));
+        tmp = tmp & ~(alignment - 1);
 
-        if (cur->size + realSize > cur->capacity) {
-            if (cur->next) {
+        char* ptr = (char*)tmp;
+        size_t realSize = (ptr + size) - (cur->buffer + cur->size);
 
-                cur = cur->next;
-                continue;
+        if (cur->size + realSize <= cur->capacity) {
 
-            } else {
-                size_t worstCase = size + (alignment - 1);
-
-                Partition* part = partitionCreate(worstCase > REGION_DEFAULT_CAPACITY
-                        ? worstCase
-                        : REGION_DEFAULT_CAPACITY);
-
-                region->last->next = part;
-                region->last = part;
-                cur = region->last;
-
-                continue;
-            }
-        } else {
             memset(ptr, 0, realSize);
             cur->size += realSize;
             return ptr;
         }
+
+        if (cur->next) {
+            cur = cur->next;
+            continue;
+        }
+
+        size_t worstCase = size + (alignment - 1);
+
+        Partition* part = partitionCreate(
+            worstCase > REGION_DEFAULT_CAPACITY
+                ? worstCase
+                : REGION_DEFAULT_CAPACITY);
+
+        region->last->next = part;
+        region->last = part;
+        cur = region->last;
     }
 }
 
