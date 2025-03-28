@@ -1,12 +1,12 @@
 #include "gbvm.h"
 
-void pushCall(Vm* vm, InternalVmCall call)
+void loadInternalCallIntoVm(Vm* vm, InternalVmCall call)
 {
     assert(vm->vmCalls.internalVmCallsDefined < INTERNAL_VMCALLS_CAPACITY);
     vm->vmCalls.VmCallI[vm->vmCalls.internalVmCallsDefined++] = call;
 }
 
-void loadProgram(Vm* vm, const char* file_path)
+void loadProgramIntoVm(Vm* vm, const char* file_path)
 {
     memset(vm, 0, sizeof(*vm));
 
@@ -92,7 +92,6 @@ void loadProgram(Vm* vm, const char* file_path)
     }
 
     n = fread(vm->mem.memory, sizeof(vm->mem.memory[0]), meta.memorySize, f);
-    vm->mem.expectedMemorySize = meta.memorySize;
 
     if (n != meta.memorySize) {
         fprintf(stderr, "ERROR: %s: read %zd bytes of memory section, but expected %" PRIu64 " bytes.\n",
@@ -114,15 +113,15 @@ void loadProgram(Vm* vm, const char* file_path)
     fclose(f);
 }
 
-void loadStandardCalls(Vm* vm)
+void loadStandardCallsIntoVm(Vm* vm)
 {
-    pushCall(vm, vmcall_alloc);           // 0
-    pushCall(vm, vmcall_free);            // 1
-    pushCall(vm, vmcall_print_f64);       // 2
-    pushCall(vm, vmcall_print_i64);       // 3
-    pushCall(vm, vmcall_print_u64);       // 4
-    pushCall(vm, vmcall_print_ptr);       // 5
-    pushCall(vm, vmcall_dump_memory);     // 6
-    pushCall(vm, vmcall_write);           // 7
-    pushCall(vm, vmcall_set_color);       // 8
+    loadInternalCallIntoVm(vm, vmcall_alloc);           // 0
+    loadInternalCallIntoVm(vm, vmcall_free);            // 1
+    loadInternalCallIntoVm(vm, vmcall_print_f64);       // 2
+    loadInternalCallIntoVm(vm, vmcall_print_i64);       // 3
+    loadInternalCallIntoVm(vm, vmcall_print_u64);       // 4
+    loadInternalCallIntoVm(vm, vmcall_print_ptr);       // 5
+    loadInternalCallIntoVm(vm, vmcall_dump_memory);     // 6
+    loadInternalCallIntoVm(vm, vmcall_write);           // 7
+    loadInternalCallIntoVm(vm, vmcall_set_color);       // 8
 }

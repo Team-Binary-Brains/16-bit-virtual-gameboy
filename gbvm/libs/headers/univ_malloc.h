@@ -20,12 +20,10 @@ typedef struct {
     Partition* last;
 } Region;
 
-Partition* partitionCreate(size_t capacity);
-
-void* allocateAlignedRegion(Region* region, size_t size, size_t alignment);
+Partition* createPartition(size_t capacity);
 
 void* allocateRegion(Region* region, size_t size);
 
-int loadFileIntoRegionString(Region* region, String file_path, String* content);
+int loadFileIntoRegionStr(Region* region, String file_path, String* content);
 
-const char* convertStringToRegionCstr(Region* region, String str);
+const char* convertStrToRegionCstr(Region* region, String str);

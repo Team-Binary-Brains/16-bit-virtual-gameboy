@@ -14,7 +14,7 @@ uint64_t evalRegister(CPU* cpu, String tmp)
     if (0 == strncmp(tmp.data, "DI", 2))
         return cpu->registers.DI.as_u64;
 
-    return strToInt(tmp);
+    return convertStrToInt(tmp);
 }
 
 uint64_t resolveAddress(CPU* cpu, String* s)

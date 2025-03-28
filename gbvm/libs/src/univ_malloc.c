@@ -5,7 +5,7 @@
 #include "univ_malloc.h"
 #include "univ_fileops.h"
 
-Partition* partitionCreate(size_t capacity)
+Partition* createPartition(size_t capacity)
 {
     const size_t partSize = sizeof(Partition) + capacity;
     Partition* part = malloc(partSize);
@@ -35,7 +35,7 @@ char* insertIntoOrExpandRegion(Region* region, Partition* cur, size_t size, size
 
     size_t worstCase = (size + alignedAddressMask) & ~alignedAddressMask;
 
-    Partition* part = partitionCreate(
+    Partition* part = createPartition(
         worstCase > REGION_DEFAULT_CAPACITY
             ? worstCase
             : REGION_DEFAULT_CAPACITY);
@@ -52,7 +52,7 @@ void* allocateAlignedRegion(Region* region, size_t size, size_t alignment)
     if (region->last == NULL) {
         assert(region->first == NULL);
 
-        Partition* part = partitionCreate(
+        Partition* part = createPartition(
             size > REGION_DEFAULT_CAPACITY ? size : REGION_DEFAULT_CAPACITY);
 
         region->last = part;
@@ -73,9 +73,9 @@ void* allocateRegion(Region* region, size_t size)
     return allocateAlignedRegion(region, size, sizeof(void*));
 }
 
-int loadFileIntoRegionString(Region* region, String filePath, String* content)
+int loadFileIntoRegionStr(Region* region, String filePath, String* content)
 {
-    const char* filePathCstr = convertStringToRegionCstr(region, filePath);
+    const char* filePathCstr = convertStrToRegionCstr(region, filePath);
 
     FILE* f = openFile(filePathCstr, "rb");
 
@@ -101,7 +101,7 @@ int loadFileIntoRegionString(Region* region, String filePath, String* content)
     return 0;
 }
 
-const char* convertStringToRegionCstr(Region* region, String str)
+const char* convertStrToRegionCstr(Region* region, String str)
 {
     char* cstr = allocateRegion(region, str.length + 1);
     memcpy(cstr, str.data, str.length);

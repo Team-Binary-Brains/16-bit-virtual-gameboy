@@ -57,7 +57,7 @@ void executeProgram(Vm* vm, int debug, int lim)
     if (lim == 0 || getFlag(HALT, cpu)) {
         return;
     }
-    String operation = cstrToStr(getOpcodeDetails(inst->type).name);
+    String operation = convertCstrToStr(getOpcodeDetails(inst->type).name);
     Error error = 0;
     switch (debug) {
     case 2:

@@ -46,7 +46,7 @@ Error includeDirective(Sasm* sasm, String* line)
 Error processPreProcessorDirective(Sasm* sasm, String* line, String token)
 {
     *line = trim(*line);
-    if (strEqu(token, cstrToStr("bind"))) {
+    if (compareStr(token, convertCstrToStr("bind"))) {
         String name = splitStr(line, ' ');
         if (name.length <= 0) {
             displayMsgWithExit(" ERROR: binding name is not provided\n");
@@ -54,7 +54,7 @@ Error processPreProcessorDirective(Sasm* sasm, String* line, String token)
         return bindDirective(sasm, name, line);
     }
 
-    if (strEqu(token, cstrToStr("include"))) {
+    if (compareStr(token, convertCstrToStr("include"))) {
         if (line->length <= 0) {
             displayMsgWithExit(" ERROR: include file path is not provided\n");
         }
@@ -110,7 +110,7 @@ bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
         return true;
     }
 
-    const char* cstr = convertStringToRegionCstr(&sasm->region, str);
+    const char* cstr = convertStrToRegionCstr(&sasm->region, str);
     char* endptr = 0;
     QuadWord result = { 0 };
 
@@ -130,7 +130,7 @@ bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
 bool resolveBinding(const Sasm* sasm, String name, QuadWord* output)
 {
     for (size_t i = 0; i < sasm->bindingCount; ++i) {
-        if (strEqu(sasm->bindings[i].name, name)) {
+        if (compareStr(sasm->bindings[i].name, name)) {
             *output = sasm->bindings[i].value;
             return true;
         }
@@ -205,7 +205,7 @@ Error processLine(Sasm* sasm, String* line)
 
     String operand;
     OpcodeDetails details;
-    if (strAsOpcode(token, &details)) {
+    if (getOpcodeDetailsFromName(token, &details)) {
         assert(sasm->prog.instruction_count < PROGRAM_CAPACITY);
         Instruction* inst = &sasm->prog.instructions[sasm->prog.instruction_count];
         inst->type = details.type;
@@ -257,7 +257,7 @@ Error processLine(Sasm* sasm, String* line)
 void parseAsmIntoProgram(Sasm* sasm, String inputFilePath)
 {
     String original_source;
-    loadFileIntoRegionString(&sasm->region, inputFilePath, &original_source);
+    loadFileIntoRegionStr(&sasm->region, inputFilePath, &original_source);
     String source = original_source;
 
     int line_number = 0;

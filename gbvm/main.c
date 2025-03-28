@@ -21,8 +21,8 @@ int main(int argc, char** argv)
         fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-h]\n", program);
         displayMsgWithExit("ERROR: input was not provided\n");
     }
-    loadProgram(&vm, inputFile);
-    loadStandardCalls(&vm);
+    loadProgramIntoVm(&vm, inputFile);
+    loadStandardCallsIntoVm(&vm);
     executeProgram(&vm, 0, limit);
 
     return 0;

@@ -89,6 +89,7 @@ typedef enum {
     REG,
     IMM
 } AddrMode;
+
 /**
  * @brief Structure representing an instruction in the SASM assembly language.
  */
@@ -123,6 +124,6 @@ QuadWord quadword_i64(int64_t i64);
 QuadWord quadword_f64(double f64);
 QuadWord quadword_ptr(void* ptr);
 
-bool strAsOpcode(String name, OpcodeDetails* outPtr);
+bool getOpcodeDetailsFromName(String name, OpcodeDetails* outPtr);
 
 OpcodeDetails getOpcodeDetails(Opcode type);

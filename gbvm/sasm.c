@@ -33,7 +33,7 @@ int main(int argc, char** argv)
                                "\tAssembly Sample Command    : ./sasm -i ./test.sasm -o ./test.sm \n"
                                "\tDisassembly Sample Command : ./sasm -i ./test.sm -d\n");
         }
-        parseAsmIntoProgram(&sasm, cstrToStr(inputFile));
+        parseAsmIntoProgram(&sasm, convertCstrToStr(inputFile));
         assembleProgramIntoBytecode(&sasm, outputFile);
     } else {
         if (!inputFile) {

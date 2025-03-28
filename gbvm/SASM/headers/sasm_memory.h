@@ -31,6 +31,7 @@ typedef enum {
     ZERO = 1 << 6,         // 64
     AUX = 1 << 7           // 128
 } Flags;
+
 typedef struct {
     Register AX; /**< Accumulator register */
     Register BX; /**< Base register */
@@ -65,7 +66,6 @@ typedef struct {
 typedef struct {
     QuadWord stack[STACK_CAPACITY]; /**< Stack memory */
     Byte memory[MEMORY_CAPACITY];
-    size_t expectedMemorySize;
 } Memory;
 
 void writeToMemory(Memory* memory, MemoryAddr address, DataEntry data);
