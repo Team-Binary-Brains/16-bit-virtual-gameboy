@@ -1,7 +1,6 @@
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 
 #include "sasm_assembler.h"
-#include "univ_cmdutils.h"
 #include "univ_strings.h"
 #include "univ_malloc.h"
 

@@ -2,7 +2,6 @@
 #include "O_lexer.h"
 #include "O_parser.h"
 #include "O_codegenerator.h"
-#include "univ_cmdutils.h"
 #include "univ_defs.h"
 #include "univ_errors.h"
 #include "univ_fileops.h"
@@ -67,16 +66,14 @@ int main(int argc, char* argv[])
 
 void processFlag(char* flag, int* argc, char*** argv)
 {
-    Option opt = flagAsOption(flag);
 
-    switch (opt) {
-    case FILE_INPUT:
+    switch (flag[1]) {
+    case 'i':
         inputFile = getNextCmdLineArg(argc, argv);
         return;
-    case FILE_OUTPUT:
+    case 'o':
         outputFile = getNextCmdLineArg(argc, argv);
         return;
-    case ASM_LANG:
     default:
         displayMsgWithExit("Unknown option provided.");
     }

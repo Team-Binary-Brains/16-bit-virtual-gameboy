@@ -1,7 +1,6 @@
 #include "gbvm.h"
 #include "gbvm_assembler.h"
 #include "univ_malloc.h"
-#include "univ_cmdutils.h"
 
 void processFlag(const char* program, const char* flag, int* argc, char*** argv);
 const char* inputFile = NULL;
