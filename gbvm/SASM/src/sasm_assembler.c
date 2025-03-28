@@ -285,23 +285,18 @@ void parseAsmIntoProgram(Sasm* sasm, String inputFilePath)
     }
 }
 
-void loadProgramIntoSasm(Sasm* sasm, const char* file_path)
+void loadProgramIntoSasm(Sasm* sasm, const char* filePath)
 {
     memset(sasm, 0, sizeof(*sasm));
 
-    FILE* f = fopen(file_path, "rb");
-    if (f == NULL) {
-        fprintf(stderr, "ERROR: Could not open file `%s`: %s\n",
-            file_path, strerror(errno));
-        exit(1);
-    }
+    FILE* f = openFile(filePath, "rb");
 
     Metadata meta = { 0 };
 
     size_t n = fread(&meta, sizeof(meta), 1, f);
     if (n < 1) {
         fprintf(stderr, "ERROR: Could not read meta data from file `%s`: %s\n",
-            file_path, strerror(errno));
+            filePath, strerror(errno));
         exit(1);
     }
 
@@ -309,52 +304,42 @@ void loadProgramIntoSasm(Sasm* sasm, const char* file_path)
         fprintf(stderr,
             "ERROR: %s does not appear to be a valid sasm file. "
             "Unexpected magic %04X. Expected %04X.\n",
-            file_path,
-            meta.magic, FILE_MAGIC);
+            filePath, meta.magic, FILE_MAGIC);
         exit(1);
     }
 
     if (meta.version != FILE_VERSION) {
         fprintf(stderr,
             "ERROR: %s: unsupported version of sasm file %d. Expected version %d.\n",
-            file_path,
-            meta.version, FILE_VERSION);
+            filePath, meta.version, FILE_VERSION);
         exit(1);
     }
 
     if (meta.programSize > PROGRAM_CAPACITY) {
         fprintf(stderr,
             "ERROR: %s: program section is too big. The file contains %" PRIu64 " program instruction. But the capacity is %" PRIu64 "\n",
-            file_path,
-            meta.programSize,
-            (uint64_t)PROGRAM_CAPACITY);
+            filePath, meta.programSize, (uint64_t)PROGRAM_CAPACITY);
         exit(1);
     }
 
     if (meta.memoryCapacity > MEMORY_CAPACITY) {
         fprintf(stderr,
             "ERROR: %s: memory section is too big. The file wants %" PRIu64 " bytes. But the capacity is %" PRIu64 " bytes\n",
-            file_path,
-            meta.memoryCapacity,
-            (uint64_t)MEMORY_CAPACITY);
+            filePath, meta.memoryCapacity, (uint64_t)MEMORY_CAPACITY);
         exit(1);
     }
 
     if (meta.memorySize > meta.memoryCapacity) {
         fprintf(stderr,
             "ERROR: %s: memory size %" PRIu64 " is greater than declared memory capacity %" PRIu64 "\n",
-            file_path,
-            meta.memorySize,
-            meta.memoryCapacity);
+            filePath, meta.memorySize, meta.memoryCapacity);
         exit(1);
     }
 
     if (meta.externalsSize > EXTERNAL_VMCALLS_CAPACITY) {
         fprintf(stderr,
             "ERROR: %s: external names section is too big. The file contains %" PRIu64 " external names. But the capacity is %" PRIu64 " external names\n",
-            file_path,
-            meta.externalsSize,
-            (uint64_t)EXTERNAL_VMCALLS_CAPACITY);
+            filePath, meta.externalsSize, (uint64_t)EXTERNAL_VMCALLS_CAPACITY);
         exit(1);
     }
 
@@ -362,9 +347,7 @@ void loadProgramIntoSasm(Sasm* sasm, const char* file_path)
 
     if (sasm->prog.instruction_count != meta.programSize) {
         fprintf(stderr, "ERROR: %s: read %" PRIu64 " program instructions, but expected %" PRIu64 "\n",
-            file_path,
-            sasm->prog.instruction_count,
-            meta.programSize);
+            filePath, sasm->prog.instruction_count, meta.programSize);
         exit(1);
     }
 
@@ -372,11 +355,9 @@ void loadProgramIntoSasm(Sasm* sasm, const char* file_path)
 
     if (n != meta.memorySize) {
         fprintf(stderr, "ERROR: %s: read %zd bytes of memory section, but expected %" PRIu64 " bytes.\n",
-            file_path,
-            n,
-            meta.memorySize);
+            filePath, n, meta.memorySize);
         exit(1);
     }
 
-    fclose(f);
+    closeFile(f, filePath);
 }
