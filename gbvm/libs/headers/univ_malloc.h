@@ -22,10 +22,10 @@ typedef struct {
 
 Partition* partitionCreate(size_t capacity);
 
-void* regionAllocAligned(Region* region, size_t size, size_t alignment);
+void* allocateAlignedRegion(Region* region, size_t size, size_t alignment);
 
-void* regionAlloc(Region* region, size_t size);
+void* allocateRegion(Region* region, size_t size);
 
-int regionSlurpFile(Region* region, String file_path, String* content);
+int loadFileIntoRegionString(Region* region, String file_path, String* content);
 
-const char* regionStrToCstr(Region* region, String str);
+const char* convertStringToRegionCstr(Region* region, String str);
