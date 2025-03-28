@@ -18,7 +18,6 @@ typedef struct {
 } VmCalls;
 
 Error vmcall_write(CPU* cpu, Memory* mem);
-Error vmcall_external(CPU* cpu, Memory* mem);
 Error vmcall_alloc(CPU* cpu, Memory* mem);
 Error vmcall_free(CPU* cpu, Memory* mem);
 Error vmcall_print_f64(CPU* cpu, Memory* mem);
