@@ -1,23 +1,6 @@
 
 #include "gbvm.h"
 
-Error vmcall_external(CPU* cpu, Memory* mem)
-{
-    if (cpu->registers.SP.as_u64 < 1) {
-        return ERR_STACK_UNDERFLOW;
-    }
-
-    MemoryAddr addr = mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-
-    if (addr >= MEMORY_CAPACITY) {
-        return ERR_ILLEGAL_MEMORY_ACCESS;
-    }
-
-    mem->stack[cpu->registers.SP.as_u64 - 1].as_ptr = &mem->memory[addr];
-
-    return ERR_OK;
-}
-
 Error vmcall_write(CPU* cpu, Memory* mem)
 {
     if (cpu->registers.SP.as_u64 < 2) {

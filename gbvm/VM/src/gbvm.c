@@ -31,10 +31,10 @@ void dumpFlags(FILE* stream, CPU* cpu)
 void dumpDetails(FILE* stream, String* operation, QuadWord lineNumber, Instruction* inst)
 {
     fprintf(stream, "\n------------------------------DETAILS-----------------------------------------"
-                    "\n  Instruction Number :\t%ld                                                    "
+                    "\n  Instruction Number :\t%ld                                                   "
                     "\n  Instruction :\t\t%.*s                                                       "
-                    "\n  Operand1 : \t\t%ld                                                           "
-                    "\n  Operand2 : \t\t%ld                                                           "
+                    "\n  Operand1 : \t\t%ld                                                          "
+                    "\n  Operand2 : \t\t%ld                                                          "
                     "\n------------------------------DETAILS----------------------------------------- \n",
         lineNumber.as_u64,
         (int)operation->length, operation->data,
@@ -48,9 +48,11 @@ void executeProgram(Vm* vm, int debug, int lim)
     Program* prog = &(vm->prog);
     VmCalls* calls = &(vm->vmCalls);
     Instruction* inst = &(prog->instructions[vm->cpu.registers.IP.as_u64]);
+
     if (lim == 0 || getFlag(HALT, cpu)) {
         return;
     }
+
     String operation = convertCstrToStr(getOpcodeDetails(inst->type).name);
     Error error = 0;
     switch (debug) {

@@ -5,6 +5,7 @@
 void processFlag(const char* program, const char* flag, int* argc, char*** argv);
 const char* inputFile = NULL;
 int limit = -1;
+int debug = 0;
 
 int main(int argc, char** argv)
 {
@@ -18,12 +19,12 @@ int main(int argc, char** argv)
     }
 
     if (inputFile == NULL) {
-        fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-h]\n", program);
+        fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-d <debug_level>]\n", program);
         displayMsgWithExit("ERROR: input was not provided\n");
     }
     loadProgramIntoVm(&vm, inputFile);
     loadStandardCallsIntoVm(&vm);
-    executeProgram(&vm, 0, limit);
+    executeProgram(&vm, debug, limit);
 
     return 0;
 }
@@ -37,8 +38,11 @@ void processFlag(const char* program, const char* flag, int* argc, char*** argv)
     case 'l':
         limit = atoi(getNextCmdLineArg(argc, argv));
         return;
+    case 'd':
+        debug = atoi(getNextCmdLineArg(argc, argv));
+        return;
     default:
-        fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-h]\n", program);
+        fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-d <debug_level>]\n", program);
         displayMsgWithExit("Unknown option provided.");
     }
 }
