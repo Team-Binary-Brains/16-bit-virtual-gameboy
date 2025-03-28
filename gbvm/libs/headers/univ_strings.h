@@ -91,7 +91,7 @@ String splitStr(String*, char);
  * @param s The input string.
  * @return The integer value represented by the string.
  */
-uint64_t strToInt(String);
+uint64_t convertStrToInt(String);
 
 /**
  * @brief Prints a string to the standard output.
@@ -102,6 +102,6 @@ uint64_t strToInt(String);
  */
 void printString(String s);
 
-bool strEqu(String a, String b);
+bool compareStr(String a, String b);
 
-String cstrToStr(const char*);
+String convertCstrToStr(const char*);

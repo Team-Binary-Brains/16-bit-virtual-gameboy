@@ -89,10 +89,10 @@ QuadWord quadword_ptr(void* ptr)
     return (QuadWord) { .as_ptr = ptr };
 }
 
-bool strAsOpcode(String name, OpcodeDetails* out_ptr)
+bool getOpcodeDetailsFromName(String name, OpcodeDetails* out_ptr)
 {
     for (Opcode type = 0; type < NUMBER_OF_INSTS; type += 1) {
-        if (strEqu(cstrToStr(OpcodeDetailsMap[type].name), name)) {
+        if (compareStr(convertCstrToStr(OpcodeDetailsMap[type].name), name)) {
             *out_ptr = OpcodeDetailsMap[type];
             return 1;
         }

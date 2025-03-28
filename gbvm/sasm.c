@@ -1,7 +1,6 @@
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 
 #include "sasm_assembler.h"
-#include "univ_cmdutils.h"
 #include "univ_strings.h"
 #include "univ_malloc.h"
 
@@ -34,7 +33,7 @@ int main(int argc, char** argv)
                                "\tAssembly Sample Command    : ./sasm -i ./test.sasm -o ./test.sm \n"
                                "\tDisassembly Sample Command : ./sasm -i ./test.sm -d\n");
         }
-        parseAsmIntoProgram(&sasm, cstrToStr(inputFile));
+        parseAsmIntoProgram(&sasm, convertCstrToStr(inputFile));
         assembleProgramIntoBytecode(&sasm, outputFile);
     } else {
         if (!inputFile) {

@@ -15,40 +15,30 @@
 #include "sasm_assembler.h"
 
 #pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
-/**
- * @brief Structure representing the registers of the CPU.
- */
 
 typedef QuadWord Register;
 
 typedef enum {
-    HALT = 1 << 0,         // 1
-    SIGN = 1 << 1,         // 2
-    OVERFLOW = 1 << 2,     // 4
-    CARRY = 1 << 3,        // 8
-    BORROW = 1 << 4,       // 16
-    PARITY = 1 << 5,       // 32
-    ZERO = 1 << 6,         // 64
-    AUX = 1 << 7           // 128
+    HALT = 1 << 0,     // 1
+    F1 = 1 << 1,       // 2
+    F2 = 1 << 2,       // 4
+    F3 = 1 << 3,       // 8
+    F4 = 1 << 4,       // 16
+    F5 = 1 << 5,       // 32
+    F6 = 1 << 6,       // 64
+    F7 = 1 << 7        // 128
 } Flags;
+
 typedef struct {
-    Register AX; /**< Accumulator register */
-    Register BX; /**< Base register */
-    Register CX; /**< Counter register */
-    Register DX; /**< Data register */
+    Register AX;
+    Register BX;
+    Register CX;
+    Register DX;
 
-    QuadWord CS; /**< Points at current code segment */
-    QuadWord IP; /**< Instruction pointer register */
+    QuadWord IP;
 
-    QuadWord SS; /**< Points at current stack segment */
-    QuadWord SP; /**< Stack pointer register */
+    QuadWord SP;
 
-    QuadWord SI; /**< Source index register */
-    QuadWord DI; /**< Destination index register */
-    QuadWord DS; /**< Points at current data segment */
-
-    QuadWord ES; /**< Extra segment */
-    QuadWord EP; /**< Extra pointer register */
 } Registers;
 
 /**
@@ -65,39 +55,10 @@ typedef struct {
 typedef struct {
     QuadWord stack[STACK_CAPACITY]; /**< Stack memory */
     Byte memory[MEMORY_CAPACITY];
-    size_t expectedMemorySize;
 } Memory;
-
-void writeToMemory(Memory* memory, MemoryAddr address, DataEntry data);
-
-DataEntry readFromMemory(Memory* memory, MemoryAddr address);
-
-/**
- * @brief Evaluates the value of a register.
- *
- * This function evaluates the value of a register based on the given CPU and temporary string.
- *
- * @param cpu The CPU structure.
- * @param tmp The temporary string.
- * @return The value of the register.
- */
-uint64_t evalRegister(CPU* cpu, String tmp);
-
-/**
- * @brief Resolves the address based on the given  string.
- *
- * @param cpu The CPU structure.
- * @param s The string containing the address.
- * @return The resolved address.
- */
-MemoryAddr resolveAddress(CPU* cpu, String* s);
-
-MemoryAddr resolveImmediateAddress(Sasm* sasm, String* s);
 
 void setFlag(Flags f, CPU* cpu, bool state);
 
 bool getFlag(Flags f, const CPU* cpu);
-
-void checkAndSetParity(CPU* cpu, uint64_t num);
 
 bool evaluateAddressingMode(Memory* mem, CPU* cpu, AddrMode mode, QuadWord* val, QuadWord* out);
