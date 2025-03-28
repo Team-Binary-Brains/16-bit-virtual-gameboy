@@ -2,7 +2,8 @@
 #include "O_symbol_table.h"
 
 // Create a new symbol table, linking it to a parent scope (or NULL if global)
-SymbolTable* createSymbolTable(SymbolTable* parent) {
+SymbolTable* createSymbolTable(SymbolTable* parent)
+{
     SymbolTable* symTable = malloc(sizeof(SymbolTable));
     symTable->table = createHashTable(100, stringHashFunc, stringKeyCompare, stringKeyDestroy, free);
     symTable->parent = parent;
@@ -10,13 +11,15 @@ SymbolTable* createSymbolTable(SymbolTable* parent) {
 }
 
 // Destroy a symbol table (but does NOT free parent scope)
-void destroySymbolTable(SymbolTable* symTable) {
+void destroySymbolTable(SymbolTable* symTable)
+{
     destroyHashTable(symTable->table);
     free(symTable);
 }
 
 // Insert a symbol into the **current scope only**
-void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, void* memAddress) {
+void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, void* memAddress)
+{
     if (!currentScope) {
         printf("Error: No active scope for insertion\n");
         exit(1);
@@ -38,20 +41,22 @@ void insertSymbol(SymbolTable* currentScope, const char* name, TokenType type, v
 }
 
 // Lookup a symbol in the current scope or any parent scope (recursive search)
-SymbolEntry* lookupSymbol(SymbolTable* currentScope, const char* name) {
+SymbolEntry* lookupSymbol(SymbolTable* currentScope, const char* name)
+{
     SymbolTable* scope = currentScope;
     while (scope) {
         SymbolEntry* entry = retrieve(scope->table, name);
         if (entry) {
             return entry;
         }
-        scope = scope->parent; // Move to parent scope
+        scope = scope->parent;     // Move to parent scope
     }
-    return NULL; // Not found
+    return NULL;     // Not found
 }
 
 // Update a symbol in the closest scope where it is declared
-void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress) {
+void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress)
+{
     SymbolTable* scope = currentScope;
     while (scope) {
         SymbolEntry* entry = retrieve(scope->table, name);
@@ -59,7 +64,7 @@ void updateSymbol(SymbolTable* currentScope, const char* name, void* memAddress)
             entry->memAddress = memAddress;
             return;
         }
-        scope = scope->parent; // Move to parent scope
+        scope = scope->parent;     // Move to parent scope
     }
     printf("Semantic error: '%s' is not declared\n", name);
     exit(1);

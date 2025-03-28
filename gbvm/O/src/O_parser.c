@@ -5,17 +5,19 @@
 #include "O_symbol_table.h"
 #include "O_debug_help.h"
 
+#pragma GCC diagnostic ignored "-Wswitch-enum"
 /* match: Verifies that the current token matches the expected type.
    Advances the token pointer if successful; otherwise, exits with an error.
 */
-Token* match(Token** currentToken, TokenType expectedType) {
+Token* match(Token** currentToken, TokenType expectedType)
+{
     if ((*currentToken)->type == expectedType) {
         Token* matchedToken = *currentToken;
         (*currentToken)++;
         return matchedToken;
     } else {
         printf("Syntax error: Expected token type %s but found %s at line %zu\n",
-               StrTokenType[expectedType], StrTokenType[(*currentToken)->type], (*currentToken)->lineNum);
+            StrTokenType[expectedType], StrTokenType[(*currentToken)->type], (*currentToken)->lineNum);
         exit(1);
     }
 }
@@ -23,7 +25,8 @@ Token* match(Token** currentToken, TokenType expectedType) {
 /* Expression Parsing */
 
 // parsePrimaryExpr: Handles "(" Expression ")" | Identifier | INT_L | FLOAT_L | CHAR_L | STR_L
-ParseTreeNode* parsePrimaryExpr(Token** currentToken, SymbolTable *symTable) {
+ParseTreeNode* parsePrimaryExpr(Token** currentToken, SymbolTable* symTable)
+{
     if ((*currentToken)->type == LPAREN) {
         match(currentToken, LPAREN);
         ParseTreeNode* exprNode = parseExpression(currentToken, symTable);
@@ -43,12 +46,11 @@ ParseTreeNode* parsePrimaryExpr(Token** currentToken, SymbolTable *symTable) {
     }
 }
 
-
 // parseMultiplicativeExpr: Handles "*", "/" and "%" operators.
-ParseTreeNode* parseMultiplicativeExpr(Token** currentToken, SymbolTable *symTable) {
+ParseTreeNode* parseMultiplicativeExpr(Token** currentToken, SymbolTable* symTable)
+{
     ParseTreeNode* left = parsePrimaryExpr(currentToken, symTable);
-    while ((*currentToken)->type == STAR || (*currentToken)->type == SLASH ||
-           (*currentToken)->type == MOD) {
+    while ((*currentToken)->type == STAR || (*currentToken)->type == SLASH || (*currentToken)->type == MOD) {
         TokenType opType = (*currentToken)->type;
         ParseTreeNode* opNode = createParseTreeNode(match(currentToken, opType), NULL);
         addChild(opNode, left);
@@ -59,7 +61,8 @@ ParseTreeNode* parseMultiplicativeExpr(Token** currentToken, SymbolTable *symTab
 }
 
 // parseAdditiveExpr: Handles "+" and "-" operators.
-ParseTreeNode* parseAdditiveExpr(Token** currentToken, SymbolTable *symTable) {
+ParseTreeNode* parseAdditiveExpr(Token** currentToken, SymbolTable* symTable)
+{
     ParseTreeNode* left = parseMultiplicativeExpr(currentToken, symTable);
     while ((*currentToken)->type == PLUS || (*currentToken)->type == MINUS) {
         TokenType opType = (*currentToken)->type;
@@ -72,11 +75,10 @@ ParseTreeNode* parseAdditiveExpr(Token** currentToken, SymbolTable *symTable) {
 }
 
 // parseRelationalExpr: Handles relational operators: "==", "!=", "<", "<=", ">" and ">=".
-ParseTreeNode* parseExpression(Token** currentToken, SymbolTable *symTable) {
+ParseTreeNode* parseExpression(Token** currentToken, SymbolTable* symTable)
+{
     ParseTreeNode* left = parseAdditiveExpr(currentToken, symTable);
-    while ((*currentToken)->type == EQ || (*currentToken)->type == NEQ ||
-           (*currentToken)->type == LT || (*currentToken)->type == LE ||
-           (*currentToken)->type == GT || (*currentToken)->type == GE) {
+    while ((*currentToken)->type == EQ || (*currentToken)->type == NEQ || (*currentToken)->type == LT || (*currentToken)->type == LE || (*currentToken)->type == GT || (*currentToken)->type == GE) {
         TokenType opType = (*currentToken)->type;
         Token* opToken = match(currentToken, opType);
         ParseTreeNode* opNode = createParseTreeNode(opToken, NULL);
@@ -91,18 +93,19 @@ ParseTreeNode* parseExpression(Token** currentToken, SymbolTable *symTable) {
 /* Statement Parsing */
 
 // parseDeclaration: Handles "DATATYPE Identifier [ "=" Expression ] ";".
-ParseTreeNode* parseDeclaration(Token** currentToken, SymbolTable *symTable, int flag) {
-    ParseTreeNode* declNode = createParseTreeNode(&(Token){.value = "DECLARATION", .type = BEGINNING}, NULL);
-    Token* typeToken = match(currentToken, (*currentToken)->type); // Accept int, float, char, string
+ParseTreeNode* parseDeclaration(Token** currentToken, SymbolTable* symTable, int flag)
+{
+    ParseTreeNode* declNode = createParseTreeNode(&(Token) { .value = "DECLARATION", .type = BEGINNING }, NULL);
+    Token* typeToken = match(currentToken, (*currentToken)->type);     // Accept int, float, char, string
     addChild(declNode, createParseTreeNode(typeToken, NULL));
-    
+
     Token* idToken = match(currentToken, IDENTIFIER);
     if (lookupSymbol(symTable, idToken->value)) {
         printf("Semantic error: Redeclaration of variable '%s' at line %zu\n", idToken->value, idToken->lineNum);
         exit(1);
     }
     addChild(declNode, createParseTreeNode(idToken, NULL));
-    
+
     ParseTreeNode* exprNode = NULL;
     if ((*currentToken)->type == EQUAL) {
         Token* eqToken = match(currentToken, EQUAL);
@@ -110,8 +113,8 @@ ParseTreeNode* parseDeclaration(Token** currentToken, SymbolTable *symTable, int
         exprNode = parseExpression(currentToken, symTable);
         addChild(declNode, exprNode);
     }
-    
-    if(flag == 0){
+
+    if (flag == 0) {
         Token* semicolonToken = match(currentToken, SEMICOLON);
         addChild(declNode, createParseTreeNode(semicolonToken, NULL));
     }
@@ -120,12 +123,13 @@ ParseTreeNode* parseDeclaration(Token** currentToken, SymbolTable *symTable, int
 }
 
 // parseAssignment: Handles "Identifier "=" Expression ";".
-ParseTreeNode* parseAssignment(Token** currentToken, SymbolTable *symTable, int flag) {
-    ParseTreeNode* assignNode = createParseTreeNode(&(Token){.value = "ASSIGNMENT", .type = BEGINNING}, NULL);
+ParseTreeNode* parseAssignment(Token** currentToken, SymbolTable* symTable, int flag)
+{
+    ParseTreeNode* assignNode = createParseTreeNode(&(Token) { .value = "ASSIGNMENT", .type = BEGINNING }, NULL);
     Token* idToken = match(currentToken, IDENTIFIER);
     if (!lookupSymbol(symTable, idToken->value)) {
         printf("Semantic error: Assignment to undeclared variable '%s' at line %zu\n",
-               idToken->value, idToken->lineNum);
+            idToken->value, idToken->lineNum);
         exit(1);
     }
     addChild(assignNode, createParseTreeNode(idToken, NULL));
@@ -133,7 +137,7 @@ ParseTreeNode* parseAssignment(Token** currentToken, SymbolTable *symTable, int 
     addChild(assignNode, createParseTreeNode(eqToken, NULL));
     ParseTreeNode* exprNode = parseExpression(currentToken, symTable);
     addChild(assignNode, exprNode);
-    if(flag==0){
+    if (flag == 0) {
         Token* semicolonToken = match(currentToken, SEMICOLON);
         addChild(assignNode, createParseTreeNode(semicolonToken, NULL));
     }
@@ -144,8 +148,9 @@ ParseTreeNode* parseAssignment(Token** currentToken, SymbolTable *symTable, int 
 }
 
 // parseExitStatement: Handles "exit" "(" Expression ")" ";".
-ParseTreeNode* parseExitStatement(Token** currentToken, SymbolTable *symTable) {
-    ParseTreeNode* exitNode = createParseTreeNode(&(Token){.value = "EXIT_STATEMENT", .type = BEGINNING}, NULL);
+ParseTreeNode* parseExitStatement(Token** currentToken, SymbolTable* symTable)
+{
+    ParseTreeNode* exitNode = createParseTreeNode(&(Token) { .value = "EXIT_STATEMENT", .type = BEGINNING }, NULL);
     Token* exitToken = match(currentToken, EXIT);
     addChild(exitNode, createParseTreeNode(exitToken, NULL));
     Token* lpToken = match(currentToken, LPAREN);
@@ -160,8 +165,9 @@ ParseTreeNode* parseExitStatement(Token** currentToken, SymbolTable *symTable) {
 }
 
 // parsePrintStatement: Handles "print" "(" Expression ")" ";".
-ParseTreeNode* parsePrintStatement(Token** currentToken, SymbolTable *symTable) {
-    ParseTreeNode* printNode = createParseTreeNode(&(Token){.value = "PRINT_STATEMENT", .type = BEGINNING}, NULL);
+ParseTreeNode* parsePrintStatement(Token** currentToken, SymbolTable* symTable)
+{
+    ParseTreeNode* printNode = createParseTreeNode(&(Token) { .value = "PRINT_STATEMENT", .type = BEGINNING }, NULL);
     Token* printToken = match(currentToken, PRINT);
     addChild(printNode, createParseTreeNode(printToken, NULL));
     match(currentToken, LPAREN);
@@ -174,15 +180,16 @@ ParseTreeNode* parsePrintStatement(Token** currentToken, SymbolTable *symTable) 
 }
 
 // parseScanStatement: Handles "scan" "(" Identifier ")" ";".
-ParseTreeNode* parseScanStatement(Token** currentToken, SymbolTable *symTable) {
-    ParseTreeNode* scanNode = createParseTreeNode(&(Token){.value = "SCAN_STATEMENT", .type = BEGINNING}, NULL);
+ParseTreeNode* parseScanStatement(Token** currentToken, SymbolTable* symTable)
+{
+    ParseTreeNode* scanNode = createParseTreeNode(&(Token) { .value = "SCAN_STATEMENT", .type = BEGINNING }, NULL);
     Token* scanToken = match(currentToken, SCAN);
     addChild(scanNode, createParseTreeNode(scanToken, NULL));
     match(currentToken, LPAREN);
     Token* idToken = match(currentToken, IDENTIFIER);
     if (!lookupSymbol(symTable, idToken->value)) {
         printf("Semantic error: Scanned variable '%s' is not declared at line %zu\n",
-               idToken->value, idToken->lineNum);
+            idToken->value, idToken->lineNum);
         exit(1);
     }
     addChild(scanNode, createParseTreeNode(idToken, NULL));
@@ -193,9 +200,10 @@ ParseTreeNode* parseScanStatement(Token** currentToken, SymbolTable *symTable) {
 }
 
 // parseIfStatement: Handles "if" "(" Expression ")" Statement [ "else" Statement ].
-ParseTreeNode* parseIfStatement(Token** currentToken, SymbolTable *symTable) {
+ParseTreeNode* parseIfStatement(Token** currentToken, SymbolTable* symTable)
+{
     SymbolTable* ifScope = createSymbolTable(symTable);
-    ParseTreeNode* ifNode = createParseTreeNode(&(Token){.value = "IF_STATEMENT", .type = BEGINNING}, ifScope);
+    ParseTreeNode* ifNode = createParseTreeNode(&(Token) { .value = "IF_STATEMENT", .type = BEGINNING }, ifScope);
     Token* ifToken = match(currentToken, IF);
     addChild(ifNode, createParseTreeNode(ifToken, NULL));
     match(currentToken, LPAREN);
@@ -215,9 +223,10 @@ ParseTreeNode* parseIfStatement(Token** currentToken, SymbolTable *symTable) {
 }
 
 // parseWhileStatement: Handles "while" "(" Expression ")" Statement.
-ParseTreeNode* parseWhileStatement(Token** currentToken, SymbolTable *symTable) {
+ParseTreeNode* parseWhileStatement(Token** currentToken, SymbolTable* symTable)
+{
     SymbolTable* whileScope = createSymbolTable(symTable);
-    ParseTreeNode* whileNode = createParseTreeNode(&(Token){.value = "WHILE_STATEMENT", .type = BEGINNING}, whileScope);
+    ParseTreeNode* whileNode = createParseTreeNode(&(Token) { .value = "WHILE_STATEMENT", .type = BEGINNING }, whileScope);
     Token* whileToken = match(currentToken, WHILE);
     addChild(whileNode, createParseTreeNode(whileToken, NULL));
     match(currentToken, LPAREN);
@@ -232,19 +241,21 @@ ParseTreeNode* parseWhileStatement(Token** currentToken, SymbolTable *symTable) 
 /* For-loop Parsing Helpers */
 
 // parseForInit: Parses the initializer part of a for-loop.
-ParseTreeNode* parseForInit(Token** currentToken, SymbolTable *symTable) {
+ParseTreeNode* parseForInit(Token** currentToken, SymbolTable* symTable)
+{
     if ((*currentToken)->type == INT)
         return parseDeclaration(currentToken, symTable, 1);
-    else if ((*currentToken)->type == IDENTIFIER && (((*currentToken)+1)->type == EQUAL))
+    else if ((*currentToken)->type == IDENTIFIER && (((*currentToken) + 1)->type == EQUAL))
         return parseAssignment(currentToken, symTable, 1);
     else
         return NULL;
 }
 
 // parseForUpdate: Parses the update part of a for-loop.
-ParseTreeNode* parseForUpdate(Token** currentToken, SymbolTable *symTable) {
+ParseTreeNode* parseForUpdate(Token** currentToken, SymbolTable* symTable)
+{
     if ((*currentToken)->type != RPAREN) {
-        if ((*currentToken)->type == IDENTIFIER && (((*currentToken)+1)->type == EQUAL))
+        if ((*currentToken)->type == IDENTIFIER && (((*currentToken) + 1)->type == EQUAL))
             return parseAssignment(currentToken, symTable, 1);
         else
             return parseExpression(currentToken, symTable);
@@ -255,9 +266,10 @@ ParseTreeNode* parseForUpdate(Token** currentToken, SymbolTable *symTable) {
 
 // parseForStatement: Handles "for" "(" [ForInit] ";" Expression ";" [ForUpdate] ")" Statement.
 // A new scope is created for the for-loop.
-ParseTreeNode* parseForStatement(Token** currentToken, SymbolTable *symTable) {
-    SymbolTable *forScope = createSymbolTable(symTable);
-    ParseTreeNode* forNode = createParseTreeNode(&(Token){.value = "FOR_STATEMENT", .type = BEGINNING}, forScope);
+ParseTreeNode* parseForStatement(Token** currentToken, SymbolTable* symTable)
+{
+    SymbolTable* forScope = createSymbolTable(symTable);
+    ParseTreeNode* forNode = createParseTreeNode(&(Token) { .value = "FOR_STATEMENT", .type = BEGINNING }, forScope);
     Token* forToken = match(currentToken, FOR);
     addChild(forNode, createParseTreeNode(forToken, NULL));
     match(currentToken, LPAREN);
@@ -280,9 +292,10 @@ ParseTreeNode* parseForStatement(Token** currentToken, SymbolTable *symTable) {
 /* Block and Statement Parsing */
 
 // parseBlock: Handles "{" StatementList "}" and creates a new scope.
-ParseTreeNode* parseBlock(Token** currentToken, SymbolTable *symTable) {
-    SymbolTable *localScope = createSymbolTable(symTable);
-    ParseTreeNode* blockNode = createParseTreeNode(&(Token){.value = "BLOCK", .type = BEGINNING}, localScope);
+ParseTreeNode* parseBlock(Token** currentToken, SymbolTable* symTable)
+{
+    SymbolTable* localScope = createSymbolTable(symTable);
+    ParseTreeNode* blockNode = createParseTreeNode(&(Token) { .value = "BLOCK", .type = BEGINNING }, localScope);
     match(currentToken, LBRACE);
     while ((*currentToken)->type != RBRACE) {
         addChild(blockNode, parseStatement(currentToken, localScope));
@@ -292,51 +305,53 @@ ParseTreeNode* parseBlock(Token** currentToken, SymbolTable *symTable) {
 }
 
 // parseStatement: Determines which kind of statement to parse.
-ParseTreeNode* parseStatement(Token** currentToken, SymbolTable *symTable) {
+ParseTreeNode* parseStatement(Token** currentToken, SymbolTable* symTable)
+{
     switch ((*currentToken)->type) {
-        case INT:
-        case FLOAT:
-        case CHAR:
-        case STRING:
-            return parseDeclaration(currentToken, symTable, 0);
-        case IDENTIFIER:
-            if (((*currentToken)+1)->type == EQUAL)
-                return parseAssignment(currentToken, symTable, 0);
-            else {
-                printf("Syntax error: Unexpected identifier usage '%s' at line %zu\n",
-                       (*currentToken)->value, (*currentToken)->lineNum);
-                exit(1);
-            }
-        case EXIT:
-            return parseExitStatement(currentToken, symTable);
-        case IF:
-            return parseIfStatement(currentToken, symTable);
-        case WHILE:
-            return parseWhileStatement(currentToken, symTable);
-        case FOR:
-            return parseForStatement(currentToken, symTable);
-        case LBRACE:
-            return parseBlock(currentToken, symTable);
-        case PRINT:
-            return parsePrintStatement(currentToken, symTable);
-        case SCAN:
-            return parseScanStatement(currentToken, symTable);
-        default:
-            printf("Syntax error: Unexpected token '%s' at line %zu\n",
-                   (*currentToken)->value, (*currentToken)->lineNum);
+    case INT:
+    case FLOAT:
+    case CHAR:
+    case STRING:
+        return parseDeclaration(currentToken, symTable, 0);
+    case IDENTIFIER:
+        if (((*currentToken) + 1)->type == EQUAL)
+            return parseAssignment(currentToken, symTable, 0);
+        else {
+            printf("Syntax error: Unexpected identifier usage '%s' at line %zu\n",
+                (*currentToken)->value, (*currentToken)->lineNum);
             exit(1);
+        }
+    case EXIT:
+        return parseExitStatement(currentToken, symTable);
+    case IF:
+        return parseIfStatement(currentToken, symTable);
+    case WHILE:
+        return parseWhileStatement(currentToken, symTable);
+    case FOR:
+        return parseForStatement(currentToken, symTable);
+    case LBRACE:
+        return parseBlock(currentToken, symTable);
+    case PRINT:
+        return parsePrintStatement(currentToken, symTable);
+    case SCAN:
+        return parseScanStatement(currentToken, symTable);
+    default:
+        printf("Syntax error: Unexpected token '%s' at line %zu\n",
+            (*currentToken)->value, (*currentToken)->lineNum);
+        exit(1);
     }
 }
 
 // Top-level parser: Processes the token stream, builds the parse tree, and manages scope.
-ParseTreeNode* parser(Token* tokens) {
+ParseTreeNode* parser(Token* tokens)
+{
     Token* currentToken = tokens;
-    SymbolTable *globalScope = createSymbolTable(NULL);
-    ParseTreeNode* root = createParseTreeNode(&(Token){.value = "PROGRAM", .type = BEGINNING}, globalScope);
+    SymbolTable* globalScope = createSymbolTable(NULL);
+    ParseTreeNode* root = createParseTreeNode(&(Token) { .value = "PROGRAM", .type = BEGINNING }, globalScope);
     while (currentToken->type != END_OF_TOKENS) {
         addChild(root, parseStatement(&currentToken, globalScope));
     }
     printParseTree(root, NULL, 0);
-    //destroySymbolTable(globalScope);
+    // destroySymbolTable(globalScope);
     return root;
 }

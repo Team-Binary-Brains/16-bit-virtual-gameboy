@@ -13,7 +13,7 @@
 
 ParseTreeNode* parser(Token*);
 
-Token* match(Token** , TokenType);
+Token* match(Token**, TokenType);
 
 ParseTreeNode* parseDeclaration(Token**, SymbolTable*, int flag);
 

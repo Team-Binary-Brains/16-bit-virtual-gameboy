@@ -12,6 +12,8 @@
 #include "univ_defs.h"
 #include "O_parse_tree.h"
 
+#pragma GCC diagnostic ignored "-Wunused-function"
+
 // Enumeration of TAC operations.
 typedef enum {
     TAC_ASSIGN,
@@ -36,10 +38,10 @@ typedef enum {
 
 // Structure representing a single TAC instruction.
 typedef struct TACInstruction {
-    TacOp op;          // Operation code
-    char* result;      // Destination (or label name)
-    char* arg1;        // First operand or condition
-    char* arg2;        // Second operand (if needed)
+    TacOp op;         // Operation code
+    char* result;     // Destination (or label name)
+    char* arg1;       // First operand or condition
+    char* arg2;       // Second operand (if needed)
     struct TACInstruction* next;
 } TACInstruction;
 

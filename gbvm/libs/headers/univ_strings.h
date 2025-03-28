@@ -8,10 +8,10 @@
  * @date January 2025
  */
 
- #pragma once
+#pragma once
 
- #include "univ_defs.h"
- 
+#include "univ_defs.h"
+
 /**
  * @struct String
  * @brief Represents a string with its length and data.

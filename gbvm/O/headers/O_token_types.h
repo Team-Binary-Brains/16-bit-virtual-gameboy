@@ -1,6 +1,8 @@
 #pragma once
 #include "univ_defs.h"
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+
 typedef enum {
     BEGINNING,
     INT,
@@ -107,7 +109,7 @@ static Token OpAndSepTokens[] = {
     { STAR, "*", 0 },
     { SLASH, "/", 0 },
     { MOD, "%", 0 },
-    { EQUAL, "=", 0},
+    { EQUAL, "=", 0 },
     { LT, "<", 0 },
     { GT, ">", 0 },
     { LE, "<=", 0 },
@@ -116,7 +118,6 @@ static Token OpAndSepTokens[] = {
     { NEQ, "!=", 0 },
 
 };
-
 
 static Token KeywordTokens[] = {
     { INT, "int", 0 },
@@ -132,5 +133,5 @@ static Token KeywordTokens[] = {
     { RETURN, "return", 0 },
     { EXIT, "exit", 0 },
     { PRINT, "print", 0 },
-    { SCAN, "scan", 0},
+    { SCAN, "scan", 0 },
 };
