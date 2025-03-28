@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "univ_malloc.h"
+#include "univ_fileops.h"
 
 Partition* partitionCreate(size_t capacity)
 {
@@ -70,30 +71,16 @@ void* regionAlloc(Region* region, size_t size)
     return regionAllocAligned(region, size, sizeof(void*));
 }
 
-int regionSlurpFile(Region* region, String file_path, String* content)
+int regionSlurpFile(Region* region, String filePath, String* content)
 {
-    const char* file_pathCstr = regionStrToCstr(region, file_path);
+    const char* filePathCstr = regionStrToCstr(region, filePath);
 
-    FILE* f = fopen(file_pathCstr, "rb");
-    if (f == NULL) {
-        return -1;
-    }
+    FILE* f = openFile(filePathCstr, "rb");
 
-    if (fseek(f, 0, SEEK_END) < 0) {
-        return -1;
-    }
-
-    long m = ftell(f);
-    if (m < 0) {
-        return -1;
-    }
+    long m = getFileSize(f, filePath.data);
 
     char* buffer = regionAlloc(region, (size_t)m);
     if (buffer == NULL) {
-        return -1;
-    }
-
-    if (fseek(f, 0, SEEK_SET) < 0) {
         return -1;
     }
 
@@ -102,7 +89,7 @@ int regionSlurpFile(Region* region, String file_path, String* content)
         return -1;
     }
 
-    fclose(f);
+    closeFile(f, filePath.data);
 
     if (content) {
         content->length = n;

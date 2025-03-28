@@ -12,7 +12,7 @@ FILE* openFile(const char* filePath, const char* mode)
     return f;
 }
 
-void closeFile(const char* filePath, FILE* file)
+void closeFile(FILE* file, const char* filePath)
 {
     if (file == NULL) {
         return;
@@ -23,7 +23,7 @@ void closeFile(const char* filePath, FILE* file)
     }
 }
 
-int getFileSize(FILE* f, const char* filePath)
+long getFileSize(FILE* f, const char* filePath)
 {
     if (f == NULL) {
         fileErrorDispWithExit("invalid file pointer", filePath);
@@ -33,7 +33,7 @@ int getFileSize(FILE* f, const char* filePath)
         fileErrorDispWithExit("can't read from file", filePath);
     }
 
-    int fileSize = ftell(f);
+    long fileSize = ftell(f);
 
     if (fileSize < 0) {
         fileErrorDispWithExit("can't read from file", filePath);

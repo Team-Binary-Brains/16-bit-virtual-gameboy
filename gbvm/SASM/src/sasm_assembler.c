@@ -172,7 +172,7 @@ void assembleProgramIntoBytecode(Sasm* sasm, const char* filePath)
         exit(1);
     }
 
-    closeFile(filePath, f);
+    closeFile(f, filePath);
 }
 
 Error processLine(Sasm* sasm, String* line)
