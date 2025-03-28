@@ -1,63 +1,5 @@
 #include "sasm_memory.h"
 
-uint64_t evalRegister(CPU* cpu, String tmp)
-{
-    if (0 == strncmp(tmp.data, "EP", 2))
-        return cpu->registers.EP.as_u64;
-
-    if (0 == strncmp(tmp.data, "BX", 2))
-        return cpu->registers.BX.as_u64;
-
-    if (0 == strncmp(tmp.data, "SI", 2))
-        return cpu->registers.SI.as_u64;
-
-    if (0 == strncmp(tmp.data, "DI", 2))
-        return cpu->registers.DI.as_u64;
-
-    return convertStrToInt(tmp);
-}
-
-uint64_t resolveAddress(CPU* cpu, String* s)
-{
-    uint64_t res = 0;
-
-    String ptrType = trim(splitStr(s, '['));
-    if (s->length <= 0)
-        return s->length;
-    if (*(ptrType.data + ptrType.length - 1) == 'b') {
-        printf("byte");
-    } else if (*(ptrType.data + ptrType.length - 1) == 'w') {
-        printf("uint64_t");
-    }
-
-    String off = splitStr(s, ']');
-
-    String tmp = trim(splitStr(&off, ' '));
-
-    if (0 == strncmp(tmp.data, "BP", 2)) {
-        res = cpu->registers.SS.as_u64 * 16;
-    } else {
-        res = cpu->registers.DS.as_u64 * 16;
-    }
-
-    while (tmp.length > 0) {
-        res += evalRegister(cpu, tmp);
-        tmp = trim(splitStr(&off, ' '));
-    }
-
-    return res;
-}
-
-void writeToMemory(Memory* memory, MemoryAddr address, DataEntry data)
-{
-    memory->stack[address].as_u64 = data;
-}
-
-DataEntry readFromMemory(Memory* memory, MemoryAddr address)
-{
-    return memory->stack[address].as_u64;
-}
-
 inline void setFlag(Flags f, CPU* cpu, bool state)
 {
     cpu->flags = state ? cpu->flags | f : cpu->flags & ~(f);
@@ -66,18 +8,6 @@ inline void setFlag(Flags f, CPU* cpu, bool state)
 inline bool getFlag(Flags f, const CPU* cpu)
 {
     return cpu->flags & f;
-}
-
-void checkAndSetParity(CPU* cpu, uint64_t num)
-{
-    bool parity = false;
-
-    while (num) {
-        parity = !parity;
-        num = num & (num - 1);
-    }
-
-    cpu->flags = parity ? cpu->flags | PARITY : cpu->flags & ~(PARITY);
 }
 
 bool evaluateAddressingMode(Memory* mem, CPU* cpu, AddrMode mode, QuadWord* val, QuadWord* out)
