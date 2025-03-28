@@ -1,421 +1,109 @@
 #include "sasm_instructions.h"
-#include "sasm_memory.h"
-#include "univ_defs.h"
-typedef struct {
-    Opcode type;
-    size_t size;
-    char* name;
-} OpcodeString;
+#include "univ_errors.h"
 
-/*
-TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
-*/
-static OpcodeString OpcodeStringMap[] = {
-    { DONOP, 5, "DONOP" }, { CLRCF, 5, "CLRCF" }, { TGLCF, 5, "TGLCF" }, { SHUTS, 5, "SHUTS" },
-
-    { DECR, 4, "DECR" }, { NEG, 3, "NEG" }, { GOTO, 4, "GOTO" }, { JA, 2, "JA    " }, { JA, 4, "JNBE" },
-    { JNC, 3, "JAE  " }, { JNC, 3, "JNC" }, { JNC, 3, "JNB  " }, { JC, 2, "JB    " }, { JC, 2, "JC  " },
-    { JC, 4, "JNAE  " }, { JBE, 3, "JBE" }, { JBE, 3, "JNA  " }, { JCXZ, 4, "JCXZ" }, { JZ, 2, "JE  " },
-    { JZ, 2, "JZ    " }, { JG, 2, "JG  " }, { JG, 4, "JNLE  " }, { JGE, 3, "JGE  " }, { JGE, 3, "JNL" },
-    { JL, 2, "JL    " }, { JL, 4, "JNGE" }, { JLE, 3, "JLE  " }, { JLE, 3, "JNG  " }, { JNZ, 3, "JNE" },
-    { JNZ, 3, "JNZ  " }, { JNO, 3, "JNO" }, { JNP, 3, "JNP  " }, { JNP, 3, "JPO  " }, { JNS, 3, "JNS" },
-    { JO, 2, "JO    " }, { JP, 2, "JP  " }, { JP, 3, "JPE   " }, { JS, 2, "JS    " },
-
-    { CPY, 3, "CPY" }, { ADC, 3, "ADC" }, { ADD, 3, "ADD" }, { AND, 3, "AND" }
+static OpcodeDetails OpcodeDetailsMap[NUMBER_OF_INSTS] = {
+    [INST_DONOP] = { .type = INST_DONOP, .name = "DONOP", .has_operand = 0, .has_operand2 = 0 },
+    [INST_RETRN] = { .type = INST_RETRN, .name = "RETRN", .has_operand = 0, .has_operand2 = 0 },
+    [INST_CALLN] = { .type = INST_CALLN, .name = "CALLN", .has_operand = 1, .has_operand2 = 0 },
+    [INST_CALLF] = { .type = INST_CALLF, .name = "CALLF", .has_operand = 1, .has_operand2 = 0 },
+    [INST_SHUTS] = { .type = INST_SHUTS, .name = "SHUTS", .has_operand = 0, .has_operand2 = 0 },
+    [INST_PUSH] = { .type = INST_PUSH, .name = "PUSH", .has_operand = 1, .has_operand2 = 0 },
+    [INST_DROP] = { .type = INST_DROP, .name = "DROP", .has_operand = 0, .has_operand2 = 0 },
+    [INST_SWAP] = { .type = INST_SWAP, .name = "SWAP", .has_operand = 1, .has_operand2 = 0 },
+    [INST_ADDI] = { .type = INST_ADDI, .name = "ADDI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_SUBI] = { .type = INST_SUBI, .name = "SUBI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_MULI] = { .type = INST_MULI, .name = "MULI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_DIVI] = { .type = INST_DIVI, .name = "DIVI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_MODI] = { .type = INST_MODI, .name = "MODI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_MULU] = { .type = INST_MULU, .name = "MULU", .has_operand = 0, .has_operand2 = 0 },
+    [INST_DIVU] = { .type = INST_DIVU, .name = "DIVU", .has_operand = 0, .has_operand2 = 0 },
+    [INST_MODU] = { .type = INST_MODU, .name = "MODU", .has_operand = 0, .has_operand2 = 0 },
+    [INST_ADDF] = { .type = INST_ADDF, .name = "ADDF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_SUBF] = { .type = INST_SUBF, .name = "SUBF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_MULF] = { .type = INST_MULF, .name = "MULF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_DIVF] = { .type = INST_DIVF, .name = "DIVF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_JMPU] = { .type = INST_JMPU, .name = "JMPU", .has_operand = 1, .has_operand2 = 0 },
+    [INST_JMPC] = { .type = INST_JMPC, .name = "JMPC", .has_operand = 1, .has_operand2 = 0 },
+    [INST_ANDB] = { .type = INST_ANDB, .name = "ANDB", .has_operand = 0, .has_operand2 = 0 },
+    [INST_NOTB] = { .type = INST_NOTB, .name = "NOTB", .has_operand = 0, .has_operand2 = 0 },
+    [INST_CPY] = { .type = INST_CPY, .name = "CPY", .has_operand = 1, .has_operand2 = 1 },
+    [INST_DUP] = { .type = INST_DUP, .name = "DUP", .has_operand = 1, .has_operand2 = 0 },
+    [INST_NOT] = { .type = INST_NOT, .name = "NOT", .has_operand = 0, .has_operand2 = 0 },
+    [INST_EQI] = { .type = INST_EQI, .name = "EQI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_GEI] = { .type = INST_GEI, .name = "GEI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_GTI] = { .type = INST_GTI, .name = "GTI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_LEI] = { .type = INST_LEI, .name = "LEI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_LTI] = { .type = INST_LTI, .name = "LTI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_NEI] = { .type = INST_NEI, .name = "NEI", .has_operand = 0, .has_operand2 = 0 },
+    [INST_EQU] = { .type = INST_EQU, .name = "EQU", .has_operand = 0, .has_operand2 = 0 },
+    [INST_GEU] = { .type = INST_GEU, .name = "GEU", .has_operand = 0, .has_operand2 = 0 },
+    [INST_GTU] = { .type = INST_GTU, .name = "GTU", .has_operand = 0, .has_operand2 = 0 },
+    [INST_LEU] = { .type = INST_LEU, .name = "LEU", .has_operand = 0, .has_operand2 = 0 },
+    [INST_LTU] = { .type = INST_LTU, .name = "LTU", .has_operand = 0, .has_operand2 = 0 },
+    [INST_NEU] = { .type = INST_NEU, .name = "NEU", .has_operand = 0, .has_operand2 = 0 },
+    [INST_EQF] = { .type = INST_EQF, .name = "EQF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_GEF] = { .type = INST_GEF, .name = "GEF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_GTF] = { .type = INST_GTF, .name = "GTF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_LEF] = { .type = INST_LEF, .name = "LEF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_LTF] = { .type = INST_LTF, .name = "LTF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_NEF] = { .type = INST_NEF, .name = "NEF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_ORB] = { .type = INST_ORB, .name = "ORB", .has_operand = 0, .has_operand2 = 0 },
+    [INST_XOR] = { .type = INST_XOR, .name = "XOR", .has_operand = 0, .has_operand2 = 0 },
+    [INST_SHR] = { .type = INST_SHR, .name = "SHR", .has_operand = 0, .has_operand2 = 0 },
+    [INST_SHL] = { .type = INST_SHL, .name = "SHL", .has_operand = 0, .has_operand2 = 0 },
+    [INST_I2F] = { .type = INST_I2F, .name = "I2F", .has_operand = 0, .has_operand2 = 0 },
+    [INST_U2F] = { .type = INST_U2F, .name = "U2F", .has_operand = 0, .has_operand2 = 0 },
+    [INST_F2I] = { .type = INST_F2I, .name = "F2I", .has_operand = 0, .has_operand2 = 0 },
+    [INST_F2U] = { .type = INST_F2U, .name = "F2U", .has_operand = 0, .has_operand2 = 0 },
+    [INST_READ1U] = { .type = INST_READ1U, .name = "READ1U", .has_operand = 0, .has_operand2 = 0 },
+    [INST_READ2U] = { .type = INST_READ2U, .name = "READ2U", .has_operand = 0, .has_operand2 = 0 },
+    [INST_READ4U] = { .type = INST_READ4U, .name = "READ4U", .has_operand = 0, .has_operand2 = 0 },
+    [INST_READ8U] = { .type = INST_READ8U, .name = "READ8U", .has_operand = 0, .has_operand2 = 0 },
+    [INST_READ1I] = { .type = INST_READ1I, .name = "READ1I", .has_operand = 0, .has_operand2 = 0 },
+    [INST_READ2I] = { .type = INST_READ2I, .name = "READ2I", .has_operand = 0, .has_operand2 = 0 },
+    [INST_READ4I] = { .type = INST_READ4I, .name = "READ4I", .has_operand = 0, .has_operand2 = 0 },
+    [INST_READ8I] = { .type = INST_READ8I, .name = "READ8I", .has_operand = 0, .has_operand2 = 0 },
+    [INST_WRITE1] = { .type = INST_WRITE1, .name = "WRITE1", .has_operand = 0, .has_operand2 = 0 },
+    [INST_WRITE2] = { .type = INST_WRITE2, .name = "WRITE2", .has_operand = 0, .has_operand2 = 0 },
+    [INST_WRITE4] = { .type = INST_WRITE4, .name = "WRITE4", .has_operand = 0, .has_operand2 = 0 },
+    [INST_WRITE8] = { .type = INST_WRITE8, .name = "WRITE8", .has_operand = 0, .has_operand2 = 0 },
 };
 
-String opcodeAsStr(const Opcode* type)
+QuadWord quadword_u64(uint64_t u64)
 {
-    size_t len = sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]);
+    return (QuadWord) { .as_u64 = u64 };
+}
 
-    for (size_t i = 0; i < len; ++i) {
-        if ((*type) == OpcodeStringMap[i].type) {
-            return (String) { .data = OpcodeStringMap[i].name, .length = OpcodeStringMap[i].size };
+QuadWord quadword_i64(int64_t i64)
+{
+    return (QuadWord) { .as_i64 = i64 };
+}
+
+QuadWord quadword_f64(double f64)
+{
+    return (QuadWord) { .as_f64 = f64 };
+}
+
+QuadWord quadword_ptr(void* ptr)
+{
+    return (QuadWord) { .as_ptr = ptr };
+}
+
+bool strAsOpcode(String name, OpcodeDetails* out_ptr)
+{
+    for (Opcode type = 0; type < NUMBER_OF_INSTS; type += 1) {
+        if (strEqu(cstrToStr(OpcodeDetailsMap[type].name), name)) {
+            *out_ptr = OpcodeDetailsMap[type];
+            return 1;
         }
     }
 
-    assert(0 && "opcodeAsStr : Unreachable");
+    displayStringMessageError("Unknown instruction detected and was ignored", name);
+    return 0;
 }
 
-Opcode strAsOpcode(const String* s)
+OpcodeDetails getOpcodeDetails(Opcode type)
 {
-    size_t len = sizeof(OpcodeStringMap) / sizeof(OpcodeStringMap[0]);
-
-    for (size_t i = 0; i < len; ++i) {
-
-        if (s->length != OpcodeStringMap[i].size) {
-            continue;
-        }
-        if (strncmp(s->data, OpcodeStringMap[i].name, s->length) == 0) {
-            // printf("Operation : %.*s\n", (int)OpcodeStringMap[i].size, OpcodeStringMap[i].name);
-            return OpcodeStringMap[i].type;
-        }
-    }
-
-    displayStringMessageError("Unknown instruction detected and was ignored", *s);
-    return DONOP;
-}
-
-/*
-TODO CHANGE THIS IMPLEMENTATION FOR NEW INSTRUCTION SET
-*/
-
-Error (*instructionFuncPtrs[])(CPU* cpu, Memory* mem, Word* operand1, Word* operand2) = {
-    __DONOP, __CLRCF, __TGLCF, __SHUTS,
-    __DECR, __NEG, __GOTO, __JA, __JNC, __JC, __JBE, __JCXZ, __JZ, __JG,
-    __JGE, __JL, __JLE, __JNZ, __JNO, __JNP, __JNS, __JO, __JP, __JS,
-    __CPY, __ADC, __ADD, __AND
-};
-Error executeInst(const Program* prog, Memory* mem, CPU* cpu)
-{
-    if (cpu->registers.IP < 0 || cpu->registers.IP >= prog->instruction_size) {
-        return ERR_ILLEGAL_INST_ACCESS;
-    }
-    Instruction inst = prog->instructions[cpu->registers.IP];
-
-    Word *operand1 = NULL, *operand2 = NULL;
-    if (inst.registerMode & o2_imm) {
-
-        operand2 = &inst.operand2;
-        // printf("\nSRC Data : %d \tMode : Immediate\n", *operand2);
-
-    } else if (inst.registerMode & o2_mem) {
-
-        operand2 = &(mem->stack[inst.operand2]);
-        // printf("\nSRC Data : %d \tMode : Memory address [%d]\n", *operand2, inst.operand2);
-
-    } else if (inst.registerMode & o2_reg) {
-
-        switch (inst.operand2) {
-        case 1:
-            operand2 = &(cpu->registers.AX.full);
-            // printf("\nSRC Data : %d \tMode : Register AX\n", *operand2);
-            break;
-        case 2:
-            operand2 = &(cpu->registers.BX.full);
-            // printf("\nSRC Data : %d \tMode : Register BX\n", *operand2);
-            break;
-        case 3:
-            operand2 = &(cpu->registers.CX.full);
-            // printf("\nSRC Data : %d \tMode : Register CX\n", *operand2);
-            break;
-        case 4:
-            operand2 = &(cpu->registers.DX.full);
-            // printf("\nSRC Data : %d \tMode : Register DX\n", *operand2);
-            break;
-        }
-    }
-
-    if (inst.registerMode & o1_mem) {
-
-        operand1 = &(mem->stack[inst.operand]);
-        // printf("DST Data : %d \tMode : Memory address [%d]\n", *operand1, inst.operand);
-
-    } else if (inst.registerMode & o1_reg) {
-
-        switch (inst.operand) {
-
-        case 1:
-            operand1 = &(cpu->registers.AX.full);
-            // printf("DST Data : %d \tMode : Register AX\n", cpu->registers.AX.full);
-            break;
-        case 2:
-            operand1 = &(cpu->registers.BX.full);
-            // printf("DST Data : %d \tMode : Register BX\n", cpu->registers.BX.full);
-            break;
-        case 3:
-            operand1 = &(cpu->registers.CX.full);
-            // printf("DST Data : %d \tMode : Register CX\n", cpu->registers.CX.full);
-            break;
-        case 4:
-            operand1 = &(cpu->registers.DX.full);
-            // printf("DST Data : %d \tMode : Register DX\n", cpu->registers.DX.full);
-            break;
-        }
-    } else {
-        operand1 = &inst.operand;
-    }
-
-    Error err = instructionFuncPtrs[inst.type](cpu, mem, operand1, operand2);
-
-    if (err) {
-        return err;
-    }
-
-    cpu->registers.IP += 1;
-    return ERR_OK;
-}
-
-Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nDO No OPeration\n");
-    return ERR_OK;
-}
-
-Error __CLRCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d", getFlag(CARRY, cpu));
-    setFlag(CARRY, cpu, false);
-    printf("\nAfter  : %d\n", getFlag(CARRY, cpu));
-    return ERR_OK;
-}
-
-Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d", getFlag(CARRY, cpu));
-    setFlag(CARRY, cpu, !getFlag(CARRY, cpu));
-    printf("\nAfter  : %d\n", getFlag(CARRY, cpu));
-    return ERR_OK;
-}
-
-Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nSHUTing down System\n");
-    setFlag(HALT, cpu, true);
-    return ERR_OK;
-}
-
-Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d", *operand1);
-
-    bool overflow = *operand1 == (-MAX_WORD);
-    bool auxiliary = (((*operand1 & 0x0F) + (-1 & 0x0f)) > 0x0f);
-    *operand1 = *operand1 + -1;
-
-    setFlag(OVERFLOW, cpu, overflow);
-    setFlag(ZERO, cpu, (*operand1 == 0));
-    setFlag(SIGN, cpu, (*operand1 < 0));
-    setFlag(AUX, cpu, auxiliary);
-    checkAndSetParity(cpu, *operand1);
-
-    printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
-}
-
-Error __NEG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("CALLED __NEG\n");
-    return ERR_OK;
-}
-
-Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nUnconditional Jump to %d\n", *operand1);
-    cpu->registers.IP = *operand1 - 1;
-    return ERR_OK;
-}
-
-Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (!getFlag(CARRY, cpu) && !getFlag(ZERO, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JA / __JNBE \n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JNC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (!getFlag(CARRY, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JAE / __JNB / __JNC\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (getFlag(CARRY, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JB /__JNAE / __JC\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (getFlag(CARRY, cpu) || getFlag(ZERO, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JBE / __JNA\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (cpu->registers.CX.full == 0) {
-        printf("\nJUMPING TO %d\nREASON : __JCXZ\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (getFlag(ZERO, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JE / __JZ\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu) && !getFlag(ZERO, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JG / __JNLE\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (getFlag(SIGN, cpu) == getFlag(OVERFLOW, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JGE / __JNL\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JL / __JNGE\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (getFlag(SIGN, cpu) != getFlag(OVERFLOW, cpu) || getFlag(ZERO, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JLE / __JNG\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JNZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (!getFlag(ZERO, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JNE / __JNZ\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JNO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (!getFlag(OVERFLOW, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JNO\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JNP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (!getFlag(PARITY, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JNP / __JPO\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JNS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (!getFlag(SIGN, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JNS\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (getFlag(OVERFLOW, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JO\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (getFlag(PARITY, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JP / __JPE\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __JS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    if (getFlag(SIGN, cpu)) {
-        printf("\nJUMPING TO %d\nREASON : __JS\n", *operand1);
-        cpu->registers.IP = *operand1 - 1;
-    }
-    return ERR_OK;
-}
-
-Error __CPY(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d, %d", *operand1, *operand2);
-    *operand1 = *operand2;
-    printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
-}
-
-Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d, %d", *operand1, *operand2);
-
-    bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
-    bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
-    *operand1 = *operand1 + *operand2;
-    *operand1 = *operand1 + (getFlag(CARRY, cpu) ? 1 : 0);
-
-    setFlag(CARRY, cpu, overflow);
-    setFlag(OVERFLOW, cpu, overflow);
-    setFlag(ZERO, cpu, (*operand1 == 0));
-    setFlag(SIGN, cpu, (*operand1 < 0));
-    setFlag(AUX, cpu, auxiliary);
-    checkAndSetParity(cpu, *operand1);
-
-    printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
-}
-
-Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d, %d", *operand1, *operand2);
-
-    bool overflow = (*operand2 > 0 && *operand1 > (MAX_WORD - *operand2));
-    bool auxiliary = (((*operand1 & 0x0F) + (*operand2 & 0x0f)) > 0x0f);
-    *operand1 = *operand1 + *operand2;
-
-    setFlag(CARRY, cpu, overflow);
-    setFlag(OVERFLOW, cpu, overflow);
-    setFlag(ZERO, cpu, (*operand1 == 0));
-    setFlag(SIGN, cpu, (*operand1 < 0));
-    setFlag(AUX, cpu, auxiliary);
-    checkAndSetParity(cpu, *operand1);
-
-    printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
-}
-
-Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2)
-{
-    printf("\nBefore : %d, %d", *operand1, *operand2);
-
-    *operand1 = *operand1 & *operand2;
-
-    setFlag(ZERO, cpu, (*operand1 == 0));
-    setFlag(SIGN, cpu, (*operand1 < 0));
-    checkAndSetParity(cpu, *operand1);
-
-    printf("\nAfter  : %d\n", *operand1);
-    return ERR_OK;
+    assert(type < NUMBER_OF_INSTS);
+    return OpcodeDetailsMap[type];
 }

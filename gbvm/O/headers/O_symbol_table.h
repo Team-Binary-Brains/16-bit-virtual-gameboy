@@ -7,15 +7,15 @@
     as the symbol table will have pointer to parent symbol table.
 */
 typedef struct {
-    char *identifier;   // Name of the variable or function
-    TokenType type;     // Data type (e.g., INT, etc.)
-    void *memAddress;   // Memory address of the variable (if allocated)
+    char* identifier;     // Name of the variable or function
+    TokenType type;       // Data type (e.g., INT, etc.)
+    void* memAddress;     // Memory address of the variable (if allocated)
 } SymbolEntry;
 
 // Symbol table structure.
 typedef struct SymbolTable {
-    HashTable *table;           // Hash table for storing symbols
-    struct SymbolTable *parent; // Pointer to the parent scope (NULL for global scope)
+    HashTable* table;               // Hash table for storing symbols
+    struct SymbolTable* parent;     // Pointer to the parent scope (NULL for global scope)
 } SymbolTable;
 
 // Scope management functions

@@ -10,120 +10,119 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include "univ_defs.h"
-#include "univ_errors.h"
 #include "univ_strings.h"
-#include "sasm_memory.h"
 /**
  * @brief Enumeration of opcodes for SASM instructions.
  */
 typedef enum {
 
-    DONOP,
-    CLRCF,
-    TGLCF,
-    SHUTS,
+    INST_DONOP = 0,
+    INST_RETRN,
+    INST_CALLN,
+    INST_CALLF,
+    INST_SHUTS,
+    INST_PUSH,
+    INST_DROP,
+    INST_SWAP,
+    INST_ADDI,
+    INST_SUBI,
+    INST_MULI,
+    INST_DIVI,
+    INST_MODI,
+    INST_MULU,
+    INST_DIVU,
+    INST_MODU,
+    INST_ADDF,
+    INST_SUBF,
+    INST_MULF,
+    INST_DIVF,
+    INST_JMPU,
+    INST_JMPC,
+    INST_ANDB,
+    INST_NOTB,
+    INST_CPY,
+    INST_DUP,
+    INST_NOT,
+    INST_EQI,
+    INST_GEI,
+    INST_GTI,
+    INST_LEI,
+    INST_LTI,
+    INST_NEI,
+    INST_EQU,
+    INST_GEU,
+    INST_GTU,
+    INST_LEU,
+    INST_LTU,
+    INST_NEU,
+    INST_EQF,
+    INST_GEF,
+    INST_GTF,
+    INST_LEF,
+    INST_LTF,
+    INST_NEF,
+    INST_ORB,
+    INST_XOR,
+    INST_SHR,
+    INST_SHL,
+    INST_I2F,
+    INST_U2F,
+    INST_F2I,
+    INST_F2U,
+    INST_READ1U,
+    INST_READ2U,
+    INST_READ4U,
+    INST_READ8U,
+    INST_READ1I,
+    INST_READ2I,
+    INST_READ4I,
+    INST_READ8I,
+    INST_WRITE1,
+    INST_WRITE2,
+    INST_WRITE4,
+    INST_WRITE8,
 
-    DECR,
-    NEG,
-    GOTO,
-    JA,
-    JNC,
-    JC,
-    JBE,
-    JCXZ,
-    JZ,
-    JG,
-    JGE,
-    JL,
-    JLE,
-    JNZ,
-    JNO,
-    JNP,
-    JNS,
-    JO,
-    JP,
-    JS,
-
-    CPY,
-    ADC,
-    ADD,
-    AND
-
+    NUMBER_OF_INSTS
 } Opcode;
-
+typedef enum {
+    MEM,
+    REG,
+    IMM
+} AddrMode;
 /**
  * @brief Structure representing an instruction in the SASM assembly language.
  */
 typedef struct {
-    Opcode type;  /**< The opcode of the instruction */
-    Word operand; /**< The operand of the instruction */
-    Word operand2;
+    Opcode type;      /**< The opcode of the instruction */
+    QuadWord operand; /**< The operand of the instruction */
+    QuadWord operand2;
     // TODO : DISCARD USE OF THIS FLAG
-    Byte registerMode;
+    AddrMode opr1Mode;
+    AddrMode opr2Mode;
 } Instruction;
+
+typedef struct {
+    Opcode type;
+    const char* name;
+    bool has_operand;
+    bool has_operand2;
+} OpcodeDetails;
 
 /**
  * @brief Structure representing a program in the SASM assembly language.
  */
-typedef struct {
+typedef struct Program {
     Instruction instructions[PROGRAM_CAPACITY]; /**< The array of instructions */
-    Word instruction_count;                     /**< The number of instructions in the program */
-    Word instruction_size;                      /**< The size of each instruction in bytes */
+    DataEntry instruction_count;                /**< The number of instructions in the program */
+    DataEntry instruction_size;                 /**< The size of each instruction in bytes */
 } Program;
 
-/**
- * @brief Executes an instruction in the virtual machine.
- *
- * @param prog The program containing the instructions.
- * @param mem The memory of the virtual machine.
- * @param cpu The CPU of the virtual machine.
- * @return An error code indicating the success or failure of the execution.
- */
-Error executeInst(const Program* prog, Memory* mem, CPU* cpu);
+// TYPE CASTING
+QuadWord quadword_u64(uint64_t u64);
+QuadWord quadword_i64(int64_t i64);
+QuadWord quadword_f64(double f64);
+QuadWord quadword_ptr(void* ptr);
 
-/**
- * @brief Converts an opcode to its corresponding string representation.
- *
- * @param type The opcode to convert.
- * @return The string representation of the opcode.
- */
-String opcodeAsStr(const Opcode* type);
+bool strAsOpcode(String name, OpcodeDetails* outPtr);
 
-/**
- * @brief Converts a string to its corresponding opcode.
- *
- * @param s The string to convert.
- * @return The opcode corresponding to the string.
- */
-Opcode strAsOpcode(const String* s);
-
-Error __DONOP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __CLRCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __TGLCF(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __SHUTS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-
-Error __DECR(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __NEG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __GOTO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JA(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JBE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JCXZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JG(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JGE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JL(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JLE(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNZ(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JNS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JO(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JP(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __JS(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-
-Error __CPY(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __ADC(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __ADD(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
-Error __AND(CPU* cpu, Memory* mem, Word* operand1, Word* operand2);
+OpcodeDetails getOpcodeDetails(Opcode type);

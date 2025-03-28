@@ -2,59 +2,80 @@
 
 #include "sasm_assembler.h"
 #include "univ_cmdutils.h"
+#include "univ_strings.h"
+#include "univ_malloc.h"
 
-char* inputFile = NULL;
-char* outputFile = NULL;
-int (*mode)(char*, char*) = &assemblyMode;
+const char* inputFile = NULL;
+const char* outputFile = NULL;
+bool disassemblyMode = false;
 
-void processFlag(char* flag, int* argc, char*** argv);
+void processFlag(const char* program, const char* flag, int* argc, char*** argv);
 
-int main(int argc, char* argv[])
+int main(int argc, char** argv)
 {
-    char* progName = getNextCmdLineArg(&argc, &argv);
+    const char* program = getNextCmdLineArg(&argc, &argv);
 
     while (argc > 0) {
-        char* arg = getNextCmdLineArg(&argc, &argv);
-        processFlag(arg, &argc, &argv);
+        const char* flag = getNextCmdLineArg(&argc, &argv);
+        processFlag(program, flag, &argc, &argv);
     }
-
-    fprintf(stdout, "\nProgram Name : %s\n", progName);
+    fprintf(stdout, "\nProgram Name : %s\n", program);
     fprintf(stdout, "Input File : %s\n", inputFile);
     fprintf(stdout, "Output File : %s\n", outputFile);
-    fprintf(stdout, "Mode : %s\n\n", mode == &assemblyMode ? "Assembly" : "Disassembly");
+    fprintf(stdout, "Mode : %s\n\n", !disassemblyMode ? "Assembly" : "Disassembly");
 
-    if (!inputFile || !outputFile) {
-        displayMsgWithExit("Missing Files\n"
-                           "Usage : gbasm -i <input file> -o <output file> [-a | -d]\n "
-                           "\t -a : Assemble mode\n "
-                           "\t -d : Disassemble mode\n "
-                           "\tDefault mode is assemble\n\n "
-                           "\tAssembly Sample Command    : ./gbasm -i ../prog/fibonacci.pblasm  -o ../prog/fibonacci.pbl\n"
-                           "\tDisassembly Sample Command : ./gbasm -o ../prog/fibonacci2.pblasm -i ../prog/fibonacci.pbl -d\n");
+    static Sasm sasm = { 0 };
+    if (!disassemblyMode) {
+        if (!inputFile || !outputFile) {
+            displayMsgWithExit("Missing Files\n"
+                               "Usage : sasm -i <input file> -o <output file> [-a | -d]\n "
+                               "\t default : Assemble mode\n "
+                               "\t -d : Disassemble mode\n "
+                               "\tAssembly Sample Command    : ./sasm -i ./test.sasm -o ./test.sm \n"
+                               "\tDisassembly Sample Command : ./sasm -i ./test.sm -d\n");
+        }
+        parseAsmIntoProgram(&sasm, cstrToStr(inputFile));
+        assembleProgramIntoBytecode(&sasm, outputFile);
+    } else {
+        if (!inputFile) {
+            displayMsgWithExit("Missing Files\n"
+                               "Usage : sasm -i <input file> -o <output file> [-a | -d]\n "
+                               "\t default : Assemble mode\n "
+                               "\t -d : Disassemble mode\n "
+                               "\tAssembly Sample Command    : ./sasm -i ./test.sasm -o ./test.sm \n"
+                               "\tDisassembly Sample Command : ./sasm -i ./test.sm -d\n");
+        }
+        loadProgramIntoSasm(&sasm, inputFile);
+        for (InstAddr i = 0; i < sasm.prog.instruction_count; ++i) {
+            OpcodeDetails details = getOpcodeDetails(sasm.prog.instructions[i].type);
+            printf("%s", details.name);
+            if (details.has_operand) {
+                printf(" %" PRIu64, sasm.prog.instructions[i].operand.as_u64);
+            }
+            if (details.has_operand2) {
+                printf(" %" PRIu64, sasm.prog.instructions[i].operand2.as_u64);
+            }
+            printf("\n");
+        }
     }
 
-    return mode(inputFile, outputFile);
+    return 0;
 }
 
-void processFlag(char* flag, int* argc, char*** argv)
+void processFlag(const char* program, const char* flag, int* argc, char*** argv)
 {
-
-    Option opt = flagAsOption(flag);
-
-    switch (opt) {
-    case FILE_INPUT:
+    switch (flag[1]) {
+    case 'i':
         inputFile = getNextCmdLineArg(argc, argv);
         return;
-    case FILE_OUTPUT:
+    case 'o':
         outputFile = getNextCmdLineArg(argc, argv);
         return;
-    case MODE_ASSEMBLE:
-        mode = &assemblyMode;
-        return;
-    case MODE_DISASSEMBLE:
-        mode = &disassemblyMode;
+    case 'd':
+        disassemblyMode = true;
         return;
     default:
+        fprintf(stdout, "Usage: %s -i <input.sasm> -o <output.sm>\n", program);
         displayMsgWithExit("Unknown option provided.");
     }
 }

@@ -17,20 +17,23 @@ static int labelCount = 0;
 //---------------------------------------------------------------------
 // Utility functions for generating names and instructions.
 
-static char* newTemp(void) {
+static char* newTemp(void)
+{
     char buffer[32];
     sprintf(buffer, "t%d", tempCount++);
     return strdup(buffer);
 }
 
-static char* newLabel(void) {
+static char* newLabel(void)
+{
     char buffer[32];
     sprintf(buffer, "L%d", labelCount++);
     return strdup(buffer);
 }
 
-static TACInstruction* newTAC(TacOp op, char* result, char* arg1, char* arg2) {
-    TACInstruction* inst = (TACInstruction*) malloc(sizeof(TACInstruction));
+static TACInstruction* newTAC(TacOp op, char* result, char* arg1, char* arg2)
+{
+    TACInstruction* inst = (TACInstruction*)malloc(sizeof(TACInstruction));
     inst->op = op;
     inst->result = result ? strdup(result) : NULL;
     inst->arg1 = arg1 ? strdup(arg1) : NULL;
@@ -39,7 +42,8 @@ static TACInstruction* newTAC(TacOp op, char* result, char* arg1, char* arg2) {
     return inst;
 }
 
-static void emit(TACInstruction* inst) {
+static void emit(TACInstruction* inst)
+{
     if (tacHead == NULL) {
         tacHead = tacTail = inst;
     } else {
@@ -50,18 +54,18 @@ static void emit(TACInstruction* inst) {
 
 //---------------------------------------------------------------------
 // generateCode: recursively traverse the parse tree and emit TAC.
-static void generateCode(ParseTreeNode* node) {
+static void generateCode(ParseTreeNode* node)
+{
     if (node == NULL)
         return;
-    
+
     // Handle high-level statement nodes based on their special marker.
     if (strcmp(node->value, "PROGRAM") == 0) {
         // Root node: process every child statement.
         for (int i = 0; i < node->childCount; i++) {
             generateCode(node->children[i]);
         }
-    }
-    else if (strcmp(node->value, "DECLARATION") == 0) {
+    } else if (strcmp(node->value, "DECLARATION") == 0) {
         // Declaration node: children[0]=DataType, children[1]=Identifier.
         // If an initializer exists, it is at children[3] (children[2] is the "=" token).
         if (node->childCount >= 4) {
@@ -71,29 +75,24 @@ static void generateCode(ParseTreeNode* node) {
             emit(newTAC(TAC_ASSIGN, id, exprTemp, NULL));
         }
         // No TAC generated for plain declarations without initializer.
-    }
-    else if (strcmp(node->value, "ASSIGNMENT") == 0) {
+    } else if (strcmp(node->value, "ASSIGNMENT") == 0) {
         // Assignment node: children[0]=Identifier, children[1]= "=" token, children[2]= Expression.
         char* id = node->children[0]->value;
         char* exprTemp = generateExpression(node->children[2]);
         emit(newTAC(TAC_ASSIGN, id, exprTemp, NULL));
-    }
-    else if (strcmp(node->value, "PRINT_STATEMENT") == 0) {
+    } else if (strcmp(node->value, "PRINT_STATEMENT") == 0) {
         // Print statement: children[1] is the expression to print.
         char* exprTemp = generateExpression(node->children[1]);
         emit(newTAC(TAC_PRINT, NULL, exprTemp, NULL));
-    }
-    else if (strcmp(node->value, "SCAN_STATEMENT") == 0) {
+    } else if (strcmp(node->value, "SCAN_STATEMENT") == 0) {
         // Scan statement: children[1] is the identifier.
         char* id = node->children[1]->value;
         emit(newTAC(TAC_SCAN, NULL, id, NULL));
-    }
-    else if (strcmp(node->value, "EXIT_STATEMENT") == 0) {
+    } else if (strcmp(node->value, "EXIT_STATEMENT") == 0) {
         // Exit statement: children[2] is the expression.
         char* exprTemp = generateExpression(node->children[2]);
         emit(newTAC(TAC_EXIT, NULL, exprTemp, NULL));
-    }
-    else if (strcmp(node->value, "IF_STATEMENT") == 0) {
+    } else if (strcmp(node->value, "IF_STATEMENT") == 0) {
         // IF_STATEMENT: children[1]= condition, children[2]= then-statement,
         // optionally children[4]= else-statement if an ELSE branch exists.
         char* condTemp = generateExpression(node->children[1]);
@@ -116,8 +115,7 @@ static void generateCode(ParseTreeNode* node) {
         } else {
             emit(newTAC(TAC_LABEL, labelFalse, NULL, NULL));
         }
-    }
-    else if (strcmp(node->value, "WHILE_STATEMENT") == 0) {
+    } else if (strcmp(node->value, "WHILE_STATEMENT") == 0) {
         // WHILE_STATEMENT: children[1] is condition, children[2] is loop body.
         char* labelStart = newLabel();
         char* labelExit = newLabel();
@@ -130,8 +128,7 @@ static void generateCode(ParseTreeNode* node) {
         generateCode(node->children[2]);
         emit(newTAC(TAC_GOTO, NULL, labelStart, NULL));
         emit(newTAC(TAC_LABEL, labelExit, NULL, NULL));
-    }
-    else if (strcmp(node->value, "FOR_STATEMENT") == 0) {
+    } else if (strcmp(node->value, "FOR_STATEMENT") == 0) {
         // FOR_STATEMENT: The children vary:
         // Child[0] is the "for" token.
         // Then, if an initializer exists, it will be present.
@@ -143,9 +140,7 @@ static void generateCode(ParseTreeNode* node) {
         // Always, the first child is the "for" token.
         int index = 1;
         // If the next child is a declaration or assignment, treat it as the initializer.
-        if (index < cnt && 
-            (strcmp(node->children[index]->value, "DECLARATION") == 0 ||
-             strcmp(node->children[index]->value, "ASSIGNMENT") == 0)) {
+        if (index < cnt && (strcmp(node->children[index]->value, "DECLARATION") == 0 || strcmp(node->children[index]->value, "ASSIGNMENT") == 0)) {
             init = node->children[index];
             index++;
         }
@@ -177,14 +172,12 @@ static void generateCode(ParseTreeNode* node) {
             generateCode(update);
         emit(newTAC(TAC_GOTO, NULL, labelStart, NULL));
         emit(newTAC(TAC_LABEL, labelExit, NULL, NULL));
-    }
-    else if (strcmp(node->value, "BLOCK") == 0) {
+    } else if (strcmp(node->value, "BLOCK") == 0) {
         // BLOCK: simply generate code for each statement within the block.
         for (int i = 0; i < node->childCount; i++) {
             generateCode(node->children[i]);
         }
-    }
-    else {
+    } else {
         // For any node that does not match a high-level statement,
         // assume it is an expression or operator node.
         // In a statement context, we simply generate the expression,
@@ -200,76 +193,68 @@ static void generateCode(ParseTreeNode* node) {
 
 //---------------------------------------------------------------------
 // generateExpression: returns the name of the temporary holding the result.
-static char* generateExpression(ParseTreeNode* node) {
+static char* generateExpression(ParseTreeNode* node)
+{
     if (node == NULL)
         return NULL;
-    
+
     // If a leaf node (identifier, literal), return its value.
     if (node->childCount == 0)
         return strdup(node->value);
-    
+
     // For expression nodes (operators), assume binary operator.
     // (d are not explicitly represented because they were consumed.)
     char* left = generateExpression(node->children[0]);
     char* right = generateExpression(node->children[1]);
     char* temp = newTemp();
-    
+
     if (strcmp(node->value, "+") == 0) {
         emit(newTAC(TAC_ADD, temp, left, right));
-    }
-    else if (strcmp(node->value, "-") == 0) {
+    } else if (strcmp(node->value, "-") == 0) {
         emit(newTAC(TAC_SUB, temp, left, right));
-    }
-    else if (strcmp(node->value, "*") == 0) {
+    } else if (strcmp(node->value, "*") == 0) {
         emit(newTAC(TAC_MUL, temp, left, right));
-    }
-    else if (strcmp(node->value, "/") == 0) {
+    } else if (strcmp(node->value, "/") == 0) {
         emit(newTAC(TAC_DIV, temp, left, right));
-    }
-    else if (strcmp(node->value, "%") == 0) {
+    } else if (strcmp(node->value, "%") == 0) {
         emit(newTAC(TAC_MOD, temp, left, right));
-    }
-    else if (strcmp(node->value, "==") == 0) {
+    } else if (strcmp(node->value, "==") == 0) {
         emit(newTAC(TAC_EQ, temp, left, right));
-    }
-    else if (strcmp(node->value, "!=") == 0) {
+    } else if (strcmp(node->value, "!=") == 0) {
         emit(newTAC(TAC_NE, temp, left, right));
-    }
-    else if (strcmp(node->value, "<") == 0) {
+    } else if (strcmp(node->value, "<") == 0) {
         emit(newTAC(TAC_LT, temp, left, right));
-    }
-    else if (strcmp(node->value, "<=") == 0) {
+    } else if (strcmp(node->value, "<=") == 0) {
         emit(newTAC(TAC_LE, temp, left, right));
-    }
-    else if (strcmp(node->value, ">") == 0) {
+    } else if (strcmp(node->value, ">") == 0) {
         emit(newTAC(TAC_GT, temp, left, right));
-    }
-    else if (strcmp(node->value, ">=") == 0) {
+    } else if (strcmp(node->value, ">=") == 0) {
         emit(newTAC(TAC_GE, temp, left, right));
-    }
-    else {
+    } else {
         // If unrecognized, default to assignment.
         emit(newTAC(TAC_ASSIGN, temp, left, NULL));
     }
-    
+
     return temp;
 }
 
 //---------------------------------------------------------------------
-TACInstruction** generateIntermediateCode(ParseTreeNode* root) {
+TACInstruction** generateIntermediateCode(ParseTreeNode* root)
+{
     // Reset state.
     tempCount = 0;
     labelCount = 0;
     tacHead = tacTail = NULL;
     generateCode(root);
-    printIntermediateCode(tacHead);
+    // printIntermediateCode(tacHead);   FUNCTION NOT IMPLEMENTED
     res[0] = tacHead;
     res[1] = tacTail;
     return res;
 }
 
 // Free the TAC instruction list.
-void freeIntermediateCode(void) {
+void freeIntermediateCode(void)
+{
     TACInstruction* curr = tacHead;
     while (curr != NULL) {
         TACInstruction* temp = curr;

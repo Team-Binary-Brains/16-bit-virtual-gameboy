@@ -3,10 +3,10 @@
 #include "O_symbol_table.h"
 
 typedef struct ParseTreeNode {
-    char* value; // Value of that node
-    TokenType type; // Type of node
-    struct ParseTreeNode** children; // Array of child nodes
-    int childCount; // Number of children
+    char* value;                         // Value of that node
+    TokenType type;                      // Type of node
+    struct ParseTreeNode** children;     // Array of child nodes
+    int childCount;                      // Number of children
     SymbolTable* scope;
 } ParseTreeNode;
 

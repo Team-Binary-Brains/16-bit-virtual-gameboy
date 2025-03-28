@@ -3,18 +3,20 @@
 #include "O_parse_tree.h"
 #include "O_symbol_table.h"
 
-void __printTokens(Token* tokens, size_t tokensIndex) {
+void __printTokens(Token* tokens, size_t tokensIndex)
+{
     printf("+--------------------------+--------------------------+\n");
     printf("| %-24s | %-24s |\n", "Token Value", "Token Type");
     printf("+--------------------------+--------------------------+\n");
-    for(size_t i=0; i<tokensIndex; i++){
+    for (size_t i = 0; i < tokensIndex; i++) {
         printf("| %-24s | %-24s |\n", tokens[i].value, StrTokenType[tokens[i].type]);
     }
     printf("+--------------------------+--------------------------+\n");
 }
 
 // For printing single token
-void __printToken(Token token) {
+void __printToken(Token token)
+{
     printf("+--------------------------+--------------------------+\n");
     printf("| %-24s | %-24s |\n", "Token Value", "Token Type");
     printf("+--------------------------+--------------------------+\n");
@@ -23,7 +25,8 @@ void __printToken(Token token) {
 }
 
 // Print the current scope for debugging
-void printCurrentScope(SymbolTable* currentScope) {
+void printCurrentScope(SymbolTable* currentScope)
+{
     if (!currentScope) {
         printf("\nNo active scope available\n");
         return;
@@ -37,8 +40,8 @@ void printCurrentScope(SymbolTable* currentScope) {
         Entry* entry = currentScope->table->entries[i];
         while (entry) {
             SymbolEntry* symEntry = (SymbolEntry*)entry->value;
-            printf("| %-15s | %-10s | %-18p |\n", 
-                   symEntry->identifier, StrTokenType[symEntry->type], symEntry->memAddress);
+            printf("| %-15s | %-10s | %-18p |\n",
+                symEntry->identifier, StrTokenType[symEntry->type], symEntry->memAddress);
             entry = entry->next;
         }
     }
@@ -47,8 +50,10 @@ void printCurrentScope(SymbolTable* currentScope) {
 }
 
 // Function to print the parse tree (preorder traversal)
-void printParseTree(ParseTreeNode* node, char* prefix, int is_last) {
-    if (!node) return;
+void printParseTree(ParseTreeNode* node, char* prefix, int is_last)
+{
+    if (!node)
+        return;
 
     // Handle root node (no prefix yet)
     if (prefix == NULL) {
@@ -59,12 +64,12 @@ void printParseTree(ParseTreeNode* node, char* prefix, int is_last) {
 
         char* new_prefix = (char*)malloc(256 * sizeof(char));
         strcpy(new_prefix, "");
-        
+
         for (int i = 0; i < node->childCount; i++) {
             int child_is_last = (i == node->childCount - 1);
             printParseTree(node->children[i], new_prefix, child_is_last);
         }
-        
+
         free(new_prefix);
         printf("\n");
         return;

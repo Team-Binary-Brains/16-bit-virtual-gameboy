@@ -3,7 +3,8 @@
 #include "O_symbol_table.h"
 
 // Function to create a new parse tree node
-ParseTreeNode* createParseTreeNode(Token* token, SymbolTable* scope) {
+ParseTreeNode* createParseTreeNode(Token* token, SymbolTable* scope)
+{
     ParseTreeNode* node = (ParseTreeNode*)malloc(sizeof(ParseTreeNode));
     node->value = strdup(token->value);
     node->type = token->type;
@@ -14,14 +15,16 @@ ParseTreeNode* createParseTreeNode(Token* token, SymbolTable* scope) {
 }
 
 // Function to add a child node to a parent
-void addChild(ParseTreeNode* parent, ParseTreeNode* child) {
+void addChild(ParseTreeNode* parent, ParseTreeNode* child)
+{
     parent->childCount++;
     parent->children = (ParseTreeNode**)realloc(parent->children, parent->childCount * sizeof(ParseTreeNode*));
     parent->children[parent->childCount - 1] = child;
 }
 
 // Function to free the parse tree
-void freeParseTree(ParseTreeNode* root) {
+void freeParseTree(ParseTreeNode* root)
+{
     for (int i = 0; i < root->childCount; i++) {
         freeParseTree(root->children[i]);
     }

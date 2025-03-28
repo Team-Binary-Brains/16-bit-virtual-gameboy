@@ -8,10 +8,10 @@
  * @date January 2025
  */
 
- #pragma once
+#pragma once
 
- #include "univ_defs.h"
- 
+#include "univ_defs.h"
+
 /**
  * @struct String
  * @brief Represents a string with its length and data.
@@ -24,6 +24,9 @@ typedef struct {
     size_t length;
     const char* data;
 } String;
+
+#define str_Fmt "%.*s"
+#define str_Arg(str) (int)(str).length, (str).data
 
 /**
  * @brief Removes leading whitespace characters from a string.
@@ -88,7 +91,7 @@ String splitStr(String*, char);
  * @param s The input string.
  * @return The integer value represented by the string.
  */
-int strToInt(String);
+uint64_t strToInt(String);
 
 /**
  * @brief Prints a string to the standard output.
@@ -98,3 +101,7 @@ int strToInt(String);
  * @param s The string to be printed.
  */
 void printString(String s);
+
+bool strEqu(String a, String b);
+
+String cstrToStr(const char*);

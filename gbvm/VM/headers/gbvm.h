@@ -12,26 +12,23 @@
 
 #include "univ_defs.h"
 #include "univ_errors.h"
+#include "univ_malloc.h"
 #include "sasm_instructions.h"
+#include "sasm_assembler.h"
 #include "sasm_memory.h"
+#include "gbvm_vmcalls.h"
 
 /**
  * @struct Vm
  * Represents the virtual machine instance.
  */
+
 typedef struct {
     Memory mem;   /**< The memory component of the virtual machine. */
     Program prog; /**< The program component of the virtual machine. */
     CPU cpu;      /**< The CPU component of the virtual machine. */
+    VmCalls vmCalls;
 } Vm;
-
-/**
- * Loads the program from the specified input file into the virtual machine.
- *
- * @param vm The virtual machine instance.
- * @param inputFile The input binary file containing the program bytecode.
- */
-void loadProgram(Vm* vm, char* inputFile);
 
 /**
  * Dumps the contents of the stack to the specified stream.
@@ -49,7 +46,7 @@ void dumpStack(FILE* stream, const Vm* vm);
  */
 void dumpFlags(FILE* stream, CPU* cpu);
 
-void dumpDetails(FILE* stream, String* operation, Word lineNumber, Instruction* inst);
+void dumpDetails(FILE* stream, String* operation, QuadWord lineNumber, Instruction* inst);
 
 /**
  * Executes the program loaded in the virtual machine.
@@ -59,3 +56,13 @@ void dumpDetails(FILE* stream, String* operation, Word lineNumber, Instruction* 
  * @param i The current execution count.
  */
 void executeProgram(Vm* vm, int debug, int i);
+
+/**
+ * @brief Executes an instruction in the virtual machine.
+ *
+ * @param prog The program containing the instructions.
+ * @param mem The memory of the virtual machine.
+ * @param cpu The CPU of the virtual machine.
+ * @return An error code indicating the success or failure of the execution.
+ */
+Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmCalls);
