@@ -5,30 +5,27 @@
 
 #include "univ_strings.h"
 
-typedef struct Region Region;
-
-struct Region {
-    Region* next;
+typedef struct Partition Partition;
+struct Partition {
+    Partition* next;
     size_t capacity;
     size_t size;
     char buffer[];
 };
 
-Region* region_create(size_t capacity);
-
-#define PART_DEFAULT_CAPACITY 65536
+#define REGION_DEFAULT_CAPACITY 65536
 
 typedef struct {
-    Region* first;
-    Region* last;
-} Partition;
+    Partition* first;
+    Partition* last;
+} Region;
 
-Region* regionCreate(size_t capacity);
+Partition* partitionCreate(size_t capacity);
 
-void* partAllocAligned(Partition* part, size_t size, size_t alignment);
+void* regionAllocAligned(Region* region, size_t size, size_t alignment);
 
-void* partAlloc(Partition* part, size_t size);
+void* regionAlloc(Region* region, size_t size);
 
-int partSlurpFile(Partition* part, String file_path, String* content);
+int regionSlurpFile(Region* region, String file_path, String* content);
 
-const char* partStrToCstr(Partition* part, String str);
+const char* regionStrToCstr(Region* region, String str);

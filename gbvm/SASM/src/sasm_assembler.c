@@ -110,7 +110,7 @@ bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
         return true;
     }
 
-    const char* cstr = partStrToCstr(&sasm->part, str);
+    const char* cstr = regionStrToCstr(&sasm->region, str);
     char* endptr = 0;
     QuadWord result = { 0 };
 
@@ -257,7 +257,7 @@ Error processLine(Sasm* sasm, String* line)
 void parseAsmIntoProgram(Sasm* sasm, String inputFilePath)
 {
     String original_source;
-    partSlurpFile(&sasm->part, inputFilePath, &original_source);
+    regionSlurpFile(&sasm->region, inputFilePath, &original_source);
     String source = original_source;
 
     int line_number = 0;

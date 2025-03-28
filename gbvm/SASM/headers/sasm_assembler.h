@@ -37,7 +37,7 @@ typedef struct {
     size_t memorySize;
     size_t memoryCapacity;
 
-    Partition part;
+    Region region;
 
     size_t includeLevel;
 } Sasm;
