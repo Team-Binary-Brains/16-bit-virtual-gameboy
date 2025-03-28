@@ -1,6 +1,5 @@
 #include "sasm_assembler.h"
 #include "univ_malloc.h"
-#include "univ_cmdutils.h"
 #include "univ_strings.h"
 #include "univ_fileops.h"
 
@@ -47,7 +46,7 @@ Error includeDirective(Sasm* sasm, String* line)
 Error processPreProcessorDirective(Sasm* sasm, String* line, String token)
 {
     *line = trim(*line);
-    if (strEqu(token, cstrToStr("bind"))) {
+    if (compareStr(token, convertCstrToStr("bind"))) {
         String name = splitStr(line, ' ');
         if (name.length <= 0) {
             displayMsgWithExit(" ERROR: binding name is not provided\n");
@@ -55,7 +54,7 @@ Error processPreProcessorDirective(Sasm* sasm, String* line, String token)
         return bindDirective(sasm, name, line);
     }
 
-    if (strEqu(token, cstrToStr("include"))) {
+    if (compareStr(token, convertCstrToStr("include"))) {
         if (line->length <= 0) {
             displayMsgWithExit(" ERROR: include file path is not provided\n");
         }
@@ -111,7 +110,7 @@ bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
         return true;
     }
 
-    const char* cstr = partStrToCstr(&sasm->part, str);
+    const char* cstr = convertStrToRegionCstr(&sasm->region, str);
     char* endptr = 0;
     QuadWord result = { 0 };
 
@@ -131,7 +130,7 @@ bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
 bool resolveBinding(const Sasm* sasm, String name, QuadWord* output)
 {
     for (size_t i = 0; i < sasm->bindingCount; ++i) {
-        if (strEqu(sasm->bindings[i].name, name)) {
+        if (compareStr(sasm->bindings[i].name, name)) {
             *output = sasm->bindings[i].value;
             return true;
         }
@@ -173,7 +172,7 @@ void assembleProgramIntoBytecode(Sasm* sasm, const char* filePath)
         exit(1);
     }
 
-    closeFile(filePath, f);
+    closeFile(f, filePath);
 }
 
 Error processLine(Sasm* sasm, String* line)
@@ -206,7 +205,7 @@ Error processLine(Sasm* sasm, String* line)
 
     String operand;
     OpcodeDetails details;
-    if (strAsOpcode(token, &details)) {
+    if (getOpcodeDetailsFromName(token, &details)) {
         assert(sasm->prog.instruction_count < PROGRAM_CAPACITY);
         Instruction* inst = &sasm->prog.instructions[sasm->prog.instruction_count];
         inst->type = details.type;
@@ -258,7 +257,7 @@ Error processLine(Sasm* sasm, String* line)
 void parseAsmIntoProgram(Sasm* sasm, String inputFilePath)
 {
     String original_source;
-    partSlurpFile(&sasm->part, inputFilePath, &original_source);
+    loadFileIntoRegionStr(&sasm->region, inputFilePath, &original_source);
     String source = original_source;
 
     int line_number = 0;
@@ -286,23 +285,18 @@ void parseAsmIntoProgram(Sasm* sasm, String inputFilePath)
     }
 }
 
-void loadProgramIntoSasm(Sasm* sasm, const char* file_path)
+void loadProgramIntoSasm(Sasm* sasm, const char* filePath)
 {
     memset(sasm, 0, sizeof(*sasm));
 
-    FILE* f = fopen(file_path, "rb");
-    if (f == NULL) {
-        fprintf(stderr, "ERROR: Could not open file `%s`: %s\n",
-            file_path, strerror(errno));
-        exit(1);
-    }
+    FILE* f = openFile(filePath, "rb");
 
     Metadata meta = { 0 };
 
     size_t n = fread(&meta, sizeof(meta), 1, f);
     if (n < 1) {
         fprintf(stderr, "ERROR: Could not read meta data from file `%s`: %s\n",
-            file_path, strerror(errno));
+            filePath, strerror(errno));
         exit(1);
     }
 
@@ -310,52 +304,42 @@ void loadProgramIntoSasm(Sasm* sasm, const char* file_path)
         fprintf(stderr,
             "ERROR: %s does not appear to be a valid sasm file. "
             "Unexpected magic %04X. Expected %04X.\n",
-            file_path,
-            meta.magic, FILE_MAGIC);
+            filePath, meta.magic, FILE_MAGIC);
         exit(1);
     }
 
     if (meta.version != FILE_VERSION) {
         fprintf(stderr,
             "ERROR: %s: unsupported version of sasm file %d. Expected version %d.\n",
-            file_path,
-            meta.version, FILE_VERSION);
+            filePath, meta.version, FILE_VERSION);
         exit(1);
     }
 
     if (meta.programSize > PROGRAM_CAPACITY) {
         fprintf(stderr,
             "ERROR: %s: program section is too big. The file contains %" PRIu64 " program instruction. But the capacity is %" PRIu64 "\n",
-            file_path,
-            meta.programSize,
-            (uint64_t)PROGRAM_CAPACITY);
+            filePath, meta.programSize, (uint64_t)PROGRAM_CAPACITY);
         exit(1);
     }
 
     if (meta.memoryCapacity > MEMORY_CAPACITY) {
         fprintf(stderr,
             "ERROR: %s: memory section is too big. The file wants %" PRIu64 " bytes. But the capacity is %" PRIu64 " bytes\n",
-            file_path,
-            meta.memoryCapacity,
-            (uint64_t)MEMORY_CAPACITY);
+            filePath, meta.memoryCapacity, (uint64_t)MEMORY_CAPACITY);
         exit(1);
     }
 
     if (meta.memorySize > meta.memoryCapacity) {
         fprintf(stderr,
             "ERROR: %s: memory size %" PRIu64 " is greater than declared memory capacity %" PRIu64 "\n",
-            file_path,
-            meta.memorySize,
-            meta.memoryCapacity);
+            filePath, meta.memorySize, meta.memoryCapacity);
         exit(1);
     }
 
     if (meta.externalsSize > EXTERNAL_VMCALLS_CAPACITY) {
         fprintf(stderr,
             "ERROR: %s: external names section is too big. The file contains %" PRIu64 " external names. But the capacity is %" PRIu64 " external names\n",
-            file_path,
-            meta.externalsSize,
-            (uint64_t)EXTERNAL_VMCALLS_CAPACITY);
+            filePath, meta.externalsSize, (uint64_t)EXTERNAL_VMCALLS_CAPACITY);
         exit(1);
     }
 
@@ -363,9 +347,7 @@ void loadProgramIntoSasm(Sasm* sasm, const char* file_path)
 
     if (sasm->prog.instruction_count != meta.programSize) {
         fprintf(stderr, "ERROR: %s: read %" PRIu64 " program instructions, but expected %" PRIu64 "\n",
-            file_path,
-            sasm->prog.instruction_count,
-            meta.programSize);
+            filePath, sasm->prog.instruction_count, meta.programSize);
         exit(1);
     }
 
@@ -373,11 +355,9 @@ void loadProgramIntoSasm(Sasm* sasm, const char* file_path)
 
     if (n != meta.memorySize) {
         fprintf(stderr, "ERROR: %s: read %zd bytes of memory section, but expected %" PRIu64 " bytes.\n",
-            file_path,
-            n,
-            meta.memorySize);
+            filePath, n, meta.memorySize);
         exit(1);
     }
 
-    fclose(f);
+    closeFile(f, filePath);
 }

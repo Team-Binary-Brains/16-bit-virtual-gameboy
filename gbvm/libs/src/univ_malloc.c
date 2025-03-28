@@ -3,96 +3,86 @@
 #include <stdio.h>
 
 #include "univ_malloc.h"
+#include "univ_fileops.h"
 
-Region* regionCreate(size_t capacity)
+Partition* createPartition(size_t capacity)
 {
-    const size_t regionSize = sizeof(Region) + capacity;
-    Region* region = malloc(regionSize);
-    memset(region, 0, regionSize);
-    region->capacity = capacity;
-    return region;
+    const size_t partSize = sizeof(Partition) + capacity;
+    Partition* part = malloc(partSize);
+    memset(part, 0, partSize);
+    part->capacity = capacity;
+    return part;
 }
 
-void* partAllocAligned(Partition* part, size_t size, size_t alignment)
+char* insertIntoOrExpandRegion(Region* region, Partition* cur, size_t size, size_t alignedAddressMask)
 {
-    if (part->last == NULL) {
-        assert(part->first == NULL);
+    uintptr_t tmp = (uintptr_t)(cur->buffer + cur->size);
+    tmp = (tmp + alignedAddressMask) & ~alignedAddressMask;
 
-        Region* region = regionCreate(
-            size > PART_DEFAULT_CAPACITY ? size : PART_DEFAULT_CAPACITY);
+    char* ptr = (char*)tmp;
+    size_t realSize = (ptr + size) - (cur->buffer + cur->size);
 
-        part->last = region;
-        part->first = region;
+    if (cur->size + realSize <= cur->capacity) {
+
+        memset(ptr, 0, realSize);
+        cur->size += realSize;
+        return ptr;
+    }
+
+    if (cur->next) {
+        return insertIntoOrExpandRegion(region, cur->next, size, alignedAddressMask);
+    }
+
+    size_t worstCase = (size + alignedAddressMask) & ~alignedAddressMask;
+
+    Partition* part = createPartition(
+        worstCase > REGION_DEFAULT_CAPACITY
+            ? worstCase
+            : REGION_DEFAULT_CAPACITY);
+
+    region->last->next = part;
+    region->last = part;
+    cur = region->last;
+
+    return insertIntoOrExpandRegion(region, cur->next, size, alignedAddressMask);
+}
+
+void* allocateAlignedRegion(Region* region, size_t size, size_t alignment)
+{
+    if (region->last == NULL) {
+        assert(region->first == NULL);
+
+        Partition* part = createPartition(
+            size > REGION_DEFAULT_CAPACITY ? size : REGION_DEFAULT_CAPACITY);
+
+        region->last = part;
+        region->first = part;
     }
 
     if (size == 0) {
-        return part->last->buffer + part->last->size;
+        return region->last->buffer + region->last->size;
     }
 
     assert((alignment & (alignment - 1)) == 0);
 
-    Region* cur = part->last;
-    while (true) {
-
-        char* ptr = (char*)(((uintptr_t)(cur->buffer + cur->size + (alignment - 1))) & ~(alignment - 1));
-        size_t realSize = (size_t)((ptr + size) - (cur->buffer + cur->size));
-
-        if (cur->size + realSize > cur->capacity) {
-            if (cur->next) {
-
-                cur = cur->next;
-                continue;
-
-            } else {
-                size_t worstCase = size + (alignment - 1);
-
-                Region* region = regionCreate(worstCase > PART_DEFAULT_CAPACITY
-                        ? worstCase
-                        : PART_DEFAULT_CAPACITY);
-
-                part->last->next = region;
-                part->last = region;
-                cur = part->last;
-
-                continue;
-            }
-        } else {
-            memset(ptr, 0, realSize);
-            cur->size += realSize;
-            return ptr;
-        }
-    }
+    return insertIntoOrExpandRegion(region, region->last, size, alignment - 1);
 }
 
-void* partAlloc(Partition* part, size_t size)
+void* allocateRegion(Region* region, size_t size)
 {
-    return partAllocAligned(part, size, sizeof(void*));
+    return allocateAlignedRegion(region, size, sizeof(void*));
 }
 
-int partSlurpFile(Partition* part, String file_path, String* content)
+int loadFileIntoRegionStr(Region* region, String filePath, String* content)
 {
-    const char* file_pathCstr = partStrToCstr(part, file_path);
+    const char* filePathCstr = convertStrToRegionCstr(region, filePath);
 
-    FILE* f = fopen(file_pathCstr, "rb");
-    if (f == NULL) {
-        return -1;
-    }
+    FILE* f = openFile(filePathCstr, "rb");
 
-    if (fseek(f, 0, SEEK_END) < 0) {
-        return -1;
-    }
+    long m = getFileSize(f, filePath.data);
 
-    long m = ftell(f);
-    if (m < 0) {
-        return -1;
-    }
-
-    char* buffer = partAlloc(part, (size_t)m);
+    char* buffer = allocateRegion(region, (size_t)m);
     if (buffer == NULL) {
-        return -1;
-    }
-
-    if (fseek(f, 0, SEEK_SET) < 0) {
         return -1;
     }
 
@@ -101,7 +91,7 @@ int partSlurpFile(Partition* part, String file_path, String* content)
         return -1;
     }
 
-    fclose(f);
+    closeFile(f, filePath.data);
 
     if (content) {
         content->length = n;
@@ -111,9 +101,9 @@ int partSlurpFile(Partition* part, String file_path, String* content)
     return 0;
 }
 
-const char* partStrToCstr(Partition* part, String str)
+const char* convertStrToRegionCstr(Region* region, String str)
 {
-    char* cstr = partAlloc(part, str.length + 1);
+    char* cstr = allocateRegion(region, str.length + 1);
     memcpy(cstr, str.data, str.length);
     cstr[str.length] = '\0';
     return cstr;

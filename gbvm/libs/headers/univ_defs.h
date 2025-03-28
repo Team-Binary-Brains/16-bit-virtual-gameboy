@@ -52,3 +52,16 @@ typedef union {
     double as_f64;
     void* as_ptr;
 } QuadWord;
+
+/**
+ * @brief Retrieves the next command line argument.
+ *
+ * This function retrieves the next command line argument from the argument list
+ * and updates the argument count and argument list pointers to only contain the
+ * remaining pointers.
+ *
+ * @param argc A pointer to the argument count.
+ * @param argv A pointer to the argument list.
+ * @return The next command line argument.
+ */
+char* getNextCmdLineArg(int* argc, char*** argv);

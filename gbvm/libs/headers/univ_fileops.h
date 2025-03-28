@@ -36,7 +36,7 @@ FILE* openFile(const char* filePath, const char* mode);
  * @param filePath The path of the file to be closed.
  * @param file A pointer to the file to be closed.
  */
-void closeFile(const char* filePath, FILE* file);
+void closeFile(FILE* file, const char* filePath);
 
 /**
  * @brief Gets the size of the specified file.
@@ -50,4 +50,4 @@ void closeFile(const char* filePath, FILE* file);
  * @param filePath The path of the file.
  * @return The size of the file in bytes.
  */
-int getFileSize(FILE* f, const char* filePath);
+long getFileSize(FILE* f, const char* filePath);

@@ -1,6 +1,6 @@
 #include "univ_strings.h"
 
-String cstrToStr(const char* cstr)
+String convertCstrToStr(const char* cstr)
 {
     return (String) {
         .length = strlen(cstr),
@@ -60,7 +60,7 @@ String splitStr(String* s, char c)
     return res;
 }
 
-uint64_t strToInt(String s)
+uint64_t convertStrToInt(String s)
 {
     uint64_t val = 0;
     size_t i = 0;
@@ -77,7 +77,7 @@ void printString(String s)
     printf("%.*s\n", (int)(s.length), s.data);
 }
 
-bool strEqu(String a, String b)
+bool compareStr(String a, String b)
 {
     if (a.length != b.length) {
         return false;
@@ -88,7 +88,7 @@ bool strEqu(String a, String b)
 
 // TODO: add ability to process hex inputs
 
-bool strParseHex(String str, uint64_t* output)
+bool parseStrHex(String str, uint64_t* output)
 {
     uint64_t result = 0;
 
