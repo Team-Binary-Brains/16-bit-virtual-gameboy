@@ -1,237 +1,230 @@
 #include "univ_defs.h"
+#include "univ_hashmap.h"
+#include "univ_fileops.h"
 #include "O_lexer.h"
+#include "O_debug_help.h"
+#include "O_token_types.h"
 
-size_t lineNumber = 0;
+size_t lineNumber = 1;
+HashTable *OpAndSepTokenMap;
+HashTable *KeywordTokenMap;
 
-void __printToken(Token token)
-{
-    printf("TOKEN VALUE: ");
-    printf("'");
-    for (int i = 0; token.value[i] != '\0'; i++) {
-        printf("%c", token.value[i]);
-    }
-    printf("'");
-    printf("\nline number: %zu", token.lineNum);
-
-    switch (token.type) {
-    case INT:
-        printf(" TOKEN TYPE: INT\n");
-        break;
-    case KEYWORD:
-        printf(" TOKEN TYPE: KEYWORD\n");
-        break;
-    case SEPARATOR:
-        printf(" TOKEN TYPE: SEPARATOR\n");
-        break;
-    case OPERATOR:
-        printf(" TOKEN TYPE: OPERATOR\n");
-        break;
-    case IDENTIFIER:
-        printf(" TOKEN TYPE: IDENTIFIER\n");
-        break;
-    case STRING:
-        printf(" TOKEN TYPE: STRING\n");
-        break;
-    case COMP:
-        printf(" TOKEN TYPE: COMPARATOR\n");
-        break;
-    case END_OF_TOKENS:
-        printf(" END OF TOKENS\n");
-        break;
-    case BEGINNING:
-        printf("BEGINNING\n");
-        break;
+void createOpAndSepTokenMap(){
+    OpAndSepTokenMap = createHashTable(20, stringHashFunc, stringKeyCompare, stringKeyDestroy, intValueDestroy);
+    size_t len = sizeof(OpAndSepTokens) / sizeof(OpAndSepTokens[0]);
+    for (size_t i = 0; i < len; i++) {
+        char *key = strdup(OpAndSepTokens[i].value);           // Dynamically allocate memory for the key
+        TokenType *value = malloc(sizeof(int));     // Dynamically allocate memory for the value
+        *value = OpAndSepTokens[i].type;
+        insert(OpAndSepTokenMap, key, value);
     }
 }
 
-Token* generateNumber(char* current, int* currentIndex)
-{
-    // Token Creation
-    Token* token = malloc(sizeof(Token));
-    token->lineNum = (size_t)malloc(sizeof(size_t));
-    token->lineNum = lineNumber;
-    token->type = INT;
+void createKeywordTokenMap(){
+    KeywordTokenMap = createHashTable(20, stringHashFunc, stringKeyCompare, stringKeyDestroy, intValueDestroy);
+    size_t len = sizeof(KeywordTokens) / sizeof(KeywordTokens[0]);
+    for (int i = 0; i < len; i++) {
+        char *key = strdup(KeywordTokens[i].value);           
+        TokenType *value = malloc(sizeof(int));     
+        *value = KeywordTokens[i].type;
+        insert(KeywordTokenMap, key, value);
+    }
+}
 
-    char* value = malloc(sizeof(char) * 8);
+Token* initToken(TokenType type){
+    Token* token = malloc(sizeof(Token));
+    token->lineNum = lineNumber;
+    token->type = type;
+    return token;
+}
+
+void generateKeywordOrIdentifier(char *current, int* currentIndex, Token* token){
+    char *keyword = malloc(sizeof(char) * 8);
+    int keywordIndex = 0;
+    while(current[*currentIndex]!='\0' && (isalpha(current[*currentIndex]) || isdigit(current[*currentIndex]))){
+        keyword[keywordIndex] = current[*currentIndex];
+        keywordIndex++;
+        *currentIndex+=1;
+    }
+
+    keyword[keywordIndex] = '\0';
+
+    token->value = keyword;
+
+    int *res = retrieve(KeywordTokenMap, keyword);
+    if(res == NULL){
+        token->type = IDENTIFIER;
+    }else{
+        token->type = *res;
+    }
+    //free(keyword);
+}
+
+void generateOpAndSepToken(char* current, int* currentIndex, Token* token){
+    char* value = malloc(sizeof(char)*3);
+    value[0] = current[*currentIndex];
+    if(current[(*currentIndex)+1] == '='){
+        *currentIndex +=1 ;
+        value[1] = current[(*currentIndex)];
+        value[2] = '\0';
+    }else{
+        value = realloc(value, sizeof(char)*2);
+        value[1] = '\0';
+    }
+
+    // O(1) operation
+    int *res = retrieve(OpAndSepTokenMap, value);
+    if(res != NULL){
+        token->type = *res;
+        token->value = value;
+    }
+}
+
+void generateIntLorFloatLToken(char* current, int* currentIndex, Token* token){
+    char* value = malloc(sizeof(char) * 16);
     int value_index = 0;
     while (current[*currentIndex] != '\0' && isdigit(current[*currentIndex])) {
         value[value_index] = current[*currentIndex];
         value_index++;
         *currentIndex += 1;
     }
+    if(current[*currentIndex] == '.'){
+        do{
+            value[value_index] = current[*currentIndex];
+            value_index++;
+            *currentIndex += 1;
+        }while (current[*currentIndex] != '\0' && isdigit(current[*currentIndex]));
+        token->type = FLOAT_L;
+    }else token->type = INT_L;
     value[value_index] = '\0';
     token->value = value;
-    return token;
 }
 
-Token* generateKeywordOrIdentifier(char* current, int* currentIndex)
-{
-    Token* token = malloc(sizeof(Token));
-    token->lineNum = (size_t)malloc(sizeof(size_t));
-    token->lineNum = lineNumber;
-    char* keyword = malloc(sizeof(char) * 8);
-    int keywordIndex = 0;
-    while (current[*currentIndex] != '\0' && isalpha(current[*currentIndex])) {
-        keyword[keywordIndex] = current[*currentIndex];
-        keywordIndex++;
-        *currentIndex += 1;
-    }
-
-    keyword[keywordIndex] = '\0';
-
-    if (strcmp(keyword, "exit") == 0) {
-        token->type = KEYWORD;
-        token->value = "EXIT";
-    } else if (strcmp(keyword, "int") == 0) {
-        token->type = KEYWORD;
-        token->value = "INT";
-    } else if (strcmp(keyword, "if") == 0) {
-        token->type = KEYWORD;
-        token->value = "IF";
-    } else if (strcmp(keyword, "while") == 0) {
-        token->type = KEYWORD;
-        token->value = "WHILE";
-    } else if (strcmp(keyword, "write") == 0) {
-        token->type = KEYWORD;
-        token->value = "WRITE";
-    } else if (strcmp(keyword, "eq") == 0) {
-        token->type = KEYWORD;
-        token->value = "EQ";
-    } else if (strcmp(keyword, "neq") == 0) {
-        token->type = COMP;
-        token->value = "NEQ";
-    } else if (strcmp(keyword, "less") == 0) {
-        token->type = COMP;
-        token->value = "LESS";
-    } else if (strcmp(keyword, "greater") == 0) {
-        token->type = COMP;
-        token->value = "GREATER";
-    } else {
-        token->type = IDENTIFIER;
-        token->value = keyword;
-    }
-    return token;
-}
-
-Token* generateStringToken(char* current, int* currentIndex)
-{
-    Token* token = malloc(sizeof(Token));
-    token->lineNum = (size_t)malloc(sizeof(size_t));
-    token->lineNum = lineNumber;
+void generateStringLToken(char* current, int* currentIndex, Token* token){
+    token->type = STR_L;
     char* value = malloc(sizeof(char) * 64);
     int value_index = 0;
     *currentIndex += 1;
-    while (current[*currentIndex] != '"') {
+    while (current[*currentIndex] != '"' && current[*currentIndex]!='\0') {
         value[value_index] = current[*currentIndex];
         value_index++;
         *currentIndex += 1;
     }
+    if(current[*currentIndex] == '\0'){
+        printf("\nError: String Never Closed");
+        exit(1);
+    }
     value[value_index] = '\0';
-    token->type = STRING;
     token->value = value;
-    return token;
 }
 
-Token* generateSeparatorOrOperator(char* current, int* currentIndex, TokenType type)
-{
-    Token* token = malloc(sizeof(Token));
-    token->value = malloc(sizeof(char) * 2);
-    token->value[0] = current[*currentIndex];
-    token->value[1] = '\0';
-    token->lineNum = (size_t)malloc(sizeof(size_t));
-    token->lineNum = lineNumber;
-    token->type = type;
-    return token;
+void generateCharLToken(char* current, int *currentIndex, Token* token){
+    if(current[*currentIndex+2] != '\''){
+        printf("\nError: Character Literal Cannot be of more than one character");
+        exit(1);
+    }
+    token->type = CHAR_L;
+    char* value = malloc(sizeof(char) * 2);
+    *currentIndex+=1;
+    value[0] = current[*currentIndex];
+    value[1] = '\0';
+    *currentIndex+=1;
+    token->value = value;
 }
 
 size_t tokensIndex;
 
-Token* lexer(FILE* file)
-{
-    int length;
+Token* lexer(FILE* file, char* inputFile){
+    long file_size;
     char* current = 0;
 
-    fseek(file, 0, SEEK_END);
-    length = ftell(file);
-    fseek(file, 0, SEEK_SET);
+    // 'file_size' will contain actual size of file ('\n' are also counted)
+    file_size = getFileSize(file, inputFile);
 
-    current = malloc(sizeof(char) * length);
-    fread(current, 1, length, file);
+    // Allocate data to store all the contents of file (including '\n')
+    // file_size +1 is for null character
+    current = malloc(sizeof(char) * file_size+1u);
+
+    // 'read_len' will contain no. of characters(including spaces) in the file. (Note: '\n' are excluded)
+    // Also, No. of lines in the file = file_size - read_len
+    size_t read_len = fread(current, 1, file_size, file);
+    current[read_len] = '\0';
+
     fclose(file);
 
-    current[length] = '\0';
+    createOpAndSepTokenMap();
+    createKeywordTokenMap();
     int currentIndex = 0;
 
-    int number_of_tokens = 15;
+    int numberOfTokens = 15;
     int tokens_size = 0;
-    Token* tokens = malloc(sizeof(Token) * number_of_tokens);
+    Token* tokens = malloc(sizeof(Token) * numberOfTokens);
     tokensIndex = 0;
 
     while (current[currentIndex] != '\0') {
-        Token* token = malloc(sizeof(Token));
-        tokens_size++;
-        if (tokens_size > number_of_tokens) {
-            number_of_tokens *= 1.5;
-            tokens = realloc(tokens, sizeof(Token) * number_of_tokens);
-        }
-
-        if (current[currentIndex] == ' ') {
-            free(token);
+        if(current[currentIndex] == ' '){
             currentIndex++;
             continue;
         }
 
-        switch (current[currentIndex]) {     // Improvement
-        case ';':
-        case ',':
-        case '(':
-        case ')':
-        case '{':
-        case '}':
-            token = generateSeparatorOrOperator(current, &currentIndex, SEPARATOR);
-            break;
-
-        case '=':
-        case '+':
-        case '-':
-        case '*':
-        case '/':
-        case '%':
-            token = generateSeparatorOrOperator(current, &currentIndex, OPERATOR);
-            break;
-        case '"':
-            token = generateStringToken(current, &currentIndex);
-            break;
+        if(current[currentIndex] == '/' && current[currentIndex+1] == '/'){
+            while(current[currentIndex] != '\n' && current[currentIndex+1] != '\0'){
+                currentIndex++;
+            }
+            if(current[currentIndex+1] == '\0'){
+                currentIndex++;
+                break;
+            }
+        }
+        
+        if(current[currentIndex] == '/' && current[currentIndex+1] == '*'){
+            while((current[currentIndex] != '*' || current[currentIndex+1] != '/') && current[currentIndex+2] != '\0'){
+                currentIndex++;
+            }
+            if(current[currentIndex+2] == '\0'){
+                currentIndex+=2;
+                break;
+            }
+            currentIndex = currentIndex+2;
         }
 
-        if (isdigit(current[currentIndex])) {
-            token = generateNumber(current, &currentIndex);
-            currentIndex--;
-        } else if (isalpha(current[currentIndex])) {
-            token = generateKeywordOrIdentifier(current, &currentIndex);
-            currentIndex--;
+        Token* token = malloc(sizeof(Token));
+        tokens_size++;
+        if (tokens_size > numberOfTokens) {
+            numberOfTokens *= 1.5;
+            tokens = realloc(tokens, sizeof(Token) * numberOfTokens);
         }
 
-        if (current[currentIndex] == '\n') {     // Improvement
-            lineNumber += 1;
-        } else {
+        if(current[currentIndex] == '\n'){
+            lineNumber++;
+        }else{
+            Token* token = initToken(UNKNOWN);
+
+            if(current[currentIndex] == '"'){
+                generateStringLToken(current, &currentIndex, token);
+            }else if (isdigit(current[currentIndex])) {
+                generateIntLorFloatLToken(current, &currentIndex, token);
+                currentIndex--;
+            } else if (current[currentIndex] == '\''){
+                generateCharLToken(current, &currentIndex, token);
+            }else if (isalpha(current[currentIndex])) {
+                generateKeywordOrIdentifier(current, &currentIndex, token);
+                currentIndex--;
+            }else{
+                generateOpAndSepToken(current, &currentIndex, token);
+            }
+
             tokens[tokensIndex] = *token;
             tokensIndex++;
         }
         free(token);
         currentIndex++;
     }
-    // Token *token = malloc(sizeof(Token));
-    // token->value = malloc(sizeof(char)*1);
-    // token->value = "a";
-    // token->type = END_OF_TOKENS;
-    // tokens[tokensIndex] = *token;
-    // free(token);
-    // printf("token index: %zu\n", tokensIndex);
-    tokens[tokensIndex].value = '\0';
+
+    tokens[tokensIndex].value = "\0";
     tokens[tokensIndex].type = END_OF_TOKENS;
-    // for(int i=0; i<tokensIndex; i++){
-    //     __printToken(tokens[i]);
-    // }
+    __printTokens(tokens, tokensIndex);
+    destroyHashTable(OpAndSepTokenMap);
+    destroyHashTable(KeywordTokenMap);
     return tokens;
 }

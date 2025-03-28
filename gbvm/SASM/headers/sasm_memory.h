@@ -31,7 +31,6 @@ typedef enum {
     ZERO = 1 << 6,         // 64
     AUX = 1 << 7           // 128
 } Flags;
-
 typedef struct {
     Register AX; /**< Accumulator register */
     Register BX; /**< Base register */

@@ -5,7 +5,8 @@
  * This header file contains various universal definitions used in the GBVM library.
  * It includes necessary standard C libraries and defines several constants and types.
  *
- * @author Soham Metha
+
+ * @authors Soham Metha, Omkar Jagtap
  * @date January 2025
  */
 
@@ -30,6 +31,7 @@
 #define BINDINGS_CAPACITY 1024
 #define INTERNAL_VMCALLS_CAPACITY 1024
 #define EXTERNAL_VMCALLS_CAPACITY 1024
+#define LOAD_FACTOR_THRESHOLD 0.75
 #define MAX_INCLUDE_LEVEL 10
 #define COMMENT_SYMBOL ';'
 #define PREP_SYMBOL '%'

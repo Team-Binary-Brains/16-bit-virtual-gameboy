@@ -20,11 +20,12 @@ CMDIR = ./VM/src
 _A_HEAD = 		sasm_assembler.h	sasm_instructions.c		sasm_memory.h
 _A_CODE = 		sasm_assembler.c	sasm_instructions.c		sasm_memory.c
 
-_G_HEAD = 		univ_cmdutils.h 	univ_errors.h			univ_fileops.h 		univ_strings.h		univ_malloc.h	univ_defs.h 
-_G_CODE = 		univ_cmdutils.c		univ_errors.c			univ_fileops.c 		univ_strings.c		univ_malloc.c
+_G_HEAD = 		univ_cmdutils.h 	univ_errors.h			univ_fileops.h 		univ_strings.h		univ_hashmap.h		univ_malloc.h	univ_defs.h 
+_G_CODE = 		univ_cmdutils.c		univ_errors.c			univ_fileops.c 		univ_strings.c		univ_hashmap.c		univ_malloc.c
 
-_C_HEAD =		O_lexer.h			O_parser.h				O_codegenerator.h 	
-_C_CODE = 		O_lexer.c			O_parser.c				O_codegenerator.c 	
+_C_HEAD =		O_lexer.h			O_parser.h				O_parse_tree.h		O_symbol_table.h	O_inter_codegen.h 	O_debug_help.h		O_inter_code_optimizer.h		O_token_types.h
+_C_CODE = 		O_lexer.c			O_parser.c				O_parse_tree.c		O_symbol_table.c	O_inter_codegen.c	O_debug_help.c		O_inter_code_optimizer.c
+
 
 _M_HEAD = 		gbvm_assembler.h	gbvm.h					gbvm_vmcalls.h
 _M_CODE =		gbvm_assembler.c	gbvm.c					gbvm_vmcalls.c
@@ -56,7 +57,7 @@ sasm: 	sasm.c $(G_CODE) $(A_CODE)
 		@echo -e ""
 
 occ:	occ.c  $(G_CODE) $(C_CODE) 
-		@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
+		@$(CC) -g -o $@ $^   $(CFLAGS) $(LIBS)
 		@echo -e ""
 		@echo -e "COMPILER MADE SUCCESSFULLY"
 		@echo -e ""

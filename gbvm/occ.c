@@ -1,11 +1,13 @@
 #pragma GCC diagnostic ignored "-Wswitch-enum"
-#include "O_codegenerator.h"
 #include "O_lexer.h"
 #include "O_parser.h"
+#include "O_codegenerator.h"
 #include "univ_cmdutils.h"
 #include "univ_defs.h"
 #include "univ_errors.h"
 #include "univ_fileops.h"
+#include "O_inter_codegen.h"
+#include "O_inter_code_optimizer.h"
 
 char* inputFile = NULL;
 char* outputFile = NULL;
@@ -28,14 +30,26 @@ int main(int argc, char* argv[])
     if (!inputFile || !outputFile) {
         displayMsgWithExit("\nMissing Files"
                            "\nUsage : gbasm -i <input file> -o <output file> -l [lang] "
-                           "\tSample Command    : ./gbasm -i ./prog/FirstProgram.osh  -o ./prog/example.pblasm\n");
+                           "\tSample Command    : ./occ -i ../extras/samplePrograms/FirstProgram.osh -o ../samplePrograms/example.pblasm/n");
     }
 
     FILE* file = openFile(inputFile, "r");
 
-    Node* root = parser(lexer(file));
+    // Phase 1: Lexical Analysis
+    Token* tokens = lexer(file, inputFile);
 
-    generateCode(root, outputFile);
+    // Phase 2: Syntax Analysis
+    ParseTreeNode* root = parser(tokens);
+
+    // Phase 3: Semantics Analysis
+    // Basis Semantic analysis already implemented in previous phase
+    // TODO: Write seperate semantic analysis along with error handler
+
+    // Phase 4: Intermediate Code generation
+    TACInstruction** tacList = generateIntermediateCode(root);
+
+    // Phase 5: Code optimizer
+    optimizeCode(tacList);
 
     // FILE *assembly_file = fopen("gbvmasm.asm", "r");
     // if(!assembly_file){
@@ -43,7 +57,7 @@ int main(int argc, char* argv[])
     //     exit(1);
     // }
 
-    printf("Compiler Ready!!!\n");
+    printf("\nCompiler Ready!!!\n");
 
     /*
     TODO: inputting assembly file to assembler
