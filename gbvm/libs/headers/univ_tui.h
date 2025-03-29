@@ -1,7 +1,7 @@
 #pragma once
 
 #include "univ_defs.h"
-
+#include "univ_strings.h"
 #define LERP(START, END, T) (START * T + END * (1 - T))
 
 const int YMIN = 0;
@@ -24,7 +24,7 @@ void enterTUIMode()
     refresh();
 }
 
-WINDOW* createWindow(int x1, int y1, int x2, int y2)
+WINDOW* createWindow(int x1, int y1, int x2, int y2, String str)
 {
     WINDOW* win = newwin(y2 - y1, x2 - x1, y1, x1);
     cchar_t vline, hline, ul, ur, ll, lr;
@@ -37,11 +37,14 @@ WINDOW* createWindow(int x1, int y1, int x2, int y2)
     setcchar(&lr, L"╝", 0, 0, NULL);
 
     wborder_set(win, &vline, &vline, &hline, &hline, &ul, &ur, &ll, &lr);
+    wmove(win, 0, (int)((x2 - x1 - str.length - 2) / 2));
+    wprintw(win, " " str_Fmt " ", str_Arg(str));
     wmove(win, 1, 1);
     wrefresh(win);
     refresh();
     return win;
 }
+
 void printToTUI(WINDOW* w, const char* txt)
 {
     wprintw(w, "%s", txt);

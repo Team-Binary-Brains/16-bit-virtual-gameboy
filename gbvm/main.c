@@ -31,9 +31,9 @@ int main(int argc, char** argv)
     int xmid = LERP(XMIN, XMAX, 0.4);
     int ymid = LERP(YMIN, YMAX, 0.4);
 
-    WINDOW* OUTPUT_WIN = createWindow(XMIN, YMIN, xmid, YMAX);
-    WINDOW* DETAIL_WIN = createWindow(xmid, YMIN, XMAX, ymid);
-    WINDOW* MEMORY_WIN = createWindow(xmid, ymid, XMAX, YMAX);
+    WINDOW* OUTPUT_WIN = createWindow(XMIN, YMIN, xmid, YMAX, convertCstrToStr("OUTPUT"));
+    WINDOW* DETAIL_WIN = createWindow(xmid, YMIN, XMAX, ymid, convertCstrToStr("DETAILS"));
+    WINDOW* MEMORY_WIN = createWindow(xmid, ymid, XMAX, YMAX, convertCstrToStr("MEMORY"));
 
     // executeProgram(&vm, debug, limit);
 
