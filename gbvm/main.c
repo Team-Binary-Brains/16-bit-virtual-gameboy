@@ -31,10 +31,10 @@ int main(int argc, char** argv)
         { .data = "DETAILS", .length = 7 },
         { .data = "MEMORY", .length = 6 },
     };
-    vm.disp = enterTUIMode(3, titles);
 
     // testing
     debug = 2;
+    vm.disp = enterTUIMode(3, titles);
     executeProgram(&vm, debug, limit);
 
     exitTUIMode(&vm.disp);

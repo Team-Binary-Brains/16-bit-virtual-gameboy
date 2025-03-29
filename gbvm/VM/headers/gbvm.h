@@ -67,4 +67,4 @@ void executeProgram(Vm* vm, int debug, int i);
  * @param cpu The CPU of the virtual machine.
  * @return An error code indicating the success or failure of the execution.
  */
-Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmCalls);
+Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmCalls, WINDOW* win);

@@ -4,20 +4,13 @@
 
 void dumpStack(WINDOW* win, const Vm* vm)
 {
-    fprintf(stdout, "\n-------------------------------STACK------------------------------------------");
-    uint64_t SP = vm->cpu.registers.SP.as_u64;
-
-    uint64_t start = (SP < 5) ? 0 : SP - 5;
-    uint64_t len = (SP < 5) ? SP : start + 5;
-
-    uint64_t i;
-    for (i = start; i < len; i++)
-        fprintf(stdout, "\n\t%ld", vm->mem.stack[i].as_u64);
-
-    for (i = len; i < start + 5; i++)
-        fprintf(stdout, "\n\t[X]  ");
-
-    fprintf(stdout, "\n-------------------------------STACK------------------------------------------ \n");
+    wprintw(win, "  ");
+    for (uint64_t i = 0; i < 256; i++) {
+        wprintw(win, "%02X ", vm->mem.memory[i]);
+        if (i % 32 == 31) {
+            wprintw(win, "\n  ");
+        }
+    }
 }
 
 void dumpFlags(WINDOW* win, CPU* cpu)
@@ -25,7 +18,6 @@ void dumpFlags(WINDOW* win, CPU* cpu)
     wprintw(win,
         "\n  Halt : %d",
         getFlag(HALT, cpu));
-    wrefresh(win);
 }
 
 void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
@@ -46,7 +38,6 @@ void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
             "\n  Operand2 : \t\t%ld",
             inst->operand2.as_u64);
     }
-    wrefresh(win);
 }
 
 void executeProgram(Vm* vm, int debug, int lim)
@@ -66,22 +57,27 @@ void executeProgram(Vm* vm, int debug, int lim)
     switch (debug) {
     case 2:
         refreshWindow(vm->disp.windows[DETAILS], (String) { .data = "DETAILS", .length = 7 });
+        refreshWindow(vm->disp.windows[MEMORY], (String) { .data = "DETAILS", .length = 7 });
         getch();
         wclear(vm->disp.windows[DETAILS]);
+        wclear(vm->disp.windows[MEMORY]);
+        dumpStack(vm->disp.windows[MEMORY], vm);
         dumpDetails(vm->disp.windows[DETAILS], &details, inst);
         dumpFlags(vm->disp.windows[DETAILS], cpu);
-        // dumpStack(vm->disp.windows[DETAILS], vm);
-        error = executeInst(prog, mem, cpu, calls);
+        error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
         break;
     case 1:
+        refreshWindow(vm->disp.windows[DETAILS], (String) { .data = "DETAILS", .length = 7 });
+        refreshWindow(vm->disp.windows[MEMORY], (String) { .data = "DETAILS", .length = 7 });
         getch();
         wclear(vm->disp.windows[DETAILS]);
+        wclear(vm->disp.windows[MEMORY]);
+        dumpStack(vm->disp.windows[MEMORY], vm);
         dumpDetails(vm->disp.windows[DETAILS], &details, inst);
-        // dumpStack(vm->disp.windows[DETAILS], vm);
-        error = executeInst(prog, mem, cpu, calls);
+        error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
         break;
     default:
-        error = executeInst(prog, mem, cpu, calls);
+        error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
         break;
     }
 
@@ -124,7 +120,7 @@ void executeProgram(Vm* vm, int debug, int lim)
         mem->stack[cpu->registers.SP.as_u64 - 1].as_##dst = cast mem->stack[cpu->registers.SP.as_u64 - 1].as_##src; \
         cpu->registers.IP.as_u64 += 1;                                                                              \
     }
-Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmCalls)
+Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmCalls, WINDOW* win)
 {
     if (cpu->registers.IP.as_u64 >= prog->instruction_count) {
         printf("error %ld %ld", cpu->registers.IP.as_u64, prog->instruction_count);
@@ -261,7 +257,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
             return ERR_NULL_CALL;
         }
 
-        const Error err = vmCalls->VmCallI[inst.operand.as_u64](cpu, mem);
+        const Error err = vmCalls->VmCallI[inst.operand.as_u64](cpu, mem, win);
         if (err != ERR_OK) {
             return err;
         }
