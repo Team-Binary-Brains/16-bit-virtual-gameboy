@@ -2,12 +2,16 @@
 
 #include "univ_defs.h"
 #include "univ_strings.h"
+#define MAX_WINDOW_COUNT 3
 #define LERP(START, END, T) (START * T + END * (1 - T))
 
 const int YMIN = 0;
 const int XMIN = 0;
 int YMAX;
 int XMAX;
+
+WINDOW* windows[MAX_WINDOW_COUNT];
+int windowCount = 0;
 
 void enterTUIMode()
 {
@@ -22,7 +26,7 @@ void enterTUIMode()
     move(1, 1);
 
     refresh();
-}
+};
 
 WINDOW* createWindow(int x1, int y1, int x2, int y2, String str)
 {
@@ -43,6 +47,39 @@ WINDOW* createWindow(int x1, int y1, int x2, int y2, String str)
     wrefresh(win);
     refresh();
     return win;
+}
+
+void CreateWindows(int n, String titles[])
+{
+    int x1 = XMIN;
+    int x2 = XMAX;
+    int y1 = YMIN;
+    int y2 = YMAX;
+
+    if (n == 1) {
+        windows[windowCount] = createWindow(x1, y1, x2, y2, titles[windowCount++]);
+        return;
+    }
+
+    int xmid = LERP(x1, x2, 0.6);
+    windows[windowCount] = createWindow(x1, y1, xmid, y2, titles[windowCount++]);
+    n -= 1;
+    x1 = xmid;
+
+    if (n == 1) {
+        windows[windowCount] = createWindow(x1, y1, x2, y2, titles[windowCount++]);
+        return;
+    }
+
+    int ymid = LERP(y1, y2, 0.6);
+    windows[windowCount] = createWindow(x1, y1, x2, ymid, titles[windowCount++]);
+    n -= 1;
+    y1 = ymid;
+
+    if (n == 1) {
+        windows[windowCount] = createWindow(x1, y1, x2, y2, titles[windowCount++]);
+        return;
+    }
 }
 
 void printToTUI(WINDOW* w, const char* txt)
