@@ -49,37 +49,28 @@ WINDOW* createWindow(int x1, int y1, int x2, int y2, String str)
     return win;
 }
 
+void windowCreatorRecursive(int x1, int y1, int x2, int y2, int n, String titles[])
+{
+    if (n == 1) {
+        windows[windowCount] = createWindow(x1, y1, x2, y2, titles[windowCount++]);
+        return;
+    }
+    int tmp;
+    if (n % 2 == 1) {
+        tmp = LERP(x1, x2, 0.6);
+        windows[windowCount] = createWindow(x1, y1, tmp, y2, titles[windowCount++]);
+        windowCreatorRecursive(tmp, y1, x2, y2, n - 1, titles);
+        return;
+    }
+    tmp = LERP(y1, y2, 0.6);
+    windows[windowCount] = createWindow(x1, y1, x2, tmp, titles[windowCount++]);
+    windowCreatorRecursive(x1, tmp, x2, y2, n - 1, titles);
+    return;
+}
+
 void CreateWindows(int n, String titles[])
 {
-    int x1 = XMIN;
-    int x2 = XMAX;
-    int y1 = YMIN;
-    int y2 = YMAX;
-
-    if (n == 1) {
-        windows[windowCount] = createWindow(x1, y1, x2, y2, titles[windowCount++]);
-        return;
-    }
-
-    int xmid = LERP(x1, x2, 0.6);
-    windows[windowCount] = createWindow(x1, y1, xmid, y2, titles[windowCount++]);
-    n -= 1;
-    x1 = xmid;
-
-    if (n == 1) {
-        windows[windowCount] = createWindow(x1, y1, x2, y2, titles[windowCount++]);
-        return;
-    }
-
-    int ymid = LERP(y1, y2, 0.6);
-    windows[windowCount] = createWindow(x1, y1, x2, ymid, titles[windowCount++]);
-    n -= 1;
-    y1 = ymid;
-
-    if (n == 1) {
-        windows[windowCount] = createWindow(x1, y1, x2, y2, titles[windowCount++]);
-        return;
-    }
+    windowCreatorRecursive(XMIN, YMIN, XMAX, YMAX, n, titles);
 }
 
 void printToTUI(WINDOW* w, const char* txt)
