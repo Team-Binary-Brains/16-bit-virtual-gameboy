@@ -9,37 +9,35 @@ int limit = -1;
 int debug = 0;
 
 int main(int argc, char** argv)
-{ /*
-     static Vm vm = { 0 };
+{
+    static Vm vm = { 0 };
 
-     const char* program = getNextCmdLineArg(&argc, &argv);
+    const char* program = getNextCmdLineArg(&argc, &argv);
 
-     while (argc > 0) {
-         const char* flag = getNextCmdLineArg(&argc, &argv);
-         processFlag(program, flag, &argc, &argv);
-     }
+    while (argc > 0) {
+        const char* flag = getNextCmdLineArg(&argc, &argv);
+        processFlag(program, flag, &argc, &argv);
+    }
 
-     if (inputFile == NULL) {
-         fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-d <debug_level>]\n", program);
-         displayMsgWithExit("ERROR: input was not provided\n");
-     }
-     loadProgramIntoVm(&vm, inputFile);
-     loadStandardCallsIntoVm(&vm);
- */
-    enterTUIMode();
+    if (inputFile == NULL) {
+        fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-d <debug_level>]\n", program);
+        displayMsgWithExit("ERROR: input was not provided\n");
+    }
+    loadProgramIntoVm(&vm, inputFile);
+    loadStandardCallsIntoVm(&vm);
 
-    int xmid = LERP(XMIN, XMAX, 0.4);
-    int ymid = LERP(YMIN, YMAX, 0.4);
     String titles[] = {
         { .data = "OUTPUT", .length = 6 },
         { .data = "DETAILS", .length = 7 },
         { .data = "MEMORY", .length = 6 },
     };
-    CreateWindows(3, titles);
+    vm.disp = enterTUIMode(3, titles);
 
-    // executeProgram(&vm, debug, limit);
+    // testing
+    debug = 2;
+    executeProgram(&vm, debug, limit);
 
-    exitTUIMode();
+    exitTUIMode(&vm.disp);
     return 0;
 }
 void processFlag(const char* program, const char* flag, int* argc, char*** argv)

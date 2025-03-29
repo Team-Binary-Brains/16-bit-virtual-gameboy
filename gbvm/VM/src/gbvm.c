@@ -2,9 +2,9 @@
 #include "sasm_memory.h"
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 
-void dumpStack(FILE* stream, const Vm* vm)
+void dumpStack(WINDOW* win, const Vm* vm)
 {
-    fprintf(stream, "\n-------------------------------STACK------------------------------------------");
+    fprintf(stdout, "\n-------------------------------STACK------------------------------------------");
     uint64_t SP = vm->cpu.registers.SP.as_u64;
 
     uint64_t start = (SP < 5) ? 0 : SP - 5;
@@ -12,35 +12,43 @@ void dumpStack(FILE* stream, const Vm* vm)
 
     uint64_t i;
     for (i = start; i < len; i++)
-        fprintf(stream, "\n\t%ld", vm->mem.stack[i].as_u64);
+        fprintf(stdout, "\n\t%ld", vm->mem.stack[i].as_u64);
 
     for (i = len; i < start + 5; i++)
-        fprintf(stream, "\n\t[X]  ");
+        fprintf(stdout, "\n\t[X]  ");
 
-    fprintf(stream, "\n-------------------------------STACK------------------------------------------ \n");
+    fprintf(stdout, "\n-------------------------------STACK------------------------------------------ \n");
 }
 
-void dumpFlags(FILE* stream, CPU* cpu)
+void dumpFlags(WINDOW* win, CPU* cpu)
 {
-    fprintf(stream, "\n-------------------------------FLAGS------------------------------------------ "
-                    "\n  Halt : %d\t                                                                  "
-                    "\n-------------------------------FLAGS------------------------------------------ \n",
+    wprintw(win,
+        "\n  Halt : %d",
         getFlag(HALT, cpu));
+    wrefresh(win);
 }
 
-void dumpDetails(FILE* stream, String* operation, QuadWord lineNumber, Instruction* inst)
+void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
 {
-    fprintf(stream, "\n------------------------------DETAILS-----------------------------------------"
-                    "\n  Instruction Number :\t%ld                                                   "
-                    "\n  Instruction :\t\t%.*s                                                       "
-                    "\n  Operand1 : \t\t%ld                                                          "
-                    "\n  Operand2 : \t\t%ld                                                          "
-                    "\n------------------------------DETAILS----------------------------------------- \n",
-        lineNumber.as_u64,
-        (int)operation->length, operation->data,
-        inst->operand.as_u64,
-        inst->operand2.as_u64);
+    wprintw(win,
+        "\n  Instruction Number :\t%d"
+        "\n  Instruction :\t\t%s      ",
+        details->type, details->name);
+
+    if (details->has_operand) {
+        wprintw(win,
+            "\n  Operand1 : \t\t%ld",
+            inst->operand.as_u64);
+    }
+
+    if (details->has_operand2) {
+        wprintw(win,
+            "\n  Operand2 : \t\t%ld",
+            inst->operand2.as_u64);
+    }
+    wrefresh(win);
 }
+
 void executeProgram(Vm* vm, int debug, int lim)
 {
     CPU* cpu = &(vm->cpu);
@@ -53,22 +61,23 @@ void executeProgram(Vm* vm, int debug, int lim)
         return;
     }
 
-    String operation = convertCstrToStr(getOpcodeDetails(inst->type).name);
+    OpcodeDetails details = getOpcodeDetails(inst->type);
     Error error = 0;
     switch (debug) {
     case 2:
-        scanf("%*c");
-        system("clear");
-        dumpDetails(stdout, &operation, vm->cpu.registers.IP, inst);
-        dumpFlags(stdout, cpu);
-        dumpStack(stdout, vm);
+        refreshWindow(vm->disp.windows[DETAILS], (String) { .data = "DETAILS", .length = 7 });
+        getch();
+        wclear(vm->disp.windows[DETAILS]);
+        dumpDetails(vm->disp.windows[DETAILS], &details, inst);
+        dumpFlags(vm->disp.windows[DETAILS], cpu);
+        // dumpStack(vm->disp.windows[DETAILS], vm);
         error = executeInst(prog, mem, cpu, calls);
         break;
     case 1:
-        scanf("%*c");
-        system("clear");
-        dumpDetails(stdout, &operation, vm->cpu.registers.IP, inst);
-        dumpStack(stdout, vm);
+        getch();
+        wclear(vm->disp.windows[DETAILS]);
+        dumpDetails(vm->disp.windows[DETAILS], &details, inst);
+        // dumpStack(vm->disp.windows[DETAILS], vm);
         error = executeInst(prog, mem, cpu, calls);
         break;
     default:

@@ -13,6 +13,7 @@
 #include "univ_defs.h"
 #include "univ_errors.h"
 #include "univ_malloc.h"
+#include "univ_tui.h"
 #include "sasm_instructions.h"
 #include "sasm_assembler.h"
 #include "sasm_memory.h"
@@ -28,6 +29,7 @@ typedef struct {
     Program prog; /**< The program component of the virtual machine. */
     CPU cpu;      /**< The CPU component of the virtual machine. */
     VmCalls vmCalls;
+    display disp;
 } Vm;
 
 /**
@@ -36,7 +38,7 @@ typedef struct {
  * @param stream The stream to dump the stack contents to.
  * @param vm The virtual machine instance.
  */
-void dumpStack(FILE* stream, const Vm* vm);
+void dumpStack(WINDOW* win, const Vm* vm);
 
 /**
  * Dumps the flags of the virtual machine to the specified stream.
@@ -44,9 +46,9 @@ void dumpStack(FILE* stream, const Vm* vm);
  * @param stream The stream to dump the flags to.
  * @param cpu The cpu of virtual machine instance.
  */
-void dumpFlags(FILE* stream, CPU* cpu);
+void dumpFlags(WINDOW* win, CPU* cpu);
 
-void dumpDetails(FILE* stream, String* operation, QuadWord lineNumber, Instruction* inst);
+void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst);
 
 /**
  * Executes the program loaded in the virtual machine.
