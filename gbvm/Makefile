@@ -20,7 +20,7 @@ CMDIR = ./VM/src
 _A_HEAD = 		sasm_assembler.h	sasm_instructions.c		sasm_memory.h
 _A_CODE = 		sasm_assembler.c	sasm_instructions.c		sasm_memory.c
 
-_G_HEAD = 		univ_defs.h		 	univ_errors.h			univ_fileops.h 		univ_strings.h		univ_hashmap.h		univ_malloc.h	 
+_G_HEAD = 		univ_defs.h		 	univ_errors.h			univ_fileops.h 		univ_strings.h		univ_hashmap.h		univ_malloc.h	 	univ_tui.h
 _G_CODE = 		univ_defs.c			univ_errors.c			univ_fileops.c 		univ_strings.c		univ_hashmap.c		univ_malloc.c
 
 _C_HEAD =		O_lexer.h			O_parser.h				O_parse_tree.h		O_symbol_table.h	O_inter_codegen.h 	O_debug_help.h		O_inter_code_optimizer.h		O_token_types.h
@@ -47,31 +47,31 @@ MAKEFLAGS += --no-print-directory
 
 
 CC = gcc
-CFLAGS = -O3 -Wall -Wextra -Werror -Wfatal-errors -Wswitch-enum -std=c2x -pedantic -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
+CFLAGS = -O3 -Wall -Wextra -Wfatal-errors -Wswitch-enum -std=c2x -pedantic -lncursesw -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
 LIBS =
 
 sasm: 	sasm.c $(G_CODE) $(A_CODE)
 		@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
-		@echo -e ""
-		@echo -e "SASM MADE SUCCESSFULLY"
-		@echo -e ""
+		@echo  ""
+		@echo  "SASM MADE SUCCESSFULLY"
+		@echo  ""
 
 occ:	occ.c  $(G_CODE) $(C_CODE) 
 		@$(CC) -g -o $@ $^   $(CFLAGS) $(LIBS)
-		@echo -e ""
-		@echo -e "COMPILER MADE SUCCESSFULLY"
-		@echo -e ""
+		@echo  ""
+		@echo  "COMPILER MADE SUCCESSFULLY"
+		@echo  ""
 
 gbvm: 	main.c $(G_CODE) $(M_CODE) $(A_CODE) $(C_CODE)
 		@make occ
 		@make sasm
-		@echo -e ""
-		@echo -e "VM MADE SUCCESSFULLY"
-		@echo -e ""
+		@echo  ""
+		@echo  "VM MADE SUCCESSFULLY"
+		@echo  ""
 	  	@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
 
 clean:
 		@rm -f $(CGDIR)/*.o $(CADIR)/*.o $(CCDIR)/*.o main.o gbvm sasm occ
-		@echo -e ""
-		@echo -e "CLEANED ALL OBJECT FILES AND EXECUTABLES"
-		@echo -e ""
+		@echo  ""
+		@echo  "CLEANED ALL OBJECT FILES AND EXECUTABLES"
+		@echo  ""

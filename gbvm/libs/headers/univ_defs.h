@@ -23,6 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#define _XOPEN_SOURCE_EXTENDED
+#include <ncurses.h>
+#include <locale.h>
 
 #define STACK_CAPACITY 1024
 #define LABELS_CAPACITY 1024
