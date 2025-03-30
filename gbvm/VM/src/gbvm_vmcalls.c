@@ -119,6 +119,7 @@ Error vmcall_dump_memory(CPU* cpu, Memory* mem, WINDOW* win)
         if (i % 16 == 15) {
             wprintw(win, "\n ");
         }
+        refreshWindow(win, WindowNames[OUTPUT]);
     }
     wprintw(win, "\n");
     refreshWindow(win, WindowNames[OUTPUT]);

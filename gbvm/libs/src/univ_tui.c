@@ -80,9 +80,13 @@ void refreshWindow(WINDOW* win, String str)
     if (y < 1)
         y = 1;
 
-    int tmp = getmaxy(win) - 3;
-    if (y > tmp) {
-        y = y - tmp;
+    int tmp = getmaxy(win) - 2;
+    while (y > tmp) {
+        wmove(win, 1, 0);
+        wdeleteln(win);
+        wmove(win, tmp, 0);
+        wdeleteln(win);
+        y -= 1;
     }
 
     cchar_t vline, hline, ul, ur, ll, lr;
