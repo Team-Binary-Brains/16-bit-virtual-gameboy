@@ -2,6 +2,15 @@
 #include "sasm_memory.h"
 #pragma GCC diagnostic ignored "-Wswitch-enum"
 
+void wprintdash(WINDOW* win)
+{
+    wprintw(win, "\n");
+    int tmp = getmaxx(win) - 1;
+    for (size_t i = 0; i < tmp; i++) {
+        wprintw(win, "─");
+    }
+    wprintw(win, "\n");
+}
 void dumpStack(WINDOW* win, const Vm* vm)
 {
     wprintw(win, "\n  ");
@@ -15,32 +24,61 @@ void dumpStack(WINDOW* win, const Vm* vm)
 
 void dumpFlags(WINDOW* win, CPU* cpu)
 {
+    wprintw(win, "\n");
+    wprintdash(win);
+    wprintw(win, "  FLAGS ");
+    wprintdash(win);
     wprintw(win,
-        "\n\n  Flags :");
-    wprintw(win,
-        "\n  Halt : %c",
-        getFlag(HALT, cpu) ? 'T' : 'F');
+        "  Halt\t: %c\t F1\t: %c\n"
+        "  F2\t: %c\t F3\t: %c\n"
+        "  F4\t: %c\t F5\t: %c\n"
+        "  F6\t: %c\t F7\t: %c\n",
+        getFlag(HALT, cpu) ? 'T' : 'F',
+        getFlag(F1, cpu) ? 'T' : 'F',
+        getFlag(F2, cpu) ? 'T' : 'F',
+        getFlag(F3, cpu) ? 'T' : 'F',
+        getFlag(F4, cpu) ? 'T' : 'F',
+        getFlag(F5, cpu) ? 'T' : 'F',
+        getFlag(F6, cpu) ? 'T' : 'F',
+        getFlag(F7, cpu) ? 'T' : 'F');
 }
 
 void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
 {
+
+    wprintdash(win);
+
+    wprintw(win, "  INSTRUCTION ");
+    wprintdash(win);
     wprintw(win,
-        "\n\n  Instruction :"
-        "\n  Name:\n\t%s\n"
-        "\n  Identifier:\n\t%d\n",
+        "  NAME    %s"
+        "\n  OPCODE  %d",
         details->name, details->type);
 
     if (details->has_operand) {
         wprintw(win,
-            "\n  Operand1 : \n\t%ld\n",
-            inst->operand.as_u64);
+            "\n────────╮"
+            "\n    1.U │ %ld"
+            "\n    1.I │ %ld"
+            "\n    1.F │ %lf"
+            "\n────────╯\n",
+            inst->operand.as_u64,
+            inst->operand.as_i64,
+            inst->operand.as_f64);
     }
 
     if (details->has_operand2) {
         wprintw(win,
-            "\n  Operand2 : \n\t%ld\n",
-            inst->operand2.as_u64);
+            "\n─────────╮"
+            "\n    2.U │ %ld"
+            "\n    2.I │ %ld"
+            "\n    2.F │ %lf"
+            "\n─────────╯\n",
+            inst->operand2.as_u64,
+            inst->operand2.as_i64,
+            inst->operand2.as_f64);
     }
+    wprintdash(win);
 }
 
 void executeProgram(Vm* vm, int debug, int lim)
@@ -49,13 +87,33 @@ void executeProgram(Vm* vm, int debug, int lim)
     Memory* mem = &(vm->mem);
     Program* prog = &(vm->prog);
     VmCalls* calls = &(vm->vmCalls);
-    Instruction* inst = &(prog->instructions[vm->cpu.registers.IP.as_u64]);
+    size_t count = cpu->registers.IP.as_u64;
+    Instruction* inst = &(prog->instructions[cpu->registers.IP.as_u64]);
+    OpcodeDetails details;
+    WINDOW* prg = vm->disp.windows[PROGRAM];
+    wclear(prg);
+    size_t i = (count - 2 > 0) ? count - 2 : 0;
+    count = (count + getmaxy(prg) > prog->instruction_count) ? prog->instruction_count : count + getmaxy(prg);
+    for (; i < count; i++) {
+        details = getOpcodeDetails(prog->instructions[i].type);
+        if (i == cpu->registers.IP.as_u64) {
+            wattron(prg, A_REVERSE);
+        }
+
+        wprintw(prg, "\n   %ld\t│ %s ", i, details.name);
+        if (details.has_operand) {
+            wprintw(prg, " %ld", prog->instructions[i].operand.as_u64);
+        }
+        wattroff(prg, A_REVERSE);
+    }
+
+    refreshWindow(vm->disp.windows[PROGRAM], WindowNames[PROGRAM]);
 
     if (lim == 0 || getFlag(HALT, cpu)) {
         return;
     }
 
-    OpcodeDetails details = getOpcodeDetails(inst->type);
+    details = getOpcodeDetails(inst->type);
     Error error = 0;
     switch (debug) {
     case 2:
