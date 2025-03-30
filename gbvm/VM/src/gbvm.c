@@ -16,26 +16,29 @@ void dumpStack(WINDOW* win, const Vm* vm)
 void dumpFlags(WINDOW* win, CPU* cpu)
 {
     wprintw(win,
-        "\n  Halt : %d",
-        getFlag(HALT, cpu));
+        "\n\n  Flags :");
+    wprintw(win,
+        "\n  Halt : %c",
+        getFlag(HALT, cpu) ? 'T' : 'F');
 }
 
 void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
 {
     wprintw(win,
-        "\n  Instruction Number :\t%d"
-        "\n  Instruction :\t\t%s      ",
-        details->type, details->name);
+        "\n\n  Instruction :"
+        "\n  Name:\n\t%s\n"
+        "\n  Identifier:\n\t%d\n",
+        details->name, details->type);
 
     if (details->has_operand) {
         wprintw(win,
-            "\n  Operand1 : \t\t%ld",
+            "\n  Operand1 : \n\t%ld\n",
             inst->operand.as_u64);
     }
 
     if (details->has_operand2) {
         wprintw(win,
-            "\n  Operand2 : \t\t%ld",
+            "\n  Operand2 : \n\t%ld\n",
             inst->operand2.as_u64);
     }
 }
@@ -62,17 +65,7 @@ void executeProgram(Vm* vm, int debug, int lim)
         wclear(vm->disp.windows[DETAILS]);
         wclear(vm->disp.windows[MEMORY]);
         dumpStack(vm->disp.windows[MEMORY], vm);
-        dumpDetails(vm->disp.windows[DETAILS], &details, inst);
         dumpFlags(vm->disp.windows[DETAILS], cpu);
-        error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
-        break;
-    case 1:
-        refreshWindow(vm->disp.windows[DETAILS], WindowNames[DETAILS]);
-        refreshWindow(vm->disp.windows[MEMORY], WindowNames[MEMORY]);
-        getch();
-        wclear(vm->disp.windows[DETAILS]);
-        wclear(vm->disp.windows[MEMORY]);
-        dumpStack(vm->disp.windows[MEMORY], vm);
         dumpDetails(vm->disp.windows[DETAILS], &details, inst);
         error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
         break;

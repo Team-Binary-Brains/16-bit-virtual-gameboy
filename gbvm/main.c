@@ -26,15 +26,10 @@ int main(int argc, char** argv)
     loadProgramIntoVm(&vm, inputFile);
     loadStandardCallsIntoVm(&vm);
 
-    String titles[] = {
-        { .data = "OUTPUT", .length = 6 },
-        { .data = "DETAILS", .length = 7 },
-        { .data = "MEMORY", .length = 6 },
-    };
-
     // testing
     debug = 2;
-    vm.disp = enterTUIMode(3, titles);
+    vm.disp = enterTUIMode(3, WindowNames);
+
     executeProgram(&vm, debug, limit);
 
     exitTUIMode(&vm.disp);

@@ -5,14 +5,21 @@
 
 #define LERP(START, END, T) (START * T + END * (1 - T))
 
-#define MAX_WINDOW_COUNT 5
-
 enum WindowID {
     OUTPUT,
+    INPUT,
     DETAILS,
     MEMORY,
     PROGRAM,
-    INPUT
+    MAX_WINDOW_COUNT
+};
+
+static String WindowNames[MAX_WINDOW_COUNT] = {
+    [OUTPUT] = { .data = "OUTPUT", .length = 6 },
+    [DETAILS] = { .data = "DETAILS", .length = 7 },
+    [MEMORY] = { .data = "MEMORY", .length = 6 },
+    [PROGRAM] = { .data = "PROGRAM", .length = 8 },
+    [INPUT] = { .data = "INPUT", .length = 6 }
 };
 
 typedef struct {
@@ -22,14 +29,6 @@ typedef struct {
 
 void refreshWindow(WINDOW* win, String str);
 
-display enterTUIMode(int n, String titles[]);
+display enterTUIMode();
 
 void exitTUIMode(display* disp);
-
-static String WindowNames[MAX_WINDOW_COUNT] = {
-    [OUTPUT] = { .data = "OUTPUT", .length = 6 },
-    [DETAILS] = { .data = "DETAILS", .length = 7 },
-    [MEMORY] = { .data = "MEMORY", .length = 6 },
-    [PROGRAM] = { .data = "PROGRAM", .length = 8 },
-    [INPUT] = { .data = "INPUT", .length = 6 }
-};

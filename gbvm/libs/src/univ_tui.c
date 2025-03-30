@@ -20,7 +20,7 @@ bool createWindow(display* disp, int x1, int y1, int x2, int y2, String str)
     return true;
 }
 
-display CreateWindows(int n)
+display CreateWindows()
 {
     refresh();
     display disp;
@@ -32,17 +32,16 @@ display CreateWindows(int n)
     int xend = LERP(xmin, xmax, 0.13);
     int ybot = LERP(ymin, ymax, 0.3);
     int ymid = LERP(ymin, ybot, 0.7);
-    int ymi2 = LERP(ymid, ybot, 0.5);
     createWindow(&disp, xmin, ymin, xmid, ybot, WindowNames[OUTPUT]);
+    createWindow(&disp, xmin, ybot, xmax, ymax, WindowNames[INPUT]);
     createWindow(&disp, xend, ymin, xmax, ybot, WindowNames[DETAILS]);
     createWindow(&disp, xmid, ymin, xend, ymid, WindowNames[MEMORY]);
     createWindow(&disp, xmid, ymid, xend, ybot, WindowNames[PROGRAM]);
-    createWindow(&disp, xmin, ybot, xmax, ymax, WindowNames[INPUT]);
 
     return disp;
 }
 
-display enterTUIMode(int n, String titles[])
+display enterTUIMode()
 {
     setlocale(LC_ALL, "");
     initscr();
@@ -50,12 +49,12 @@ display enterTUIMode(int n, String titles[])
     cbreak();
     noecho();
 
-    display disp = CreateWindows(n);
+    display disp = CreateWindows();
 
     move(1, 1);
 
     return disp;
-};
+}
 
 void exitTUIMode(display* disp)
 {
