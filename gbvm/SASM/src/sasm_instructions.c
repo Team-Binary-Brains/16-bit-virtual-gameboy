@@ -1,7 +1,7 @@
 #include "sasm_instructions.h"
 #include "univ_errors.h"
 
-static OpcodeDetails OpcodeDetailsMap[NUMBER_OF_INSTS] = {
+static OpcodeDetails OpcodeDetailsLUT[NUMBER_OF_INSTS] = {
     [INST_DONOP] = { .type = INST_DONOP, .name = "DONOP", .has_operand = 0, .has_operand2 = 0 },
     [INST_RETRN] = { .type = INST_RETRN, .name = "RETRN", .has_operand = 0, .has_operand2 = 0 },
     [INST_CALLN] = { .type = INST_CALLN, .name = "CALLN", .has_operand = 1, .has_operand2 = 0 },
@@ -91,11 +91,35 @@ QuadWord quadword_ptr(void* ptr)
 
 bool getOpcodeDetailsFromName(String name, OpcodeDetails* out_ptr)
 {
-    for (Opcode type = 0; type < NUMBER_OF_INSTS; type += 1) {
-        if (compareStr(convertCstrToStr(OpcodeDetailsMap[type].name), name)) {
-            *out_ptr = OpcodeDetailsMap[type];
+    Opcode type = 0, last = NUMBER_OF_INSTS;
+    switch (name.length) {
+    case 5:
+        type = INST_DONOP;
+        last = INST_SHUTS;
+        break;
+    case 4:
+        type = INST_PUSH;
+        last = INST_NOTB;
+        break;
+    case 3:
+        type = INST_CPY;
+        last = INST_F2U;
+        break;
+    case 6:
+        type = INST_READ1U;
+        last = INST_WRITE8;
+        break;
+
+    default:
+        last = 0;
+        break;
+    }
+    while (type <= last) {
+        if (compareStr(convertCstrToStr(OpcodeDetailsLUT[type].name), name)) {
+            *out_ptr = OpcodeDetailsLUT[type];
             return 1;
         }
+        type += 1;
     }
 
     displayStringMessageError("Unknown instruction detected and was ignored", name);
@@ -105,5 +129,5 @@ bool getOpcodeDetailsFromName(String name, OpcodeDetails* out_ptr)
 OpcodeDetails getOpcodeDetails(Opcode type)
 {
     assert(type < NUMBER_OF_INSTS);
-    return OpcodeDetailsMap[type];
+    return OpcodeDetailsLUT[type];
 }

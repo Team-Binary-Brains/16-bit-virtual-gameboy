@@ -4,7 +4,7 @@
 
 void dumpStack(WINDOW* win, const Vm* vm)
 {
-    wprintw(win, "  ");
+    wprintw(win, "\n  ");
     for (uint64_t i = 0; i < 256; i++) {
         wprintw(win, "%02X ", vm->mem.memory[i]);
         if (i % 32 == 31) {
@@ -56,8 +56,8 @@ void executeProgram(Vm* vm, int debug, int lim)
     Error error = 0;
     switch (debug) {
     case 2:
-        refreshWindow(vm->disp.windows[DETAILS], (String) { .data = "DETAILS", .length = 7 });
-        refreshWindow(vm->disp.windows[MEMORY], (String) { .data = "DETAILS", .length = 7 });
+        refreshWindow(vm->disp.windows[DETAILS], WindowNames[DETAILS]);
+        refreshWindow(vm->disp.windows[MEMORY], WindowNames[MEMORY]);
         getch();
         wclear(vm->disp.windows[DETAILS]);
         wclear(vm->disp.windows[MEMORY]);
@@ -67,8 +67,8 @@ void executeProgram(Vm* vm, int debug, int lim)
         error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
         break;
     case 1:
-        refreshWindow(vm->disp.windows[DETAILS], (String) { .data = "DETAILS", .length = 7 });
-        refreshWindow(vm->disp.windows[MEMORY], (String) { .data = "DETAILS", .length = 7 });
+        refreshWindow(vm->disp.windows[DETAILS], WindowNames[DETAILS]);
+        refreshWindow(vm->disp.windows[MEMORY], WindowNames[MEMORY]);
         getch();
         wclear(vm->disp.windows[DETAILS]);
         wclear(vm->disp.windows[MEMORY]);
@@ -132,7 +132,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
     evaluateAddressingMode(mem, cpu, inst.opr1Mode, &inst.operand, operand1);
     evaluateAddressingMode(mem, cpu, inst.opr2Mode, &inst.operand2, operand2);
 
-    // printf("\nenter : %d %s", inst.type, OpcodeDetailsMap[inst.type].name);
+    // printf("\nenter : %d %s", inst.type, OpcodeDetailsLUT[inst.type].name);
     switch (inst.type) {
     case INST_CPY:
         *operand1 = *operand2;

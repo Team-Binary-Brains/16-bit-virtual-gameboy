@@ -19,7 +19,7 @@ Error vmcall_write(CPU* cpu, Memory* mem, WINDOW* win)
     }
     wprintw(win, "%.*s", (int)count, &mem->memory[addr]);
 
-    refreshWindow(win, (String) { .data = "OUTPUT", .length = 6 });
+    refreshWindow(win, WindowNames[OUTPUT]);
 
     cpu->registers.SP.as_u64 -= 2;
 
@@ -56,7 +56,7 @@ Error vmcall_print_f64(CPU* cpu, Memory* mem, WINDOW* win)
     }
 
     wprintw(win, " %lf\n", mem->stack[cpu->registers.SP.as_u64 - 1].as_f64);
-    refreshWindow(win, (String) { .data = "OUTPUT", .length = 6 });
+    refreshWindow(win, WindowNames[OUTPUT]);
     cpu->registers.SP.as_u64 -= 1;
     return ERR_OK;
 }
@@ -68,7 +68,7 @@ Error vmcall_print_i64(CPU* cpu, Memory* mem, WINDOW* win)
     }
 
     wprintw(win, " %" PRId64 "\n", mem->stack[cpu->registers.SP.as_u64 - 1].as_i64);
-    refreshWindow(win, (String) { .data = "OUTPUT", .length = 6 });
+    refreshWindow(win, WindowNames[OUTPUT]);
     cpu->registers.SP.as_u64 -= 1;
     return ERR_OK;
 }
@@ -80,7 +80,7 @@ Error vmcall_print_u64(CPU* cpu, Memory* mem, WINDOW* win)
     }
 
     wprintw(win, " %" PRIu64 "\n", mem->stack[cpu->registers.SP.as_u64 - 1].as_u64);
-    refreshWindow(win, (String) { .data = "OUTPUT", .length = 6 });
+    refreshWindow(win, WindowNames[OUTPUT]);
     cpu->registers.SP.as_u64 -= 1;
     return ERR_OK;
 }
@@ -92,7 +92,7 @@ Error vmcall_print_ptr(CPU* cpu, Memory* mem, WINDOW* win)
     }
 
     wprintw(win, " %p\n", mem->stack[cpu->registers.SP.as_u64 - 1].as_ptr);
-    refreshWindow(win, (String) { .data = "OUTPUT", .length = 6 });
+    refreshWindow(win, WindowNames[OUTPUT]);
     cpu->registers.SP.as_u64 -= 1;
     return ERR_OK;
 }
@@ -121,7 +121,7 @@ Error vmcall_dump_memory(CPU* cpu, Memory* mem, WINDOW* win)
         }
     }
     wprintw(win, "\n");
-    refreshWindow(win, (String) { .data = "OUTPUT", .length = 6 });
+    refreshWindow(win, WindowNames[OUTPUT]);
 
     cpu->registers.SP.as_u64 -= 2;
 
@@ -136,7 +136,7 @@ Error vmcall_set_color(CPU* cpu, Memory* mem, WINDOW* win)
 
     uint64_t color = mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
     wprintw(win, " \033[%ldm", color);
-    refreshWindow(win, (String) { .data = "OUTPUT", .length = 6 });
+    refreshWindow(win, WindowNames[OUTPUT]);
     cpu->registers.SP.as_u64 -= 1;
 
     return ERR_OK;

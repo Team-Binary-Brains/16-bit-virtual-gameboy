@@ -18,43 +18,27 @@ bool createWindow(display* disp, int x1, int y1, int x2, int y2, String str)
     refreshWindow(disp->windows[disp->windowCount - 1], str);
 
     return true;
-    /*
-    printw("%d %d %d %d\n", x1, y1, x2, y2);
-    refresh();
-    return stdscr;*/
 }
 
-void windowCreatorRecursive(display* disp, int x1, int y1, int x2, int y2, int n, String titles[])
-{
-    if (disp->windowCount >= MAX_WINDOW_COUNT) {
-        fprintf(stderr, "Error: Exceeded MAX_WINDOW_COUNT\n");
-        return;
-    }
-    if (n == 1) {
-        createWindow(disp, x1, y1, x2, y2, titles[disp->windowCount]);
-        return;
-    }
-    int tmp;
-    if (n == 2) {
-        tmp = LERP(x1, x2, 0.6);
-        createWindow(disp, x1, y1, tmp, y2, titles[disp->windowCount]);
-        return windowCreatorRecursive(disp, tmp, y1, x2, y2, n - 1, titles);
-    }
-    tmp = LERP(y1, y2, 0.4);
-    createWindow(disp, x1, y1, x2, tmp, titles[disp->windowCount]);
-    return windowCreatorRecursive(disp, x1, tmp, x2, y2, n - 1, titles);
-}
-
-display CreateWindows(int n, String titles[])
+display CreateWindows(int n)
 {
     refresh();
     display disp;
     disp.windowCount = 0;
+    int xmin = 0, ymin = 0;
+    int xmax = getmaxx(stdscr), ymax = getmaxy(stdscr);
 
-    for (int i = 0; i < MAX_WINDOW_COUNT; i++)
-        disp.windows[i] = NULL;
+    int xmid = LERP(xmin, xmax, 0.55);
+    int xend = LERP(xmin, xmax, 0.13);
+    int ybot = LERP(ymin, ymax, 0.3);
+    int ymid = LERP(ymin, ybot, 0.7);
+    int ymi2 = LERP(ymid, ybot, 0.5);
+    createWindow(&disp, xmin, ymin, xmid, ybot, WindowNames[OUTPUT]);
+    createWindow(&disp, xend, ymin, xmax, ybot, WindowNames[DETAILS]);
+    createWindow(&disp, xmid, ymin, xend, ymid, WindowNames[MEMORY]);
+    createWindow(&disp, xmid, ymid, xend, ybot, WindowNames[PROGRAM]);
+    createWindow(&disp, xmin, ybot, xmax, ymax, WindowNames[INPUT]);
 
-    windowCreatorRecursive(&disp, XMIN, YMIN, getmaxx(stdscr), getmaxy(stdscr), n, titles);
     return disp;
 }
 
@@ -66,10 +50,7 @@ display enterTUIMode(int n, String titles[])
     cbreak();
     noecho();
 
-    display disp = CreateWindows(n, titles);
-
-    disp.YMAX = getmaxy(stdscr);
-    disp.XMAX = getmaxx(stdscr);
+    display disp = CreateWindows(n);
 
     move(1, 1);
 
