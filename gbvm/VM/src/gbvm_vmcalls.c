@@ -124,16 +124,3 @@ Error vmcall_dump_memory(CPU* cpu, Memory* mem, WINDOW* win)
 
     return ERR_OK;
 }
-
-Error vmcall_set_color(CPU* cpu, Memory* mem, WINDOW* win)
-{
-    if (cpu->registers.SP.as_u64 < 1) {
-        return ERR_STACK_UNDERFLOW;
-    }
-
-    uint64_t color = mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-    wprintw(win, " \033[%ldm", color);
-    cpu->registers.SP.as_u64 -= 1;
-
-    return ERR_OK;
-}
