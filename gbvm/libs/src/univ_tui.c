@@ -43,6 +43,7 @@ display CreateWindows()
 
 display enterTUIMode()
 {
+    printf("/033[?12l");
     setlocale(LC_ALL, "");
     initscr();
     clear();
@@ -52,6 +53,7 @@ display enterTUIMode()
     display disp = CreateWindows();
 
     move(1, 1);
+    keypad(disp.windows[INPUT], true);
 
     return disp;
 }
@@ -90,15 +92,16 @@ void refreshWindow(WINDOW* win, String str)
 
     cchar_t vline, hline, ul, ur, ll, lr;
 
-    setcchar(&vline, L"║", 0, 0, NULL);
-    setcchar(&hline, L"═", 0, 0, NULL);
-    setcchar(&ul, L"╔", 0, 0, NULL);
-    setcchar(&ur, L"╗", 0, 0, NULL);
-    setcchar(&ll, L"╚", 0, 0, NULL);
-    setcchar(&lr, L"╝", 0, 0, NULL);
+    setcchar(&vline, L"│", 0, 0, NULL);
+    setcchar(&hline, L"─", 0, 0, NULL);
+    setcchar(&ul, L"╭", 0, 0, NULL);
+    setcchar(&ur, L"╮", 0, 0, NULL);
+    setcchar(&ll, L"╰", 0, 0, NULL);
+    setcchar(&lr, L"╯", 0, 0, NULL);
 
     wborder_set(win, &vline, &vline, &hline, &hline, &ul, &ur, &ll, &lr);
-    wmove(win, 0, (int)((getmaxx(win) - str.length - 2) / 2));
+    // wmove(win, 0, (int)((getmaxx(win) - str.length - 2) / 2));
+    wmove(win, 0, 2);
     wprintw(win, " " str_Fmt " ", str_Arg(str));
     wmove(win, y, x);
     wrefresh(win);

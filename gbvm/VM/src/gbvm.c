@@ -69,11 +69,11 @@ void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
 
     if (details->has_operand2) {
         wprintw(win,
-            "\n─────────╮"
+            "\n────────╮"
             "\n    2.U │ %ld"
             "\n    2.I │ %ld"
             "\n    2.F │ %lf"
-            "\n─────────╯\n",
+            "\n────────╯\n",
             inst->operand2.as_u64,
             inst->operand2.as_i64,
             inst->operand2.as_f64);

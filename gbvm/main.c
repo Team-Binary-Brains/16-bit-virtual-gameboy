@@ -11,6 +11,7 @@ int debug = 0;
 int main(int argc, char** argv)
 {
     static Vm vm = { 0 };
+    vm.disp = enterTUIMode();
 
     const char* program = getNextCmdLineArg(&argc, &argv);
 
@@ -23,12 +24,37 @@ int main(int argc, char** argv)
         fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-d <debug_level>]\n", program);
         displayMsgWithExit("ERROR: input was not provided\n");
     }
+
+    int ch;
+    int highlight = 0;
+    do {
+
+        for (size_t i = 0; i < MAX_INPUTS; i++) {
+            if (i == highlight) {
+                wattron(vm.disp.windows[INPUT], A_REVERSE);
+            }
+            mvwprintw(vm.disp.windows[INPUT], i + 2, 4, Inputs[i].data);
+            wattroff(vm.disp.windows[INPUT], A_REVERSE);
+        }
+
+        ch = wgetch(vm.disp.windows[INPUT]);
+
+        switch (ch) {
+        case KEY_UP:
+            highlight = (highlight == 0) ? MAX_INPUTS - 1 : highlight - 1;
+            break;
+        case KEY_DOWN:
+            highlight = (highlight + 1) % MAX_INPUTS;
+            break;
+
+        default:
+            break;
+        }
+
+    } while (ch);
+
     loadProgramIntoVm(&vm, inputFile);
     loadStandardCallsIntoVm(&vm);
-
-    // testing
-    debug = 2;
-    vm.disp = enterTUIMode(3, WindowNames);
 
     executeProgram(&vm, debug, limit);
 
