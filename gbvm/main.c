@@ -36,7 +36,6 @@ int main(int argc, char** argv)
         } while (ch != '\n');
 
         inputHandler(&vm, vm.disp.windows[INPUT], &highlight);
-        refreshWindow(vm.disp.windows[DETAILS], getNameForWindow(DETAILS));
         wgetch(vm.disp.windows[INPUT]);
         vm.cpu.registers.IP.as_u64 = 0;
         setFlag(HALT, &vm.cpu, 0);
@@ -61,7 +60,7 @@ void processFlag(const char* program, const char* flag, int* argc, char*** argv)
 void inputHandler(Vm* vm, WINDOW* win, int* highlight)
 {
     wclear(win);
-    refreshWindow(win, getNameForWindow(INPUT));
+    refreshWindow(win, getNameForWindow(INPUT), 5, 5, 3);
     wmove(win, 2, 4);
     switch (*highlight) {
     case ASSEMBLE_EXEC_SASM:
@@ -90,10 +89,6 @@ void inputHandler(Vm* vm, WINDOW* win, int* highlight)
     default:
         break;
     }
-
-    refreshWindow(vm->disp.windows[OUTPUT], getNameForWindow(OUTPUT));
-    refreshWindow(vm->disp.windows[DETAILS], getNameForWindow(DETAILS));
-    refreshWindow(vm->disp.windows[MEMORY], getNameForWindow(MEMORY));
 }
 
 void __exec_sm(Vm* vm, WINDOW* win)
@@ -106,7 +101,7 @@ void __exec_sm(Vm* vm, WINDOW* win)
         "\n     1. Yes"
         "\n     2. Fast Debug"
         "\n     Your choice : ");
-    refreshWindow(win, getNameForWindow(INPUT));
+    refreshWindow(win, getNameForWindow(INPUT), 5, 5, 3);
 
     debug = wgetch(win) - '0';
     executeProgram(vm, debug, -1);

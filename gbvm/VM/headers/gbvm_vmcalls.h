@@ -25,4 +25,3 @@ Error vmcall_print_i64(CPU* cpu, Memory* mem, WINDOW* win);
 Error vmcall_print_u64(CPU* cpu, Memory* mem, WINDOW* win);
 Error vmcall_print_ptr(CPU* cpu, Memory* mem, WINDOW* win);
 Error vmcall_dump_memory(CPU* cpu, Memory* mem, WINDOW* win);
-Error vmcall_set_color(CPU* cpu, Memory* mem, WINDOW* win);

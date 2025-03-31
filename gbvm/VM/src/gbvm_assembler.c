@@ -102,5 +102,4 @@ void loadStandardCallsIntoVm(Vm* vm)
     loadInternalCallIntoVm(vm, vmcall_print_ptr);       // 5
     loadInternalCallIntoVm(vm, vmcall_dump_memory);     // 6
     loadInternalCallIntoVm(vm, vmcall_write);           // 7
-    loadInternalCallIntoVm(vm, vmcall_set_color);       // 8
 }
