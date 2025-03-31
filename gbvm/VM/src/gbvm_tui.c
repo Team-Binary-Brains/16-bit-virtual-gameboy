@@ -47,7 +47,7 @@ display enterTUIMode()
     initscr();
     clear();
     cbreak();
-    noecho();
+    // noecho();
 
     display disp = CreateWindows();
 
@@ -104,4 +104,34 @@ void refreshWindow(WINDOW* win, String str)
     wprintw(win, " " str_Fmt " ", str_Arg(str));
     wmove(win, y, x);
     wrefresh(win);
+}
+
+void InputMenu(WINDOW* win, int* highlight, int* ch)
+{
+    wclear(win);
+    refreshWindow(win, WindowNames[INPUT]);
+    for (size_t i = 0; i < MAX_INPUTS; i++) {
+        wmove(win, i + 2, 4);
+
+        if (i == *highlight) {
+            wattron(win, A_REVERSE);
+            wprintw(win, " ▶ ");
+        }
+        wprintw(win, Inputs[i].data);
+        wattroff(win, A_REVERSE);
+    }
+
+    *ch = wgetch(win);
+
+    switch (*ch) {
+    case KEY_UP:
+        *highlight = (*highlight == 0) ? MAX_INPUTS - 1 : *highlight - 1;
+        break;
+    case KEY_DOWN:
+        *highlight = (*highlight + 1) % MAX_INPUTS;
+        break;
+
+    default:
+        break;
+    }
 }

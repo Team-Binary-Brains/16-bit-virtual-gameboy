@@ -90,47 +90,48 @@ void executeProgram(Vm* vm, int debug, int lim)
     size_t count = cpu->registers.IP.as_u64;
     Instruction* inst = &(prog->instructions[cpu->registers.IP.as_u64]);
     OpcodeDetails details;
-    WINDOW* prg = vm->disp.windows[PROGRAM];
-    wclear(prg);
-    size_t i = (count - 2 > 0) ? count - 2 : 0;
-    count = (count + getmaxy(prg) > prog->instruction_count) ? prog->instruction_count : count + getmaxy(prg);
-    for (; i < count; i++) {
-        details = getOpcodeDetails(prog->instructions[i].type);
-        if (i == cpu->registers.IP.as_u64) {
-            wattron(prg, A_REVERSE);
+
+    Error error = 0;
+    if (debug > 0) {
+        WINDOW* prg = vm->disp.windows[PROGRAM];
+        size_t i = (count - 2 > 0) ? count - 2 : 0;
+        count = (count + getmaxy(prg) > prog->instruction_count) ? prog->instruction_count : count + getmaxy(prg);
+        for (; i < count; i++) {
+            details = getOpcodeDetails(prog->instructions[i].type);
+            if (i == cpu->registers.IP.as_u64) {
+                wattron(prg, A_REVERSE);
+            }
+
+            wprintw(prg, "\n   %ld\t│ %s ", i, details.name);
+            if (details.has_operand) {
+                wprintw(prg, " %ld", prog->instructions[i].operand.as_u64);
+            }
+            wattroff(prg, A_REVERSE);
         }
 
-        wprintw(prg, "\n   %ld\t│ %s ", i, details.name);
-        if (details.has_operand) {
-            wprintw(prg, " %ld", prog->instructions[i].operand.as_u64);
+        refreshWindow(vm->disp.windows[PROGRAM], WindowNames[PROGRAM]);
+        refreshWindow(vm->disp.windows[OUTPUT], WindowNames[OUTPUT]);
+        refreshWindow(vm->disp.windows[DETAILS], WindowNames[DETAILS]);
+        refreshWindow(vm->disp.windows[MEMORY], WindowNames[MEMORY]);
+        if (debug == 1) {
+            wgetch(vm->disp.windows[INPUT]);
         }
-        wattroff(prg, A_REVERSE);
+
+        wclear(vm->disp.windows[DETAILS]);
+        wclear(prg);
+        wclear(vm->disp.windows[MEMORY]);
+
+        details = getOpcodeDetails(inst->type);
+        dumpStack(vm->disp.windows[MEMORY], vm);
+        dumpFlags(vm->disp.windows[DETAILS], cpu);
+        dumpDetails(vm->disp.windows[DETAILS], &details, inst);
     }
-
-    refreshWindow(vm->disp.windows[PROGRAM], WindowNames[PROGRAM]);
 
     if (lim == 0 || getFlag(HALT, cpu)) {
         return;
     }
 
-    details = getOpcodeDetails(inst->type);
-    Error error = 0;
-    switch (debug) {
-    case 2:
-        refreshWindow(vm->disp.windows[DETAILS], WindowNames[DETAILS]);
-        refreshWindow(vm->disp.windows[MEMORY], WindowNames[MEMORY]);
-        getch();
-        wclear(vm->disp.windows[DETAILS]);
-        wclear(vm->disp.windows[MEMORY]);
-        dumpStack(vm->disp.windows[MEMORY], vm);
-        dumpFlags(vm->disp.windows[DETAILS], cpu);
-        dumpDetails(vm->disp.windows[DETAILS], &details, inst);
-        error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
-        break;
-    default:
-        error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
-        break;
-    }
+    error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
 
     if (error != ERR_OK)
         executionErrorWithExit(&error);

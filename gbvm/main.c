@@ -4,6 +4,7 @@
 #include "gbvm_tui.h"
 
 void processFlag(const char* program, const char* flag, int* argc, char*** argv);
+void inputHandler(Vm* vm, WINDOW* win, int* highlight);
 const char* inputFile = NULL;
 int limit = -1;
 int debug = 0;
@@ -11,6 +12,7 @@ int debug = 0;
 int main(int argc, char** argv)
 {
     static Vm vm = { 0 };
+    loadStandardCallsIntoVm(&vm);
     vm.disp = enterTUIMode();
 
     const char* program = getNextCmdLineArg(&argc, &argv);
@@ -20,62 +22,78 @@ int main(int argc, char** argv)
         processFlag(program, flag, &argc, &argv);
     }
 
-    if (inputFile == NULL) {
-        fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-d <debug_level>]\n", program);
-        displayMsgWithExit("ERROR: input was not provided\n");
-    }
-
     int ch;
     int highlight = 0;
     do {
+        do {
+            InputMenu(vm.disp.windows[INPUT], &highlight, &ch);
+        } while (ch != '\n');
 
-        for (size_t i = 0; i < MAX_INPUTS; i++) {
-            if (i == highlight) {
-                wattron(vm.disp.windows[INPUT], A_REVERSE);
-            }
-            mvwprintw(vm.disp.windows[INPUT], i + 2, 4, Inputs[i].data);
-            wattroff(vm.disp.windows[INPUT], A_REVERSE);
-        }
+        inputHandler(&vm, vm.disp.windows[INPUT], &highlight);
+        refreshWindow(vm.disp.windows[DETAILS], WindowNames[DETAILS]);
+        wgetch(vm.disp.windows[INPUT]);
+        vm.cpu.registers.IP.as_u64 = 0;
+        setFlag(HALT, &vm.cpu, 0);
 
-        ch = wgetch(vm.disp.windows[INPUT]);
-
-        switch (ch) {
-        case KEY_UP:
-            highlight = (highlight == 0) ? MAX_INPUTS - 1 : highlight - 1;
-            break;
-        case KEY_DOWN:
-            highlight = (highlight + 1) % MAX_INPUTS;
-            break;
-
-        default:
-            break;
-        }
-
-    } while (ch != '\n');
-
-    loadProgramIntoVm(&vm, inputFile);
-    loadStandardCallsIntoVm(&vm);
-
-    executeProgram(&vm, debug, limit);
-
+    } while (ch);
     exitTUIMode(&vm.disp);
     return 0;
 }
+
 void processFlag(const char* program, const char* flag, int* argc, char*** argv)
 {
 
     switch (flag[1]) {
-    case 'i':
-        inputFile = getNextCmdLineArg(argc, argv);
-        return;
     case 'l':
         limit = atoi(getNextCmdLineArg(argc, argv));
-        return;
-    case 'd':
-        debug = atoi(getNextCmdLineArg(argc, argv));
         return;
     default:
         fprintf(stdout, "Usage: %s -i <input.sm> [-l <limit>] [-d <debug_level>]\n", program);
         displayMsgWithExit("Unknown option provided.");
+    }
+}
+
+void inputHandler(Vm* vm, WINDOW* win, int* highlight)
+{
+    switch (*highlight) {
+
+    case ASSEMBLE_EXEC_SASM:
+
+    case EXEC_SM:
+
+        wclear(win);
+        refreshWindow(win, WindowNames[INPUT]);
+        mvwprintw(win, 2, 4, "Enter the name of the file : ");
+
+        char buffer[256];
+        wgetnstr(win, buffer, sizeof(buffer) - 1);
+
+        inputFile = strdup(buffer);
+
+        loadProgramIntoVm(vm, inputFile);
+
+        wprintw(win,
+            "\n     Debug Mode?"
+            "\n     0. No"
+            "\n     1. Yes"
+            "\n     2. Fast Debug"
+            "\n     Your choice : ");
+        refreshWindow(win, WindowNames[INPUT]);
+
+        debug = wgetch(win) - '0';
+        executeProgram(vm, debug, -1);
+
+        refreshWindow(vm->disp.windows[OUTPUT], WindowNames[OUTPUT]);
+        refreshWindow(vm->disp.windows[DETAILS], WindowNames[DETAILS]);
+        refreshWindow(vm->disp.windows[MEMORY], WindowNames[MEMORY]);
+        break;
+
+    case ASSEMBLE_SASM:
+        break;
+    case COMPILE_ORIN:
+    case EXIT_VM:
+        exit(0);
+    default:
+        break;
     }
 }

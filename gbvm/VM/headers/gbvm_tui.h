@@ -49,3 +49,5 @@ void refreshWindow(WINDOW* win, String str);
 display enterTUIMode();
 
 void exitTUIMode(display* disp);
+
+void InputMenu(WINDOW* win, int* highlight, int* ch);
