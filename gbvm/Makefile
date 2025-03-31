@@ -47,7 +47,7 @@ MAKEFLAGS += --no-print-directory
 
 
 CC = gcc
-CFLAGS = -O3 -Wall -Wextra -Wfatal-errors -Wswitch-enum -std=c2x -pedantic -lncursesw -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
+CFLAGS = -O3 -Wall -Wextra -Werror -Wfatal-errors -Wswitch-enum -std=c2x -pedantic -lncursesw -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
 LIBS =
 
 sasm: 	sasm.c $(G_CODE) $(A_CODE)

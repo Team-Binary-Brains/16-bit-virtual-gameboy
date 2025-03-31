@@ -12,6 +12,21 @@
 
 #pragma once
 
+#define INTERNAL_VMCALLS_CAPACITY 1024
+#define EXTERNAL_VMCALLS_CAPACITY 1024
+#define LOAD_FACTOR_THRESHOLD 0.75
+#define _XOPEN_SOURCE_EXTENDED
+#define BINDINGS_CAPACITY 1024
+#define PROGRAM_CAPACITY 1024
+#define MEMORY_CAPACITY 65536
+#define LABELS_CAPACITY 1024
+#define MAX_INCLUDE_LEVEL 10
+#define STACK_CAPACITY 1024
+#define FILE_MAGIC 0x484f53
+#define FILE_VERSION 0x4D41
+#define COMMENT_SYMBOL ';'
+#define PREP_SYMBOL '%'
+
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -23,21 +38,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define _XOPEN_SOURCE_EXTENDED
 #include <ncurses.h>
 #include <locale.h>
-
-#define STACK_CAPACITY 1024
-#define LABELS_CAPACITY 1024
-#define MEMORY_CAPACITY 65536
-#define PROGRAM_CAPACITY 1024
-#define BINDINGS_CAPACITY 1024
-#define INTERNAL_VMCALLS_CAPACITY 1024
-#define EXTERNAL_VMCALLS_CAPACITY 1024
-#define LOAD_FACTOR_THRESHOLD 0.75
-#define MAX_INCLUDE_LEVEL 10
-#define COMMENT_SYMBOL ';'
-#define PREP_SYMBOL '%'
 
 typedef uint8_t Byte;
 typedef uint16_t Word;

@@ -7,7 +7,6 @@
  */
 
 #pragma once
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include "univ_defs.h"
 #include "univ_strings.h"

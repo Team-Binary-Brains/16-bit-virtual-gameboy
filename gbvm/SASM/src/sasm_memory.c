@@ -12,6 +12,10 @@ inline bool getFlag(Flags f, const CPU* cpu)
 
 bool evaluateAddressingMode(Memory* mem, CPU* cpu, AddrMode mode, QuadWord* val, QuadWord* out)
 {
+    if (!out) {
+        return false;
+    }
+
     if (mode == MEM) {
 
         out = &(mem->stack[val->as_u64]);

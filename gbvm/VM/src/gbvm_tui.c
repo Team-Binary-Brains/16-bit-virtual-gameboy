@@ -1,5 +1,22 @@
 #include "gbvm_tui.h"
 
+static String WindowNames[MAX_WINDOW_COUNT] = {
+    [OUTPUT] = { .data = "OUTPUT", .length = 6 },
+    [DETAILS] = { .data = "DETAILS", .length = 7 },
+    [MEMORY] = { .data = "MEMORY", .length = 6 },
+    [PROGRAM] = { .data = "PROGRAM", .length = 8 },
+    [INPUT] = { .data = "INPUT", .length = 6 }
+};
+
+static String Inputs[] = {
+    [EXEC_SM] = { .data = "Execute the Simulated Machine Code", .length = 34 },
+    [DISASSEMBLE_SM] = { .data = "Disassemble the Simulated Machine Code", .length = 38 },
+    [ASSEMBLE_SASM] = { .data = "Assemble the Simulated Assembly Code into SM", .length = 44 },
+    [ASSEMBLE_EXEC_SASM] = { .data = "Assemble and Execute the Simulated Assembly Code", .length = 48 },
+    [COMPILE_ORIN] = { .data = "Compile the ORIN Code into SASM", .length = 33 },
+    [EXIT_VM] = { .data = "Exit the Virtual Machine", .length = 24 }
+};
+
 bool createWindow(display* disp, int x1, int y1, int x2, int y2, String str)
 {
     int width = x2 - x1;
@@ -59,16 +76,11 @@ display enterTUIMode()
 
 void exitTUIMode(display* disp)
 {
-    getch();
-
-    {
-        getch();
-        while (disp->windowCount > 0) {
-            delwin(disp->windows[disp->windowCount--]);
-        }
-        endwin();
+    while (disp->windowCount > 0) {
+        delwin(disp->windows[disp->windowCount--]);
     }
     endwin();
+    exit(0);
 }
 
 void refreshWindow(WINDOW* win, String str)
@@ -110,14 +122,14 @@ void InputMenu(WINDOW* win, int* highlight, int* ch)
 {
     wclear(win);
     refreshWindow(win, WindowNames[INPUT]);
-    for (size_t i = 0; i < MAX_INPUTS; i++) {
+    for (int i = 0; i < MAX_INPUTS; i++) {
         wmove(win, i + 2, 4);
 
         if (i == *highlight) {
             wattron(win, A_REVERSE);
             wprintw(win, " ▶ ");
         }
-        wprintw(win, Inputs[i].data);
+        wprintw(win, "%s", Inputs[i].data);
         wattroff(win, A_REVERSE);
     }
 
@@ -134,4 +146,29 @@ void InputMenu(WINDOW* win, int* highlight, int* ch)
     default:
         break;
     }
+}
+
+void readFilePath(WINDOW* win, const char* msg, const char** filePath)
+{
+    char buffer[100];
+    wprintw(win, "%s", msg);
+
+    wgetnstr(win, buffer, sizeof(buffer) - 1);
+
+    *filePath = strdup(buffer);
+}
+
+String getNameForWindow(int id)
+{
+    return WindowNames[id];
+}
+
+void wprintdash(WINDOW* win)
+{
+    wprintw(win, "\n");
+    int tmp = getmaxx(win) - 1;
+    for (int i = 0; i < tmp; i++) {
+        wprintw(win, "─");
+    }
+    wprintw(win, "\n");
 }

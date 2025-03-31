@@ -1,16 +1,6 @@
 #include "gbvm.h"
 #include "sasm_memory.h"
-#pragma GCC diagnostic ignored "-Wswitch-enum"
 
-void wprintdash(WINDOW* win)
-{
-    wprintw(win, "\n");
-    int tmp = getmaxx(win) - 1;
-    for (size_t i = 0; i < tmp; i++) {
-        wprintw(win, "─");
-    }
-    wprintw(win, "\n");
-}
 void dumpStack(WINDOW* win, const Vm* vm)
 {
     wprintw(win, "\n  ");
@@ -109,10 +99,10 @@ void executeProgram(Vm* vm, int debug, int lim)
             wattroff(prg, A_REVERSE);
         }
 
-        refreshWindow(vm->disp.windows[PROGRAM], WindowNames[PROGRAM]);
-        refreshWindow(vm->disp.windows[OUTPUT], WindowNames[OUTPUT]);
-        refreshWindow(vm->disp.windows[DETAILS], WindowNames[DETAILS]);
-        refreshWindow(vm->disp.windows[MEMORY], WindowNames[MEMORY]);
+        refreshWindow(vm->disp.windows[PROGRAM], getNameForWindow(PROGRAM));
+        refreshWindow(vm->disp.windows[OUTPUT], getNameForWindow(OUTPUT));
+        refreshWindow(vm->disp.windows[DETAILS], getNameForWindow(DETAILS));
+        refreshWindow(vm->disp.windows[MEMORY], getNameForWindow(MEMORY));
         if (debug == 1) {
             wgetch(vm->disp.windows[INPUT]);
         }
