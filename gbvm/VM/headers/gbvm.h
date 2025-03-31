@@ -13,7 +13,7 @@
 #include "univ_defs.h"
 #include "univ_errors.h"
 #include "univ_malloc.h"
-#include "univ_tui.h"
+#include "gbvm_tui.h"
 #include "sasm_instructions.h"
 #include "sasm_assembler.h"
 #include "sasm_memory.h"

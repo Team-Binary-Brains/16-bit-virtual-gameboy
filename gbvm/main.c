@@ -1,7 +1,7 @@
 #include "gbvm.h"
 #include "gbvm_assembler.h"
 #include "univ_malloc.h"
-#include "univ_tui.h"
+#include "gbvm_tui.h"
 
 void processFlag(const char* program, const char* flag, int* argc, char*** argv);
 const char* inputFile = NULL;
@@ -51,7 +51,7 @@ int main(int argc, char** argv)
             break;
         }
 
-    } while (ch);
+    } while (ch != '\n');
 
     loadProgramIntoVm(&vm, inputFile);
     loadStandardCallsIntoVm(&vm);

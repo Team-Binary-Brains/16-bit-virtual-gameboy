@@ -1,4 +1,4 @@
-#include "univ_tui.h"
+#include "gbvm_tui.h"
 
 bool createWindow(display* disp, int x1, int y1, int x2, int y2, String str)
 {
@@ -43,7 +43,6 @@ display CreateWindows()
 
 display enterTUIMode()
 {
-    printf("/033[?12l");
     setlocale(LC_ALL, "");
     initscr();
     clear();
