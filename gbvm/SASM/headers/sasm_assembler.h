@@ -11,9 +11,6 @@
 #include "univ_errors.h"
 #include "univ_malloc.h"
 
-#define FILE_MAGIC 0x484f53
-#define FILE_VERSION 0x4D41
-
 typedef struct {
     String name;
     QuadWord value;

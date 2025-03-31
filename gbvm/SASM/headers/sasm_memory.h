@@ -14,8 +14,6 @@
 #include "univ_strings.h"
 #include "sasm_assembler.h"
 
-#pragma GCC diagnostic ignored "-Wunused-but-set-parameter"
-
 typedef QuadWord Register;
 
 typedef enum {

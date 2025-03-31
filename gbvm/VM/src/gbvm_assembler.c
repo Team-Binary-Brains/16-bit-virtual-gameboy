@@ -9,8 +9,7 @@ void loadInternalCallIntoVm(Vm* vm, InternalVmCall call)
 
 void loadProgramIntoVm(Vm* vm, const char* filePath)
 {
-    memset(vm, 0, sizeof(*vm));
-
+    memset(&vm->prog, 0, sizeof(vm->prog));
     FILE* f = openFile(filePath, "rb");
 
     Metadata meta = { 0 };

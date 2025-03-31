@@ -1,80 +1,127 @@
 #include "gbvm.h"
 #include "sasm_memory.h"
-#pragma GCC diagnostic ignored "-Wswitch-enum"
 
-void dumpStack(FILE* stream, const Vm* vm)
+void dumpStack(WINDOW* win, const Vm* vm)
 {
-    fprintf(stream, "\n-------------------------------STACK------------------------------------------");
-    uint64_t SP = vm->cpu.registers.SP.as_u64;
-
-    uint64_t start = (SP < 5) ? 0 : SP - 5;
-    uint64_t len = (SP < 5) ? SP : start + 5;
-
-    uint64_t i;
-    for (i = start; i < len; i++)
-        fprintf(stream, "\n\t%ld", vm->mem.stack[i].as_u64);
-
-    for (i = len; i < start + 5; i++)
-        fprintf(stream, "\n\t[X]  ");
-
-    fprintf(stream, "\n-------------------------------STACK------------------------------------------ \n");
+    wprintw(win, "\n  ");
+    for (uint64_t i = 0; i < 256; i++) {
+        wprintw(win, "%02X ", vm->mem.memory[i]);
+        if (i % 32 == 31) {
+            wprintw(win, "\n  ");
+        }
+    }
 }
 
-void dumpFlags(FILE* stream, CPU* cpu)
+void dumpFlags(WINDOW* win, CPU* cpu)
 {
-    fprintf(stream, "\n-------------------------------FLAGS------------------------------------------ "
-                    "\n  Halt : %d\t                                                                  "
-                    "\n-------------------------------FLAGS------------------------------------------ \n",
-        getFlag(HALT, cpu));
+    wprintw(win, "\n");
+    wprintdash(win);
+    wprintw(win, "  FLAGS ");
+    wprintdash(win);
+    wprintw(win,
+        "  Halt\t: %c\t F1\t: %c\n"
+        "  F2\t: %c\t F3\t: %c\n"
+        "  F4\t: %c\t F5\t: %c\n"
+        "  F6\t: %c\t F7\t: %c\n",
+        getFlag(HALT, cpu) ? 'T' : 'F',
+        getFlag(F1, cpu) ? 'T' : 'F',
+        getFlag(F2, cpu) ? 'T' : 'F',
+        getFlag(F3, cpu) ? 'T' : 'F',
+        getFlag(F4, cpu) ? 'T' : 'F',
+        getFlag(F5, cpu) ? 'T' : 'F',
+        getFlag(F6, cpu) ? 'T' : 'F',
+        getFlag(F7, cpu) ? 'T' : 'F');
 }
 
-void dumpDetails(FILE* stream, String* operation, QuadWord lineNumber, Instruction* inst)
+void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
 {
-    fprintf(stream, "\n------------------------------DETAILS-----------------------------------------"
-                    "\n  Instruction Number :\t%ld                                                   "
-                    "\n  Instruction :\t\t%.*s                                                       "
-                    "\n  Operand1 : \t\t%ld                                                          "
-                    "\n  Operand2 : \t\t%ld                                                          "
-                    "\n------------------------------DETAILS----------------------------------------- \n",
-        lineNumber.as_u64,
-        (int)operation->length, operation->data,
-        inst->operand.as_u64,
-        inst->operand2.as_u64);
+
+    wprintdash(win);
+
+    wprintw(win, "  INSTRUCTION ");
+    wprintdash(win);
+    wprintw(win,
+        "  NAME    %s"
+        "\n  OPCODE  %d",
+        details->name, details->type);
+
+    if (details->has_operand) {
+        wprintw(win,
+            "\n────────╮"
+            "\n    1.U │ %ld"
+            "\n    1.I │ %ld"
+            "\n    1.F │ %lf"
+            "\n────────╯\n",
+            inst->operand.as_u64,
+            inst->operand.as_i64,
+            inst->operand.as_f64);
+    }
+
+    if (details->has_operand2) {
+        wprintw(win,
+            "\n────────╮"
+            "\n    2.U │ %ld"
+            "\n    2.I │ %ld"
+            "\n    2.F │ %lf"
+            "\n────────╯\n",
+            inst->operand2.as_u64,
+            inst->operand2.as_i64,
+            inst->operand2.as_f64);
+    }
+    wprintdash(win);
 }
+
 void executeProgram(Vm* vm, int debug, int lim)
 {
     CPU* cpu = &(vm->cpu);
     Memory* mem = &(vm->mem);
     Program* prog = &(vm->prog);
     VmCalls* calls = &(vm->vmCalls);
-    Instruction* inst = &(prog->instructions[vm->cpu.registers.IP.as_u64]);
+    size_t count = cpu->registers.IP.as_u64;
+    Instruction* inst = &(prog->instructions[cpu->registers.IP.as_u64]);
+    OpcodeDetails details;
+
+    Error error = 0;
+    if (debug > 0) {
+        WINDOW* prg = vm->disp.windows[PROGRAM];
+        size_t i = (count - 2 > 0) ? count - 2 : 0;
+        count = (count + getmaxy(prg) > prog->instruction_count) ? prog->instruction_count : count + getmaxy(prg);
+        for (; i < count; i++) {
+            details = getOpcodeDetails(prog->instructions[i].type);
+            if (i == cpu->registers.IP.as_u64) {
+                wattron(prg, A_REVERSE);
+            }
+
+            wprintw(prg, "\n   %ld\t│ %s ", i, details.name);
+            if (details.has_operand) {
+                wprintw(prg, " %ld", prog->instructions[i].operand.as_u64);
+            }
+            wattroff(prg, A_REVERSE);
+        }
+
+        refreshWindow(vm->disp.windows[PROGRAM], getNameForWindow(PROGRAM));
+        refreshWindow(vm->disp.windows[OUTPUT], getNameForWindow(OUTPUT));
+        refreshWindow(vm->disp.windows[DETAILS], getNameForWindow(DETAILS));
+        refreshWindow(vm->disp.windows[MEMORY], getNameForWindow(MEMORY));
+        if (debug == 1) {
+            wgetch(vm->disp.windows[INPUT]);
+        }
+
+        wclear(vm->disp.windows[DETAILS]);
+        wclear(prg);
+        wclear(vm->disp.windows[MEMORY]);
+
+        details = getOpcodeDetails(inst->type);
+        dumpStack(vm->disp.windows[MEMORY], vm);
+        dumpFlags(vm->disp.windows[DETAILS], cpu);
+        dumpDetails(vm->disp.windows[DETAILS], &details, inst);
+    }
 
     if (lim == 0 || getFlag(HALT, cpu)) {
         return;
     }
 
-    String operation = convertCstrToStr(getOpcodeDetails(inst->type).name);
-    Error error = 0;
-    switch (debug) {
-    case 2:
-        scanf("%*c");
-        system("clear");
-        dumpDetails(stdout, &operation, vm->cpu.registers.IP, inst);
-        dumpFlags(stdout, cpu);
-        dumpStack(stdout, vm);
-        error = executeInst(prog, mem, cpu, calls);
-        break;
-    case 1:
-        scanf("%*c");
-        system("clear");
-        dumpDetails(stdout, &operation, vm->cpu.registers.IP, inst);
-        dumpStack(stdout, vm);
-        error = executeInst(prog, mem, cpu, calls);
-        break;
-    default:
-        error = executeInst(prog, mem, cpu, calls);
-        break;
-    }
+    error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
 
     if (error != ERR_OK)
         executionErrorWithExit(&error);
@@ -115,7 +162,7 @@ void executeProgram(Vm* vm, int debug, int lim)
         mem->stack[cpu->registers.SP.as_u64 - 1].as_##dst = cast mem->stack[cpu->registers.SP.as_u64 - 1].as_##src; \
         cpu->registers.IP.as_u64 += 1;                                                                              \
     }
-Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmCalls)
+Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmCalls, WINDOW* win)
 {
     if (cpu->registers.IP.as_u64 >= prog->instruction_count) {
         printf("error %ld %ld", cpu->registers.IP.as_u64, prog->instruction_count);
@@ -127,7 +174,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
     evaluateAddressingMode(mem, cpu, inst.opr1Mode, &inst.operand, operand1);
     evaluateAddressingMode(mem, cpu, inst.opr2Mode, &inst.operand2, operand2);
 
-    // printf("\nenter : %d %s", inst.type, OpcodeDetailsMap[inst.type].name);
+    // printf("\nenter : %d %s", inst.type, OpcodeDetailsLUT[inst.type].name);
     switch (inst.type) {
     case INST_CPY:
         *operand1 = *operand2;
@@ -252,7 +299,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
             return ERR_NULL_CALL;
         }
 
-        const Error err = vmCalls->VmCallI[inst.operand.as_u64](cpu, mem);
+        const Error err = vmCalls->VmCallI[inst.operand.as_u64](cpu, mem, win);
         if (err != ERR_OK) {
             return err;
         }
