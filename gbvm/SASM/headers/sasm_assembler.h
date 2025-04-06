@@ -11,17 +11,27 @@
 #include "univ_errors.h"
 #include "univ_malloc.h"
 
-typedef struct {
+typedef enum
+{
+    SASM_CONST = 0,
+    SASM_LABEL,
+} BindingType;
+
+typedef struct
+{
+    BindingType type;
     String name;
     QuadWord value;
 } Binding;
 
-typedef struct {
+typedef struct
+{
     InstAddr addr;
     String name;
 } Label;
 
-typedef struct {
+typedef struct
+{
     Binding bindings[BINDINGS_CAPACITY];
     size_t bindingCount;
 
@@ -39,7 +49,8 @@ typedef struct {
     size_t includeLevel;
 } Sasm;
 
-typedef struct Metadata {
+typedef struct Metadata
+{
     DoubleWord magic;
     Word version;
     DataEntry programSize;
@@ -49,18 +60,20 @@ typedef struct Metadata {
     DataEntry externalsSize;
 } __attribute__((__packed__)) Metadata;
 
-bool resolveBinding(const Sasm*, String name, QuadWord* output);
+bool resolveBinding(const Sasm *, String name, QuadWord *output, BindingType *type);
 
-bool bindValue(Sasm*, String name, QuadWord QuadWord);
+bool bindValue(Sasm *, String name, QuadWord QuadWord, BindingType type);
 
-void pushLabel(Sasm*, InstAddr addr, String name);
+void pushLabel(Sasm *, InstAddr addr, String name);
 
-bool translateLiteral(Sasm*, String s, QuadWord* output);
+bool translateLiteral(Sasm *, String s, QuadWord *output);
 
-void assembleProgramIntoBytecode(Sasm*, const char* outputFilePath);
+void assembleProgramIntoBytecode(Sasm *, const char *outputFilePath);
 
-QuadWord pushStringToMemory(Sasm*, String s);
+QuadWord pushStringToMemory(Sasm *, String s);
 
-void parseAsmIntoProgram(Sasm*, String inputFilePath);
+void parseAsmIntoProgram(Sasm *, String inputFilePath);
 
-void loadProgramIntoSasm(Sasm* sasm, const char* file_path);
+void loadProgramIntoSasm(Sasm *sasm, const char *file_path);
+
+const char *bindingTypeAsCstr(BindingType type);
