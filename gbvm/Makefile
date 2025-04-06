@@ -65,10 +65,10 @@ occ:	occ.c  $(G_CODE) $(C_CODE)
 virex: 	main.c $(G_CODE) $(M_CODE) $(A_CODE) $(C_CODE)
 		@make occ
 		@make sasm
+	  	@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
 		@echo  ""
 		@echo  "VM MADE SUCCESSFULLY"
 		@echo  ""
-	  	@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
 
 clean:
 		@rm -f $(CGDIR)/*.o $(CADIR)/*.o $(CCDIR)/*.o main.o virex sasm occ

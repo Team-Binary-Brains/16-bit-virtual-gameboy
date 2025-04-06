@@ -103,7 +103,13 @@ QuadWord pushStringToMemory(Sasm* sasm, String str)
 
 bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
 {
-    if (str.length >= 2 && *str.data == '"' && str.data[str.length - 1] == '"') {
+    if (str.length >= 2 && *str.data == '\'' && str.data[str.length - 1] == '\'') {
+        if (str.length - 2 != 1) {
+            return false;
+        }
+        *output = quadword_u64((uint64_t) str.data[1]);
+        return true;
+    } else if (str.length >= 2 && *str.data == '"' && str.data[str.length - 1] == '"') {
         str.data += 1;
         str.length -= 2;
         *output = pushStringToMemory(sasm, str);

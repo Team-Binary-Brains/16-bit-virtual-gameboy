@@ -108,3 +108,16 @@ const char* convertStrToRegionCstr(Region* region, String str)
     cstr[str.length] = '\0';
     return cstr;
 }
+
+String concatRegionStr(Region *region, const char *a, const char *b)
+{
+    const size_t a_len = strlen(a);
+    const size_t b_len = strlen(b);
+    char *buf = allocateRegion(region, a_len + b_len);
+    memcpy(buf, a, a_len);
+    memcpy(buf + a_len, b, b_len);
+    return (String) {
+        .length = a_len + b_len,
+        .data = buf
+    };
+}
