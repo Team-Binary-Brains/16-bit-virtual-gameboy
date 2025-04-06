@@ -20,10 +20,17 @@ static String Inputs[] = {
     [EXIT_VM] = { .data = "Exit the Virtual Machine", .length = 24 }
 };
 
-// Initialize color pairs
 void initColors()
 {
     start_color();
+    init_color(COLOR_BLACK,102,106,149);
+    init_color(COLOR_RED,999,0,333);
+    init_color(COLOR_GREEN,278,921,705);
+    init_color(COLOR_YELLOW,999,795,419);
+    //init_color(COLOR_BLUE,);
+    init_color(COLOR_MAGENTA,615,431,995);
+    init_color(COLOR_CYAN,537,866,999);
+    init_color(COLOR_WHITE,815,815,815);
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
     init_pair(2, COLOR_MAGENTA, COLOR_BLACK);
     init_pair(3, COLOR_CYAN, COLOR_BLACK);
@@ -48,7 +55,7 @@ bool createWindow(display* disp, int x1, int y1, int x2, int y2, String str, int
         return false;
     }
 
-    wbkgd(win, COLOR_PAIR(colorPair));     // Set window background color
+    wbkgd(win, COLOR_PAIR(colorPair));
     disp->windows[disp->windowCount++] = win;
     refreshWindow(disp->windows[disp->windowCount - 1], str, colorPair, 5, 3);
 
@@ -62,6 +69,12 @@ display CreateWindows()
     disp.windowCount = 0;
     int xmin = 0, ymin = 0;
     int xmax = getmaxx(stdscr), ymax = getmaxy(stdscr);
+    if (xmax < 238 ){
+        fprintf(stderr,"PLEASE DECREASE YOUR TERMINAL FONT SIZE");
+        getch();
+        exitTUIMode(&disp);
+        exit(1);
+    }
 
     int xsta = LERP(xmin, xmax, 0.85);
     int xmid = LERP(xsta, xmax, 0.50);
@@ -88,16 +101,16 @@ display enterTUIMode()
     clear();
     cbreak();
     // noecho();
-    initColors();     // Initialize colors
+    initColors();
 
     display disp = CreateWindows();
     wprintw(disp.windows[NAME],
-        "\n    ██╗   ██╗██╗██████╗ ████████╗██╗   ██╗ █████╗ ██╗     "       //      ██╗   ██╗██╗██████╗ ███████╗██╗  ██╗"
-        "\n    ██║   ██║██║██╔══██╗╚══██╔══╝██║   ██║██╔══██╗██║       "     //      ██║   ██║██║██████╔╝█████╗   ╚███╔╝ "
-        "\n    ██║   ██║██║██████╔╝   ██║   ██║   ██║███████║██║       "     //      ╚██╗ ██╔╝██║██╔══██╗██╔══╝   ██╔██╗ "
-        "\n    ╚██╗ ██╔╝██║██╔══██╗   ██║   ██║   ██║██╔══██║██║       "     //       ╚████╔╝ ██║██║  ██║███████╗██╔╝ ██╗"
-        "\n     ╚████╔╝ ██║██║  ██║   ██║   ╚██████╔╝██║  ██║███████╗  "     //        ╚═══╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝"
-        "\n      ╚═══╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝  "
+        "\n    ██╗   ██╗██╗██████╗ ████████╗██╗   ██╗ █████╗ ██╗     "     //      ██╗   ██╗██╗██████╗ ███████╗██╗  ██╗"
+        "\n    ██║   ██║██║██╔══██╗╚══██╔══╝██║   ██║██╔══██╗██║     "     //      ██║   ██║██║██████╔╝█████╗   ╚███╔╝ "
+        "\n    ██║   ██║██║██████╔╝   ██║   ██║   ██║███████║██║     "     //      ╚██╗ ██╔╝██║██╔══██╗██╔══╝   ██╔██╗ "
+        "\n    ╚██╗ ██╔╝██║██╔══██╗   ██║   ██║   ██║██╔══██║██║     "     //       ╚████╔╝ ██║██║  ██║███████╗██╔╝ ██╗"
+        "\n     ╚████╔╝ ██║██║  ██║   ██║   ╚██████╔╝██║  ██║███████╗"     //        ╚═══╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝"
+        "\n      ╚═══╝  ╚═╝╚═╝  ╚═╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝╚══════╝"
         "\n    ███████╗██╗  ██╗███████╗ ██████╗██╗   ██╗████████╗ ██████╗ ██████╗ "
         "\n    ██╔════╝╚██╗██╔╝██╔════╝██╔════╝██║   ██║╚══██╔══╝██╔═══██╗██╔══██╗"
         "\n    █████╗   ╚███╔╝ █████╗  ██║     ██║   ██║   ██║   ██║   ██║██████╔╝"
@@ -152,7 +165,7 @@ void refreshWindow(WINDOW* win, String str, int contentCol, int borderCol, int t
         y -= 1;
     }
 
-    wbkgd(win, COLOR_PAIR(contentCol));     // Set window background
+    wbkgd(win, COLOR_PAIR(contentCol));
 
     cchar_t vline, hline, ul, ur, ll, lr;
 
@@ -165,13 +178,13 @@ void refreshWindow(WINDOW* win, String str, int contentCol, int borderCol, int t
 
     // wmove(win, 0, 0);
     // wprintdash(win);
-    wattron(win, COLOR_PAIR(borderCol));     // Apply border color
+    wattron(win, COLOR_PAIR(borderCol));
     wborder_set(win, &vline, &vline, &hline, &hline, &ul, &ur, &ll, &lr);
-    wattroff(win, COLOR_PAIR(borderCol));     // Remove border color
+    wattroff(win, COLOR_PAIR(borderCol));
 
-    // wmove(win, 0, (int)((getmaxx(win) - str.length - 2) / 2));
     wattron(win, COLOR_PAIR(titleCol));
-    wmove(win, 0, 2);
+    wmove(win, 0, (int)((getmaxx(win) - str.length - 2) / 2));
+    // wmove(win, 0, 2);
     wprintw(win, " %s ", str.data);
     wattroff(win, COLOR_PAIR(titleCol));
 
@@ -224,12 +237,12 @@ String getNameForWindow(int id)
 
 void wprintdash(WINDOW* win, int col)
 {
-    wattron(win, COLOR_PAIR(col));     // Apply border color
+    wattron(win, COLOR_PAIR(col));
     wprintw(win, "\n");
     int tmp = getmaxx(win) - 1;
     for (int i = 0; i < tmp; i++) {
         wprintw(win, "─");
     }
     wprintw(win, "\n");
-    wattroff(win, COLOR_PAIR(col));     // Apply border color
+    wattroff(win, COLOR_PAIR(col));
 }
