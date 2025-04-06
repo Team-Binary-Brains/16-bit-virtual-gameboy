@@ -1,5 +1,5 @@
 
-#include "gbvm.h"
+#include "virex.h"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 Error vmcall_write(CPU* cpu, Memory* mem, WINDOW* win)
 {

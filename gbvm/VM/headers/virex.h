@@ -1,5 +1,5 @@
 /**
- * @file gbvm.h
+ * @file virex.h
  * @brief This file contains the declarations of functions and structures related to the virtual machine.
  *
  * The virtual machine represents the execution environment for the Game Boy program.
@@ -13,11 +13,11 @@
 #include "univ_defs.h"
 #include "univ_errors.h"
 #include "univ_malloc.h"
-#include "gbvm_tui.h"
+#include "virex_tui.h"
 #include "sasm_instructions.h"
 #include "sasm_assembler.h"
 #include "sasm_memory.h"
-#include "gbvm_vmcalls.h"
+#include "virex_vmcalls.h"
 
 /**
  * @struct Vm

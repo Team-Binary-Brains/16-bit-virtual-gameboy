@@ -1,7 +1,7 @@
-#include "gbvm.h"
-#include "gbvm_assembler.h"
+#include "virex.h"
+#include "virex_assembler.h"
 #include "univ_malloc.h"
-#include "gbvm_tui.h"
+#include "virex_tui.h"
 
 void processFlag(const char* program, const char* flag, int* argc, char*** argv);
 void __exec_sm(Vm* vm, WINDOW* win);

@@ -1,4 +1,4 @@
-#include "gbvm.h"
+#include "virex.h"
 #include "sasm_memory.h"
 
 void dumpStack(WINDOW* win, const Vm* vm)

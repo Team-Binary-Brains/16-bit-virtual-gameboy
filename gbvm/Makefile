@@ -27,8 +27,8 @@ _C_HEAD =		O_lexer.h			O_parser.h				O_parse_tree.h		O_symbol_table.h	O_inter_co
 _C_CODE = 		O_lexer.c			O_parser.c				O_parse_tree.c		O_symbol_table.c	O_inter_codegen.c	O_debug_help.c		O_inter_code_optimizer.c
 
 
-_M_HEAD = 		gbvm_assembler.h	gbvm.h					gbvm_vmcalls.h		gbvm_tui.h
-_M_CODE =		gbvm_assembler.c	gbvm.c					gbvm_vmcalls.c		gbvm_tui.c
+_M_HEAD = 		virex_assembler.h	virex.h					virex_vmcalls.h		virex_tui.h
+_M_CODE =		virex_assembler.c	virex.c					virex_vmcalls.c		virex_tui.c
 
 G_HEAD = 		$(patsubst %, 		$(IGDIR)/%,				$(_G_HEAD))
 G_CODE = 		$(patsubst %, 		$(CGDIR)/%,				$(_G_CODE))
@@ -62,7 +62,7 @@ occ:	occ.c  $(G_CODE) $(C_CODE)
 		@echo  "COMPILER MADE SUCCESSFULLY"
 		@echo  ""
 
-gbvm: 	main.c $(G_CODE) $(M_CODE) $(A_CODE) $(C_CODE)
+virex: 	main.c $(G_CODE) $(M_CODE) $(A_CODE) $(C_CODE)
 		@make occ
 		@make sasm
 		@echo  ""
@@ -71,7 +71,7 @@ gbvm: 	main.c $(G_CODE) $(M_CODE) $(A_CODE) $(C_CODE)
 	  	@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
 
 clean:
-		@rm -f $(CGDIR)/*.o $(CADIR)/*.o $(CCDIR)/*.o main.o gbvm sasm occ
+		@rm -f $(CGDIR)/*.o $(CADIR)/*.o $(CCDIR)/*.o main.o virex sasm occ
 		@echo  ""
 		@echo  "CLEANED ALL OBJECT FILES AND EXECUTABLES"
 		@echo  ""
