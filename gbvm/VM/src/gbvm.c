@@ -3,11 +3,11 @@
 
 void dumpStack(WINDOW* win, const Vm* vm)
 {
-    wprintw(win, "\n  ");
+    wprintw(win, "\n\n   ");
     for (uint64_t i = 0; i < 256; i++) {
         wprintw(win, "%02X ", vm->mem.memory[i]);
         if (i % 32 == 31) {
-            wprintw(win, "\n  ");
+            wprintw(win, "\n   ");
         }
     }
 }
@@ -15,9 +15,11 @@ void dumpStack(WINDOW* win, const Vm* vm)
 void dumpFlags(WINDOW* win, CPU* cpu)
 {
     wprintw(win, "\n");
-    wprintdash(win);
+    wprintdash(win, 1);
+    wattron(win, A_REVERSE);
     wprintw(win, "  FLAGS ");
-    wprintdash(win);
+    wattroff(win, A_REVERSE);
+    wprintdash(win, 1);
     wprintw(win,
         "  Halt\t: %c\t F1\t: %c\n"
         "  F2\t: %c\t F3\t: %c\n"
@@ -35,11 +37,11 @@ void dumpFlags(WINDOW* win, CPU* cpu)
 
 void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
 {
-
-    wprintdash(win);
-
+    wprintdash(win, 1);
+    wattron(win, A_REVERSE);
     wprintw(win, "  INSTRUCTION ");
-    wprintdash(win);
+    wattroff(win, A_REVERSE);
+    wprintdash(win, 1);
     wprintw(win,
         "  NAME    %s"
         "\n  OPCODE  %d",
@@ -68,7 +70,7 @@ void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
             inst->operand2.as_i64,
             inst->operand2.as_f64);
     }
-    wprintdash(win);
+    wprintdash(win, 1);
 }
 
 void executeProgram(Vm* vm, int debug, int lim)
@@ -99,10 +101,10 @@ void executeProgram(Vm* vm, int debug, int lim)
             wattroff(prg, A_REVERSE);
         }
 
-        refreshWindow(vm->disp.windows[PROGRAM], getNameForWindow(PROGRAM));
-        refreshWindow(vm->disp.windows[OUTPUT], getNameForWindow(OUTPUT));
-        refreshWindow(vm->disp.windows[DETAILS], getNameForWindow(DETAILS));
-        refreshWindow(vm->disp.windows[MEMORY], getNameForWindow(MEMORY));
+        refreshWindow(vm->disp.windows[PROGRAM], getNameForWindow(PROGRAM), 3, 3, 3);
+        refreshWindow(vm->disp.windows[OUTPUT], getNameForWindow(OUTPUT), 4, 5, 3);
+        refreshWindow(vm->disp.windows[DETAILS], getNameForWindow(DETAILS), 1, 1, 1);
+        refreshWindow(vm->disp.windows[MEMORY], getNameForWindow(MEMORY), 2, 2, 3);
         if (debug == 1) {
             wgetch(vm->disp.windows[INPUT]);
         }

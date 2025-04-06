@@ -1,5 +1,9 @@
 %include "./calls.smh"
 
+JMPU main
+
+%bind buffer " "
+
 %bind hello " Hello, World"                  ; 12
 %bind msg0 " THIS IS A SAMPLE SASM CODE"     ; 26
 %bind msg1 " ADDING FLOATS"                  ; 13
@@ -14,37 +18,28 @@
 %bind N 30
 %bind M 256
 
-    JMPU main
 
 main:
-    PUSH 32
-    CALLF set_color
 
-    CALLN append_newline_all_messages
+    PUSH buffer
+    PUSH 10
+    WRITE1
 
     PUSH msg0
-    PUSH 28
-    CALLF write
-
-    PUSH hello      ; PUSH address of "hello world"
-    PUSH 13         ; PUSH the length of string
-    ADDI            ; add 12 to the memory address
-    PUSH 10         ; newline
-    WRITE1          ; write 1 byte to memory
-    
+    PUSH 26
+    CALLN println
 
     PUSH hello      ; fetch memory address of string
     PUSH 14         ; new length
-    CALLF write     ; print 13 characters
+    CALLN println     ; print 13 characters
 
-    PUSH 41
-    CALLF set_color
    ;SHUTS
 
 f123:
+    CALLN printNewLine
     PUSH msg1
     PUSH 15
-    CALLF write
+    CALLN println
 
     PUSH 1.0
     PUSH 2.0
@@ -55,9 +50,10 @@ f123:
     ;SHUTS
 
 i123:
+    CALLN printNewLine
     PUSH msg2
     PUSH 13
-    CALLF write
+    CALLN println
 
     PUSH 1
     PUSH 2
@@ -68,9 +64,10 @@ i123:
     ;SHUTS
 
 allocation:
+    CALLN printNewLine
     PUSH msg3
     PUSH 32
-    CALLF write
+    CALLN println
 
     PUSH MEMORY_SIZE
     CALLF alloc
@@ -80,9 +77,10 @@ allocation:
     ;SHUTS
 
 bits:
+    CALLN printNewLine
     PUSH msg4
     PUSH 19
-    CALLF write
+    CALLN println
 
     PUSH N
 loop:
@@ -104,9 +102,10 @@ loop:
     ;SHUTS
 
 cast:
+    CALLN printNewLine
     PUSH msg5
     PUSH 13
-    CALLF write
+    CALLN println
 
     PUSH 3.1415
     F2I
@@ -139,9 +138,10 @@ cast:
     ;SHUTS
 
 fibo:
+    CALLN printNewLine
     PUSH msg6
     PUSH 32
-    CALLF write
+    CALLN println
     PUSH 0                       ; F_0
     PUSH 1                       ; F_1
     PUSH N                       ; N - the amount of iterations
@@ -166,9 +166,10 @@ loopfib:
     ;SHUTS
 
 memtest:
+    CALLN printNewLine
     PUSH msg7
     PUSH 15
-    CALLF write
+    CALLN println
     PUSH 0      ; i
 loopmem:
    DUP 0
@@ -188,58 +189,16 @@ loopmem:
    PUSH 0
    PUSH M
    CALLF dump_memory
-    PUSH 0
-    CALLF set_color
-    SHUTS
+   SHUTS
 
-append_newline_all_messages:
+println:
+    SWAP 2                      ; AFTER A PROCEDURE CALL, TOP OF STACK IS OUR MEMORY ADDRESS
+    SWAP 1                        ; SO WE MUST SHIFT THE REQUIRED NUMBER OF OPERANDS (IF ANY)
+    CALLF write
 
-    PUSH msg0
-    PUSH 27
-    ADDI
-    PUSH 10
-    WRITE1
-
-    PUSH msg1
-    PUSH 14
-    ADDI
-    PUSH 10
-    WRITE1
-
-    PUSH msg2
-    PUSH 12
-    ADDI
-    PUSH 10
-    WRITE1
-
-    PUSH msg3
-    PUSH 31
-    ADDI
-    PUSH 10
-    WRITE1
-
-    PUSH msg4
-    PUSH 18
-    ADDI
-    PUSH 10
-    WRITE1
-
-    PUSH msg5
-    PUSH 12
-    ADDI
-    PUSH 10
-    WRITE1
-
-    PUSH msg6
-    PUSH 31
-    ADDI
-    PUSH 10
-    WRITE1
-
-    PUSH msg7
-    PUSH 14
-    ADDI
-    PUSH 10
-    WRITE1
+printNewLine:
+    PUSH buffer
+    PUSH 1
+    CALLF write
 
     RETRN

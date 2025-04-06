@@ -19,7 +19,7 @@ Error vmcall_write(CPU* cpu, Memory* mem, WINDOW* win)
     }
     wprintw(win, "%.*s", (int)count, &mem->memory[addr]);
 
-    refreshWindow(win, getNameForWindow(OUTPUT));
+    refreshWindow(win, getNameForWindow(OUTPUT), 1, 5, 3);
 
     cpu->registers.SP.as_u64 -= 2;
 
@@ -115,25 +115,12 @@ Error vmcall_dump_memory(CPU* cpu, Memory* mem, WINDOW* win)
         if (i % 16 == 15) {
             wprintw(win, "\n ");
         }
-        refreshWindow(win, getNameForWindow(OUTPUT));
+        refreshWindow(win, getNameForWindow(OUTPUT), 1, 5, 3);
     }
     wprintw(win, "\n");
-    refreshWindow(win, getNameForWindow(OUTPUT));
+    refreshWindow(win, getNameForWindow(OUTPUT), 1, 5, 3);
 
     cpu->registers.SP.as_u64 -= 2;
-
-    return ERR_OK;
-}
-
-Error vmcall_set_color(CPU* cpu, Memory* mem, WINDOW* win)
-{
-    if (cpu->registers.SP.as_u64 < 1) {
-        return ERR_STACK_UNDERFLOW;
-    }
-
-    uint64_t color = mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-    wprintw(win, " \033[%ldm", color);
-    cpu->registers.SP.as_u64 -= 1;
 
     return ERR_OK;
 }
