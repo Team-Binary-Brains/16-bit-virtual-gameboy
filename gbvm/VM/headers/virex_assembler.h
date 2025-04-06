@@ -1,5 +1,5 @@
 #pragma once
-#include "gbvm.h"
+#include "virex.h"
 
 void loadInternalCallIntoVm(Vm* Vm, InternalVmCall call);
 void loadStandardCallsIntoVm(Vm* Vm);

@@ -1,4 +1,4 @@
-#include "gbvm.h"
+#include "virex.h"
 #include "univ_fileops.h"
 
 void loadInternalCallIntoVm(Vm* vm, InternalVmCall call)

@@ -1,4 +1,4 @@
-#include "gbvm_tui.h"
+#include "virex_tui.h"
 #include <stdlib.h>
 
 static String WindowNames[MAX_WINDOW_COUNT] = {
