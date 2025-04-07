@@ -33,7 +33,7 @@ typedef struct {
     Register CX;
     Register DX;
 
-    QuadWord IP;
+    QuadWord NX;
 
     QuadWord SP;
 

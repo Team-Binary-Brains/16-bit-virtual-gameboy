@@ -79,8 +79,8 @@ void executeProgram(Vm* vm, int debug, int lim)
     Memory* mem = &(vm->mem);
     Program* prog = &(vm->prog);
     VmCalls* calls = &(vm->vmCalls);
-    size_t count = cpu->registers.IP.as_u64;
-    Instruction* inst = &(prog->instructions[cpu->registers.IP.as_u64]);
+    size_t count = cpu->registers.NX.as_u64;
+    Instruction* inst = &(prog->instructions[cpu->registers.NX.as_u64]);
     OpcodeDetails details;
 
     Error error = 0;
@@ -90,7 +90,7 @@ void executeProgram(Vm* vm, int debug, int lim)
         count = (count + getmaxy(prg) > prog->instruction_count) ? prog->instruction_count : count + getmaxy(prg);
         for (; i < count; i++) {
             details = getOpcodeDetails(prog->instructions[i].type);
-            if (i == cpu->registers.IP.as_u64) {
+            if (i == cpu->registers.NX.as_u64) {
                 wattron(prg, A_REVERSE);
             }
 
@@ -143,7 +143,7 @@ void executeProgram(Vm* vm, int debug, int lim)
         type tmp;                                                                \
         memcpy(&tmp, &mem->memory[addr], sizeof(type));                          \
         mem->stack[cpu->registers.SP.as_u64 - 1].as_##out = tmp;                 \
-        cpu->registers.IP.as_u64 += 1;                                           \
+        cpu->registers.NX.as_u64 += 1;                                           \
     }
 
 #define BINARY_OP(prog, mem, cpu, in, out, op)                                                                                                                    \
@@ -153,7 +153,7 @@ void executeProgram(Vm* vm, int debug, int lim)
         }                                                                                                                                                         \
         mem->stack[cpu->registers.SP.as_u64 - 2].as_##out = mem->stack[cpu->registers.SP.as_u64 - 2].as_##in op mem->stack[cpu->registers.SP.as_u64 - 1].as_##in; \
         cpu->registers.SP.as_u64 -= 1;                                                                                                                            \
-        cpu->registers.IP.as_u64 += 1;                                                                                                                            \
+        cpu->registers.NX.as_u64 += 1;                                                                                                                            \
     }
 
 #define CAST_OP(prog, mem, cpu, src, dst, cast)                                                                     \
@@ -162,15 +162,15 @@ void executeProgram(Vm* vm, int debug, int lim)
             return ERR_STACK_UNDERFLOW;                                                                             \
         }                                                                                                           \
         mem->stack[cpu->registers.SP.as_u64 - 1].as_##dst = cast mem->stack[cpu->registers.SP.as_u64 - 1].as_##src; \
-        cpu->registers.IP.as_u64 += 1;                                                                              \
+        cpu->registers.NX.as_u64 += 1;                                                                              \
     }
 Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmCalls, WINDOW* win)
 {
-    if (cpu->registers.IP.as_u64 >= prog->instruction_count) {
-        printf("error %ld %ld", cpu->registers.IP.as_u64, prog->instruction_count);
+    if (cpu->registers.NX.as_u64 >= prog->instruction_count) {
+        printf("error %ld %ld", cpu->registers.NX.as_u64, prog->instruction_count);
         return ERR_ILLEGAL_INST_ACCESS;
     }
-    Instruction inst = prog->instructions[cpu->registers.IP.as_u64];
+    Instruction inst = prog->instructions[cpu->registers.NX.as_u64];
 
     QuadWord *operand1 = NULL, *operand2 = NULL;
     evaluateAddressingMode(mem, cpu, inst.opr1Mode, &inst.operand, operand1);
@@ -180,10 +180,10 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
     switch (inst.type) {
     case INST_CPY:
         *operand1 = *operand2;
-        cpu->registers.IP.as_u64 += 1;
+        cpu->registers.NX.as_u64 += 1;
         break;
     case INST_DONOP:
-        cpu->registers.IP.as_u64 += 1;
+        cpu->registers.NX.as_u64 += 1;
         break;
 
     case INST_PUSH:
@@ -191,7 +191,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
             return ERR_STACK_OVERFLOW;
         }
         mem->stack[cpu->registers.SP.as_u64++] = inst.operand;
-        cpu->registers.IP.as_u64 += 1;
+        cpu->registers.NX.as_u64 += 1;
         break;
 
     case INST_DROP:
@@ -199,7 +199,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
             return ERR_STACK_UNDERFLOW;
         }
         cpu->registers.SP.as_u64 -= 1;
-        cpu->registers.IP.as_u64 += 1;
+        cpu->registers.NX.as_u64 += 1;
         break;
 
     case INST_ADDI:
@@ -271,7 +271,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
         break;
 
     case INST_JMPU:
-        cpu->registers.IP.as_u64 = inst.operand.as_u64;
+        cpu->registers.NX.as_u64 = inst.operand.as_u64;
         break;
 
     case INST_RETRN:
@@ -279,7 +279,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
             return ERR_STACK_UNDERFLOW;
         }
 
-        cpu->registers.IP.as_u64 = mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
+        cpu->registers.NX.as_u64 = mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
         cpu->registers.SP.as_u64 -= 1;
         break;
 
@@ -288,8 +288,8 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
             return ERR_STACK_OVERFLOW;
         }
 
-        mem->stack[cpu->registers.SP.as_u64++].as_u64 = cpu->registers.IP.as_u64 + 1;
-        cpu->registers.IP.as_u64 = inst.operand.as_u64;
+        mem->stack[cpu->registers.SP.as_u64++].as_u64 = cpu->registers.NX.as_u64 + 1;
+        cpu->registers.NX.as_u64 = inst.operand.as_u64;
         break;
 
     case INST_CALLF:
@@ -305,7 +305,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
         if (err != ERR_OK) {
             return err;
         }
-        cpu->registers.IP.as_u64 += 1;
+        cpu->registers.NX.as_u64 += 1;
         break;
 
     case INST_SHUTS:
@@ -390,9 +390,9 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
         }
 
         if (mem->stack[cpu->registers.SP.as_u64 - 1].as_u64) {
-            cpu->registers.IP.as_u64 = inst.operand.as_u64;
+            cpu->registers.NX.as_u64 = inst.operand.as_u64;
         } else {
-            cpu->registers.IP.as_u64 += 1;
+            cpu->registers.NX.as_u64 += 1;
         }
 
         cpu->registers.SP.as_u64 -= 1;
@@ -409,7 +409,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
 
         mem->stack[cpu->registers.SP.as_u64] = mem->stack[cpu->registers.SP.as_u64 - 1 - inst.operand.as_u64];
         cpu->registers.SP.as_u64 += 1;
-        cpu->registers.IP.as_u64 += 1;
+        cpu->registers.NX.as_u64 += 1;
         break;
 
     case INST_SWAP:
@@ -423,7 +423,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
         QuadWord t = mem->stack[a];
         mem->stack[a] = mem->stack[b];
         mem->stack[b] = t;
-        cpu->registers.IP.as_u64 += 1;
+        cpu->registers.NX.as_u64 += 1;
         break;
 
     case INST_NOT:
@@ -432,7 +432,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
         }
 
         mem->stack[cpu->registers.SP.as_u64 - 1].as_u64 = !mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-        cpu->registers.IP.as_u64 += 1;
+        cpu->registers.NX.as_u64 += 1;
         break;
 
     case INST_ANDB:
@@ -461,7 +461,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
         }
 
         mem->stack[cpu->registers.SP.as_u64 - 1].as_u64 = ~mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-        cpu->registers.IP.as_u64 += 1;
+        cpu->registers.NX.as_u64 += 1;
         break;
 
     case INST_READ1U:
@@ -507,7 +507,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
             }
             mem->memory[addr] = (MemoryAddr)mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
             cpu->registers.SP.as_u64 -= 2;
-            cpu->registers.IP.as_u64 += 1;
+            cpu->registers.NX.as_u64 += 1;
         }
         break;
 
@@ -523,7 +523,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
             Word value = (Word)mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
             memcpy(&mem->memory[addr], &value, sizeof(value));
             cpu->registers.SP.as_u64 -= 2;
-            cpu->registers.IP.as_u64 += 1;
+            cpu->registers.NX.as_u64 += 1;
         }
         break;
 
@@ -539,7 +539,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
             DoubleWord value = (DoubleWord)mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
             memcpy(&mem->memory[addr], &value, sizeof(value));
             cpu->registers.SP.as_u64 -= 2;
-            cpu->registers.IP.as_u64 += 1;
+            cpu->registers.NX.as_u64 += 1;
         }
         break;
 
@@ -555,7 +555,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
             QuadWord value = mem->stack[cpu->registers.SP.as_u64 - 1];
             memcpy(&mem->memory[addr], &value, sizeof(value));
             cpu->registers.SP.as_u64 -= 2;
-            cpu->registers.IP.as_u64 += 1;
+            cpu->registers.NX.as_u64 += 1;
         }
         break;
 
