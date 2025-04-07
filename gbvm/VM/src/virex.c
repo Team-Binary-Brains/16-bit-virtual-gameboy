@@ -172,14 +172,9 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
     }
     Instruction inst = prog->instructions[cpu->registers.NX.as_u64];
 
-    QuadWord *operand1 = NULL, *operand2 = NULL;
-    evaluateAddressingMode(mem, cpu, inst.opr1Mode, &inst.operand, operand1);
-    evaluateAddressingMode(mem, cpu, inst.opr2Mode, &inst.operand2, operand2);
-
     // printf("\nenter : %d %s", inst.type, OpcodeDetailsLUT[inst.type].name);
     switch (inst.type) {
     case INST_CPY:
-        *operand1 = *operand2;
         cpu->registers.NX.as_u64 += 1;
         break;
     case INST_DONOP:

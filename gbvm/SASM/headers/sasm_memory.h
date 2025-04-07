@@ -10,9 +10,9 @@
 
 #pragma once
 
+#include "sasm_assembler.h"
 #include "univ_defs.h"
 #include "univ_strings.h"
-#include "sasm_assembler.h"
 
 typedef QuadWord Register;
 
@@ -27,15 +27,59 @@ typedef enum {
     F7 = 1 << 7        // 128
 } Flags;
 
-typedef struct {
-    Register AX;
-    Register BX;
-    Register CX;
-    Register DX;
+enum {
+    H0,
+    H1,
+    I0,
+    I1,
+    JS,
+    KC,
+    L0,
+    L1,
+    L2,
+    L3,
+    NX,
+    OP,
+    P0,
+    P1,
+    P2,
+    P3,
+    QT,
+    RF,
+    SP,
+    REG_COUNT
+};
 
-    QuadWord NX;
+typedef union {
+    struct
+    {
+        Register H0;
+        Register H1;
 
-    QuadWord SP;
+        Register I0;
+        Register I1;
+
+        Register JS;
+        Register KC;
+
+        Register L0;
+        Register L1;
+        Register L2;
+        Register L3;
+
+        Register NX;
+        Register OP;
+
+        Register P0;
+        Register P1;
+        Register P2;
+        Register P3;
+
+        Register QT;
+        Register RF;
+        Register SP;
+    };
+    Register reg[18];
 
 } Registers;
 
@@ -58,5 +102,3 @@ typedef struct {
 void setFlag(Flags f, CPU* cpu, bool state);
 
 bool getFlag(Flags f, const CPU* cpu);
-
-bool evaluateAddressingMode(Memory* mem, CPU* cpu, AddrMode mode, QuadWord* val, QuadWord* out);
