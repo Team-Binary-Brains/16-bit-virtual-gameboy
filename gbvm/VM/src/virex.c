@@ -328,7 +328,7 @@ Error executeInst(Vm* vm, WINDOW* win)
             return ERR_NULL_CALL;
         }
 
-        const Error err = vm->vmCalls.VmCallI[inst.operand.u64](&vm->cpu,&vm->mem, win);
+        const Error err = vm->vmCalls.VmCallI[inst.operand.u64](&vm->cpu,&vm->mem, win,&vm->region);
         if (err != ERR_OK) {
             return err;
         }

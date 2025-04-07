@@ -121,3 +121,19 @@ String concatRegionStr(Region *region, const char *a, const char *b)
         .data = buf
     };
 }
+
+void clearGarbage(Region* region){
+    for (Partition *part = region->first; part != NULL; part = part->next)
+    {
+        part->size = 0;
+    }
+    region->last = region->first;
+}
+
+void cleanRegion(Region* region){
+    for (Partition *part = region->first,*next = NULL; part!=NULL; part = next)
+    {
+        next = part->next;
+        free(part);
+    }
+}

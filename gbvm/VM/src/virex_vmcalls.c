@@ -1,7 +1,7 @@
 #include "virex.h"
 
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-Error vmcall_write(CPU* cpu, Memory* mem, WINDOW* win)
+Error vmcall_write(CPU* cpu, Memory* mem, WINDOW* win,Region* region)
 {
     if (cpu->registers.SP.u64 < 2) {
         return ERR_STACK_UNDERFLOW;
@@ -26,30 +26,29 @@ Error vmcall_write(CPU* cpu, Memory* mem, WINDOW* win)
     return ERR_OK;
 }
 
-Error vmcall_alloc(CPU* cpu, Memory* mem, WINDOW* win)
+Error vmcall_alloc(CPU* cpu, Memory* mem, WINDOW* win,Region* region)
 {
     if (cpu->registers.SP.u64 < 1) {
         return ERR_STACK_UNDERFLOW;
     }
 
-    mem->stack[cpu->registers.SP.u64 - 1].ptr = malloc(mem->stack[cpu->registers.SP.u64 - 1].u64);
+    mem->stack[cpu->registers.SP.u64 - 1].ptr = allocateRegion(region,mem->stack[cpu->registers.SP.u64 - 1].u64);
 
     return ERR_OK;
 }
 
-Error vmcall_free(CPU* cpu, Memory* mem, WINDOW* win)
+Error vmcall_free(CPU* cpu, Memory* mem, WINDOW* win,Region* region)
 {
     if (cpu->registers.SP.u64 < 1) {
         return ERR_STACK_UNDERFLOW;
     }
 
-    free(mem->stack[cpu->registers.SP.u64 - 1].ptr);
-    cpu->registers.SP.u64 -= 1;
+    clearGarbage(region);
 
     return ERR_OK;
 }
 
-Error vmcall_print_f64(CPU* cpu, Memory* mem, WINDOW* win)
+Error vmcall_print_f64(CPU* cpu, Memory* mem, WINDOW* win,Region* region)
 {
     if (cpu->registers.SP.u64 < 1) {
         return ERR_STACK_UNDERFLOW;
@@ -60,7 +59,7 @@ Error vmcall_print_f64(CPU* cpu, Memory* mem, WINDOW* win)
     return ERR_OK;
 }
 
-Error vmcall_print_i64(CPU* cpu, Memory* mem, WINDOW* win)
+Error vmcall_print_i64(CPU* cpu, Memory* mem, WINDOW* win,Region* region)
 {
     if (cpu->registers.SP.u64 < 1) {
         return ERR_STACK_UNDERFLOW;
@@ -71,7 +70,7 @@ Error vmcall_print_i64(CPU* cpu, Memory* mem, WINDOW* win)
     return ERR_OK;
 }
 
-Error vmcall_print_u64(CPU* cpu, Memory* mem, WINDOW* win)
+Error vmcall_print_u64(CPU* cpu, Memory* mem, WINDOW* win,Region* region)
 {
     if (cpu->registers.SP.u64 < 1) {
         return ERR_STACK_UNDERFLOW;
@@ -82,7 +81,7 @@ Error vmcall_print_u64(CPU* cpu, Memory* mem, WINDOW* win)
     return ERR_OK;
 }
 
-Error vmcall_print_ptr(CPU* cpu, Memory* mem, WINDOW* win)
+Error vmcall_print_ptr(CPU* cpu, Memory* mem, WINDOW* win,Region* region)
 {
     if (cpu->registers.SP.u64 < 1) {
         return ERR_STACK_UNDERFLOW;
@@ -93,7 +92,7 @@ Error vmcall_print_ptr(CPU* cpu, Memory* mem, WINDOW* win)
     return ERR_OK;
 }
 
-Error vmcall_dump_memory(CPU* cpu, Memory* mem, WINDOW* win)
+Error vmcall_dump_memory(CPU* cpu, Memory* mem, WINDOW* win,Region* region)
 {
     if (cpu->registers.SP.u64 < 2) {
         return ERR_STACK_UNDERFLOW;
@@ -119,6 +118,32 @@ Error vmcall_dump_memory(CPU* cpu, Memory* mem, WINDOW* win)
     }
     wprintw(win, "\n");
     refreshWindow(win, getNameForWindow(OUTPUT), 1, 5, 3);
+
+    cpu->registers.SP.u64 -= 2;
+
+    return ERR_OK;
+}
+
+Error vmcall_writeROM(CPU* cpu, Memory* mem, WINDOW* win,Region* region)
+{
+    if (cpu->registers.SP.u64 < 2) {
+        return ERR_STACK_UNDERFLOW;
+    }
+
+    MemoryAddr addr = mem->stack[cpu->registers.SP.u64 - 2].u64;
+    uint64_t count = mem->stack[cpu->registers.SP.u64 - 1].u64;
+
+    char* buffer = cpu->registers.RF.ptr;
+
+    if (addr >= MEMORY_CAPACITY) {
+        return ERR_ILLEGAL_MEMORY_ACCESS;
+    }
+
+    if (addr + count < addr || addr + count >= MEMORY_CAPACITY) {
+        return ERR_ILLEGAL_MEMORY_ACCESS;
+    }
+
+    memcpy(buffer, &mem->memory[addr], count);
 
     cpu->registers.SP.u64 -= 2;
 
