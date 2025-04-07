@@ -1,8 +1,9 @@
 #include "sasm_assembler.h"
-#include "univ_strings.h"
-#include "univ_malloc.h"
 #include "univ_fileops.h"
+#include "univ_malloc.h"
+#include "univ_strings.h"
 
+#pragma GCC diagnostic ignored "-Wunused-result"
 const char* inputFile = NULL;
 const char* outputFile = NULL;
 bool disassemblyMode = false;
@@ -11,6 +12,7 @@ void processFlag(const char* program, const char* flag, int* argc, char*** argv)
 
 int main(int argc, char** argv)
 {
+    freopen("logs.txt", "a", stderr);
     const char* program = getNextCmdLineArg(&argc, &argv);
 
     while (argc > 0) {
@@ -41,10 +43,10 @@ int main(int argc, char** argv)
         OpcodeDetails details = getOpcodeDetails(sasm.prog.instructions[i].type);
         fprintf(f, "%s", details.name);
         if (details.has_operand) {
-            fprintf(f, " %" PRIu64, sasm.prog.instructions[i].operand.as_u64);
+            fprintf(f, " %" PRIu64, sasm.prog.instructions[i].operand.u64);
         }
         if (details.has_operand2) {
-            fprintf(f, " %" PRIu64, sasm.prog.instructions[i].operand2.as_u64);
+            fprintf(f, " %" PRIu64, sasm.prog.instructions[i].operand2.u64);
         }
         fprintf(f, "\n");
     }

@@ -10,13 +10,13 @@
 
 #pragma once
 
+#include "sasm_assembler.h"
+#include "sasm_instructions.h"
+#include "sasm_memory.h"
 #include "univ_defs.h"
 #include "univ_errors.h"
 #include "univ_malloc.h"
 #include "virex_tui.h"
-#include "sasm_instructions.h"
-#include "sasm_assembler.h"
-#include "sasm_memory.h"
 #include "virex_vmcalls.h"
 
 /**
@@ -30,6 +30,7 @@ typedef struct {
     CPU cpu;      /**< The CPU component of the virtual machine. */
     VmCalls vmCalls;
     display disp;
+    Region region;
 } Vm;
 
 /**
@@ -67,4 +68,7 @@ void executeProgram(Vm* vm, int debug, int i);
  * @param cpu The CPU of the virtual machine.
  * @return An error code indicating the success or failure of the execution.
  */
-Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmCalls, WINDOW* win);
+Error executeInst(Vm* vm, WINDOW* win);
+
+Register* getReg(RegID id, Vm* vm);
+void setReg(RegID id,Vm* vm,DataEntry val);

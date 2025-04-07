@@ -79,8 +79,8 @@ display CreateWindows()
     int xsta = LERP(xmin, xmax, 0.85);
     int xmid = LERP(xsta, xmax, 0.50);
     int xmi2 = LERP(xmin, xmax, 0.68);
-    int xen2 = LERP(xmin, xmax, 0.13);
-    int ybot = LERP(ymin, ymax, 0.3);
+    int xen2 = LERP(xmin, xmax, 0.18);
+    int ybot = LERP(ymin, ymax, 0.26);
     int ymid = LERP(ymin, ybot, 0.68);
 
     createWindow(&disp, xsta, ymin, xmid, ybot, WindowNames[OUTPUT], 1);
@@ -183,9 +183,9 @@ void refreshWindow(WINDOW* win, String str, int contentCol, int borderCol, int t
     wattroff(win, COLOR_PAIR(borderCol));
 
     wattron(win, COLOR_PAIR(titleCol));
-    wmove(win, 0, (int)((getmaxx(win) - str.length - 2) / 2));
+    wmove(win, 0, (int)((getmaxx(win) - str.length - 4) / 2));
     // wmove(win, 0, 2);
-    wprintw(win, " %s ", str.data);
+    wprintw(win, "❮ %s ❯", str.data);
     wattroff(win, COLOR_PAIR(titleCol));
 
     wmove(win, y, x);
@@ -202,7 +202,7 @@ void InputMenu(WINDOW* win, int* highlight, int* ch)
 
         if (i == *highlight) {
             wattron(win, A_REVERSE);
-            wprintw(win, " ▶ ");
+            wprintw(win, " ❖  ");
         }
         wprintw(win, "%s", Inputs[i].data);
         wattroff(win, A_REVERSE);
@@ -238,11 +238,13 @@ String getNameForWindow(int id)
 void wprintdash(WINDOW* win, int col)
 {
     wattron(win, COLOR_PAIR(col));
-    wprintw(win, "\n");
     int tmp = getmaxx(win) - 1;
-    for (int i = 0; i < tmp; i++) {
+    int i,j;
+    getyx(win,j,i);
+    wmove(win,j,i);
+    for (; i < tmp; i++) {
         wprintw(win, "─");
     }
-    wprintw(win, "\n");
+    wprintw(win, "\n\n");
     wattroff(win, COLOR_PAIR(col));
 }

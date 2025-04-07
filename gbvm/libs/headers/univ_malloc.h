@@ -27,3 +27,9 @@ void* allocateRegion(Region* region, size_t size);
 int loadFileIntoRegionStr(Region* region, String file_path, String* content);
 
 const char* convertStrToRegionCstr(Region* region, String str);
+
+String concatRegionStr(Region *region, const char *a, const char *b);
+
+void clearGarbage(Region* region);
+
+void cleanRegion(Region* region);

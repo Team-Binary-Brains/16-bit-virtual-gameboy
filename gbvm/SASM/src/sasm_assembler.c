@@ -1,19 +1,20 @@
 #include "sasm_assembler.h"
+#include "sasm_memory.h"
+#include "univ_fileops.h"
 #include "univ_malloc.h"
 #include "univ_strings.h"
-#include "univ_fileops.h"
 
 Error bindDirective(Sasm* sasm, String name, String* line)
 {
     *line = trim(*line);
     String value = *line;
     QuadWord word = { 0 };
-    if (!translateLiteral(sasm, value, &word)) {
+    if (!translateLiteral(sasm, value, &word, NULL)) {
         fprintf(stderr, " ERROR: `" str_Fmt "` is not a number", str_Arg(value));
         return ERR_NAN;
     }
 
-    if (!bindValue(sasm, name, word)) {
+    if (!bindValue(sasm, name, word, SASM_CONST)) {
         fprintf(stderr, " ERROR: name `" str_Fmt "` is already bound\n", str_Arg(name));
         return ERR_ALREADY_BOUND;
     }
@@ -67,16 +68,15 @@ Error processPreProcessorDirective(Sasm* sasm, String* line, String token)
     exit(1);
 }
 
-bool bindValue(Sasm* sasm, String name, QuadWord value)
+bool bindValue(Sasm* sasm, String name, QuadWord value, BindingType type)
 {
     assert(sasm->bindingCount < BINDINGS_CAPACITY);
 
-    QuadWord ignore = { 0 };
-    if (resolveBinding(sasm, name, &ignore)) {
+    if (resolveBinding(sasm, name, NULL, NULL)) {
         return false;
     }
 
-    sasm->bindings[sasm->bindingCount++] = (Binding) { .name = name, .value = value };
+    sasm->bindings[sasm->bindingCount++] = (Binding) { .name = name, .value = value, .type = type };
     return true;
 }
 
@@ -101,9 +101,65 @@ QuadWord pushStringToMemory(Sasm* sasm, String str)
     return result;
 }
 
-bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
+bool translateLiteral(Sasm* sasm, String str, QuadWord* output,bool *inlineOut)
 {
-    if (str.length >= 2 && *str.data == '"' && str.data[str.length - 1] == '"') {
+    if (str.length >= 2 && *str.data == '[' && str.data[str.length - 1] == ']') {
+        if (str.length - 2 < 2) {
+            return false;
+        }
+        switch (str.data[1]) {
+        case 'H':
+            if (str.data[2] > '1')
+                return false;
+            *output = quadword_u64((uint64_t)(H0 + str.data[2] - '0'));
+            break;
+        case 'I':
+            if (str.data[2] > '1')
+                return false;
+            *output = quadword_u64((uint64_t)(I0 + str.data[2] - '0'));
+            break;
+        case 'L':
+            if (str.data[2] > '3')
+                return false;
+            *output = quadword_u64((uint64_t)(L0 + str.data[2] - '0'));
+            break;
+        case 'P':
+            if (str.data[2] > '3')
+                return false;
+            *output = quadword_u64((uint64_t)(P0 + str.data[2] - '0'));
+            break;
+        case 'J':
+            *output = quadword_u64((uint64_t)JS);
+            break;
+        case 'K':
+            *output = quadword_u64((uint64_t)KC);
+            break;
+        case 'O':
+            *output = quadword_u64((uint64_t)OP);
+            break;
+        case 'Q':
+            *output = quadword_u64((uint64_t)QT);
+            break;
+        case 'R':
+            *output = quadword_u64((uint64_t)RF);
+            break;
+
+        default:
+            assert(0 && "INVALID REGISTER NAME");
+        }
+        if (str.data[3] == 'v') {
+            *inlineOut = true;
+        }
+
+        return true;
+    }
+    if (str.length >= 2 && *str.data == '\'' && str.data[str.length - 1] == '\'') {
+        if (str.length - 2 != 1) {
+            return false;
+        }
+        *output = quadword_u64((uint64_t)str.data[1]);
+        return true;
+    } else if (str.length >= 2 && *str.data == '"' && str.data[str.length - 1] == '"') {
         str.data += 1;
         str.length -= 2;
         *output = pushStringToMemory(sasm, str);
@@ -114,10 +170,10 @@ bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
     char* endptr = 0;
     QuadWord result = { 0 };
 
-    result.as_u64 = strtoull(cstr, &endptr, 10);
+    result.u64 = strtoull(cstr, &endptr, 10);
     if ((size_t)(endptr - cstr) != str.length) {
 
-        result.as_f64 = strtod(cstr, &endptr);
+        result.f64 = strtod(cstr, &endptr);
 
         if ((size_t)(endptr - cstr) != str.length)
             return false;
@@ -127,11 +183,14 @@ bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
     return true;
 }
 
-bool resolveBinding(const Sasm* sasm, String name, QuadWord* output)
+bool resolveBinding(const Sasm* sasm, String name, QuadWord* output, BindingType* type)
 {
     for (size_t i = 0; i < sasm->bindingCount; ++i) {
         if (compareStr(sasm->bindings[i].name, name)) {
-            *output = sasm->bindings[i].value;
+            if (output)
+                *output = sasm->bindings[i].value;
+            if (type)
+                *type = sasm->bindings[i].type;
             return true;
         }
     }
@@ -191,7 +250,7 @@ Error processLine(Sasm* sasm, String* line)
             .data = token.data
         };
 
-        if (!bindValue(sasm, label, quadword_u64(sasm->prog.instruction_count))) {
+        if (!bindValue(sasm, label, quadword_u64(sasm->prog.instruction_count), SASM_LABEL)) {
             fprintf(stderr, " ERROR: name `" str_Fmt "` is already bound to something\n", str_Arg(label));
             return ERR_ALREADY_BOUND;
         }
@@ -210,7 +269,8 @@ Error processLine(Sasm* sasm, String* line)
         Instruction* inst = &sasm->prog.instructions[sasm->prog.instruction_count];
         inst->type = details.type;
 
-        operand = trim(splitStr(line, ','));
+        *line = trim(splitStr(line, '\n'));
+        operand = trim(splitStr(line, ' '));
         if (details.has_operand) {
             // printString(operand);
             if (operand.length == 0) {
@@ -220,15 +280,13 @@ Error processLine(Sasm* sasm, String* line)
             }
             if (!translateLiteral(
                     sasm,
-                    operand, &inst->operand)) {
+                    operand, &inst->operand, &inst->opr1IsInline)) {
                 pushLabel(
                     sasm, sasm->prog.instruction_count, operand);
             }
         }
 
-        operand = trim(splitStr(line, ' '));
-        operand.data += 1;
-        operand.length -= 1;
+        operand = trim(*line);
         if (details.has_operand2) {
             if (operand.length == 0) {
                 fprintf(stderr, " ERROR: instruction `" str_Fmt "` requires 2 operands\n",
@@ -237,14 +295,13 @@ Error processLine(Sasm* sasm, String* line)
             }
             if (!translateLiteral(
                     sasm,
-                    operand, &inst->operand2)) {
+                    operand, &inst->operand2, &inst->opr2IsInline)) {
                 pushLabel(
                     sasm, sasm->prog.instruction_count, operand);
             }
         }
 
         sasm->prog.instruction_count += 1;
-
     } else {
         fprintf(stderr, " ERROR: unknown instruction `" str_Fmt "`\n",
             str_Arg(token));
@@ -276,10 +333,20 @@ void parseAsmIntoProgram(Sasm* sasm, String inputFilePath)
 
     for (size_t i = 0; i < sasm->LabelsCount; ++i) {
         String name = sasm->Labels[i].name;
-        if (!resolveBinding(sasm, name,
-                &sasm->prog.instructions[sasm->Labels[i].addr].operand)) {
+        InstAddr addr = sasm->Labels[i].addr;
+        BindingType type;
+        if (!resolveBinding(sasm, name, &sasm->prog.instructions[addr].operand, &type)) {
             fprintf(stderr, str_Fmt ": ERROR: unknown binding `" str_Fmt "`\n",
                 str_Arg(inputFilePath), str_Arg(name));
+            exit(1);
+        }
+        if (sasm->prog.instructions[addr].type == INST_CALL && type != SASM_LABEL) {
+            fprintf(stderr,
+                str_Fmt ": ERROR: trying to call not a label. `" str_Fmt "` is %s, but the call instructions"
+                        " accepts only literals or labels.\n",
+                str_Arg(inputFilePath),
+                str_Arg(name),
+                bindingTypeAsCstr(type));
             exit(1);
         }
     }
@@ -360,4 +427,16 @@ void loadProgramIntoSasm(Sasm* sasm, const char* filePath)
     }
 
     closeFile(f, filePath);
+}
+
+const char* bindingTypeAsCstr(BindingType type)
+{
+    switch (type) {
+    case SASM_CONST:
+        return "const";
+    case SASM_LABEL:
+        return "label";
+    default:
+        assert(false && "bindingTypeAsCstr: unreachable");
+    }
 }
