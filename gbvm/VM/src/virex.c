@@ -174,6 +174,9 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
 
     // printf("\nenter : %d %s", inst.type, OpcodeDetailsLUT[inst.type].name);
     switch (inst.type) {
+
+    case INST_SET:
+    case INST_GET:
     case INST_CPY:
         cpu->registers.NX.as_u64 += 1;
         break;

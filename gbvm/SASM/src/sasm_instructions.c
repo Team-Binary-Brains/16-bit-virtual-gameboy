@@ -27,6 +27,8 @@ static OpcodeDetails OpcodeDetailsLUT[NUMBER_OF_INSTS] = {
     [INST_ANDB] = { .type = INST_ANDB, .name = "ANDB", .has_operand = 0, .has_operand2 = 0 },
     [INST_NOTB] = { .type = INST_NOTB, .name = "NOTB", .has_operand = 0, .has_operand2 = 0 },
     [INST_CPY] = { .type = INST_CPY, .name = "CPY", .has_operand = 1, .has_operand2 = 1 },
+    [INST_SET] = { .type = INST_SET, .name = "SET", .has_operand = 1, .has_operand2 = 1 },
+    [INST_GET] = { .type = INST_CPY, .name = "GET", .has_operand = 1, .has_operand2 = 1 },
     [INST_DUP] = { .type = INST_DUP, .name = "DUP", .has_operand = 1, .has_operand2 = 0 },
     [INST_NOT] = { .type = INST_NOT, .name = "NOT", .has_operand = 0, .has_operand2 = 0 },
     [INST_EQI] = { .type = INST_EQI, .name = "EQI", .has_operand = 0, .has_operand2 = 0 },

@@ -1,41 +1,38 @@
 #include "sasm_assembler.h"
+#include "sasm_memory.h"
+#include "univ_fileops.h"
 #include "univ_malloc.h"
 #include "univ_strings.h"
-#include "univ_fileops.h"
 
-Error bindDirective(Sasm *sasm, String name, String *line)
+Error bindDirective(Sasm* sasm, String name, String* line)
 {
     *line = trim(*line);
     String value = *line;
-    QuadWord word = {0};
-    if (!translateLiteral(sasm, value, &word))
-    {
+    QuadWord word = { 0 };
+    if (!translateLiteral(sasm, value, &word)) {
         fprintf(stderr, " ERROR: `" str_Fmt "` is not a number", str_Arg(value));
         return ERR_NAN;
     }
 
-    if (!bindValue(sasm, name, word, SASM_CONST))
-    {
+    if (!bindValue(sasm, name, word, SASM_CONST)) {
         fprintf(stderr, " ERROR: name `" str_Fmt "` is already bound\n", str_Arg(name));
         return ERR_ALREADY_BOUND;
     }
     return ERR_OK;
 }
 
-Error includeDirective(Sasm *sasm, String *line)
+Error includeDirective(Sasm* sasm, String* line)
 {
-    if (*line->data != '"' || line->data[line->length - 1] != '"')
-    {
+    if (*line->data != '"' || line->data[line->length - 1] != '"') {
         fprintf(stderr,
-                " ERROR: include file path has to be surrounded with quotation marks\n");
+            " ERROR: include file path has to be surrounded with quotation marks\n");
         exit(1);
     }
 
     line->data += 1;
     line->length -= 2;
 
-    if (sasm->includeLevel + 1 >= MAX_INCLUDE_LEVEL)
-    {
+    if (sasm->includeLevel + 1 >= MAX_INCLUDE_LEVEL) {
         fprintf(stderr, " ERROR: exceeded maximum include level\n");
         exit(1);
     }
@@ -47,54 +44,49 @@ Error includeDirective(Sasm *sasm, String *line)
     return ERR_OK;
 }
 
-Error processPreProcessorDirective(Sasm *sasm, String *line, String token)
+Error processPreProcessorDirective(Sasm* sasm, String* line, String token)
 {
     *line = trim(*line);
-    if (compareStr(token, convertCstrToStr("bind")))
-    {
+    if (compareStr(token, convertCstrToStr("bind"))) {
         String name = splitStr(line, ' ');
-        if (name.length <= 0)
-        {
+        if (name.length <= 0) {
             displayMsgWithExit(" ERROR: binding name is not provided\n");
         }
         return bindDirective(sasm, name, line);
     }
 
-    if (compareStr(token, convertCstrToStr("include")))
-    {
-        if (line->length <= 0)
-        {
+    if (compareStr(token, convertCstrToStr("include"))) {
+        if (line->length <= 0) {
             displayMsgWithExit(" ERROR: include file path is not provided\n");
         }
         return includeDirective(sasm, line);
     }
 
     fprintf(stderr,
-            " ERROR: unknown pre-processor directive `" str_Fmt "`\n",
-            str_Arg(token));
+        " ERROR: unknown pre-processor directive `" str_Fmt "`\n",
+        str_Arg(token));
     exit(1);
 }
 
-bool bindValue(Sasm *sasm, String name, QuadWord value, BindingType type)
+bool bindValue(Sasm* sasm, String name, QuadWord value, BindingType type)
 {
     assert(sasm->bindingCount < BINDINGS_CAPACITY);
 
-    if (resolveBinding(sasm, name, NULL, NULL))
-    {
+    if (resolveBinding(sasm, name, NULL, NULL)) {
         return false;
     }
 
-    sasm->bindings[sasm->bindingCount++] = (Binding){.name = name, .value = value, .type = type};
+    sasm->bindings[sasm->bindingCount++] = (Binding) { .name = name, .value = value, .type = type };
     return true;
 }
 
-void pushLabel(Sasm *sasm, InstAddr addr, String name)
+void pushLabel(Sasm* sasm, InstAddr addr, String name)
 {
     assert(sasm->LabelsCount < LABELS_CAPACITY);
-    sasm->Labels[sasm->LabelsCount++] = (Label){.addr = addr, .name = name};
+    sasm->Labels[sasm->LabelsCount++] = (Label) { .addr = addr, .name = name };
 }
 
-QuadWord pushStringToMemory(Sasm *sasm, String str)
+QuadWord pushStringToMemory(Sasm* sasm, String str)
 {
     assert(sasm->memorySize + str.length <= MEMORY_CAPACITY);
 
@@ -102,40 +94,80 @@ QuadWord pushStringToMemory(Sasm *sasm, String str)
     memcpy(sasm->memory + sasm->memorySize, str.data, str.length);
     sasm->memorySize += str.length;
 
-    if (sasm->memorySize > sasm->memoryCapacity)
-    {
+    if (sasm->memorySize > sasm->memoryCapacity) {
         sasm->memoryCapacity = sasm->memorySize;
     }
 
     return result;
 }
 
-bool translateLiteral(Sasm *sasm, String str, QuadWord *output)
+bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
 {
-    if (str.length >= 2 && *str.data == '\'' && str.data[str.length - 1] == '\'')
-    {
-        if (str.length - 2 != 1)
-        {
+    if (str.length >= 2 && *str.data == '[' && str.data[str.length - 1] == ']') {
+        if (str.length - 2 < 2) {
+            return false;
+        }
+        switch (str.data[1]) {
+        case 'H':
+            if (str.data[2] > '1')
+                return false;
+            *output = quadword_u64((uint64_t)(H0 + str.data[2] - '0'));
+            break;
+        case 'I':
+            if (str.data[2] > '1')
+                return false;
+            *output = quadword_u64((uint64_t)(I0 + str.data[2] - '0'));
+            break;
+        case 'L':
+            if (str.data[2] > '3')
+                return false;
+            *output = quadword_u64((uint64_t)(L0 + str.data[2] - '0'));
+            break;
+        case 'P':
+            if (str.data[2] > '3')
+                return false;
+            *output = quadword_u64((uint64_t)(P0 + str.data[2] - '0'));
+            break;
+        case 'J':
+            *output = quadword_u64((uint64_t)JS);
+            break;
+        case 'K':
+            *output = quadword_u64((uint64_t)KC);
+            break;
+        case 'O':
+            *output = quadword_u64((uint64_t)OP);
+            break;
+        case 'Q':
+            *output = quadword_u64((uint64_t)QT);
+            break;
+        case 'R':
+            *output = quadword_u64((uint64_t)RF);
+            break;
+
+        default:
+            assert(0 && "INVALID REGISTER NAME");
+        }
+        return true;
+    }
+    if (str.length >= 2 && *str.data == '\'' && str.data[str.length - 1] == '\'') {
+        if (str.length - 2 != 1) {
             return false;
         }
         *output = quadword_u64((uint64_t)str.data[1]);
         return true;
-    }
-    else if (str.length >= 2 && *str.data == '"' && str.data[str.length - 1] == '"')
-    {
+    } else if (str.length >= 2 && *str.data == '"' && str.data[str.length - 1] == '"') {
         str.data += 1;
         str.length -= 2;
         *output = pushStringToMemory(sasm, str);
         return true;
     }
 
-    const char *cstr = convertStrToRegionCstr(&sasm->region, str);
-    char *endptr = 0;
-    QuadWord result = {0};
+    const char* cstr = convertStrToRegionCstr(&sasm->region, str);
+    char* endptr = 0;
+    QuadWord result = { 0 };
 
     result.as_u64 = strtoull(cstr, &endptr, 10);
-    if ((size_t)(endptr - cstr) != str.length)
-    {
+    if ((size_t)(endptr - cstr) != str.length) {
 
         result.as_f64 = strtod(cstr, &endptr);
 
@@ -147,12 +179,10 @@ bool translateLiteral(Sasm *sasm, String str, QuadWord *output)
     return true;
 }
 
-bool resolveBinding(const Sasm *sasm, String name, QuadWord *output, BindingType *type)
+bool resolveBinding(const Sasm* sasm, String name, QuadWord* output, BindingType* type)
 {
-    for (size_t i = 0; i < sasm->bindingCount; ++i)
-    {
-        if (compareStr(sasm->bindings[i].name, name))
-        {
+    for (size_t i = 0; i < sasm->bindingCount; ++i) {
+        if (compareStr(sasm->bindings[i].name, name)) {
             if (output)
                 *output = sasm->bindings[i].value;
             if (type)
@@ -164,9 +194,9 @@ bool resolveBinding(const Sasm *sasm, String name, QuadWord *output, BindingType
     return false;
 }
 
-void assembleProgramIntoBytecode(Sasm *sasm, const char *filePath)
+void assembleProgramIntoBytecode(Sasm* sasm, const char* filePath)
 {
-    FILE *f = openFile(filePath, "wb");
+    FILE* f = openFile(filePath, "wb");
 
     Metadata meta = {
         .magic = FILE_MAGIC,
@@ -177,51 +207,46 @@ void assembleProgramIntoBytecode(Sasm *sasm, const char *filePath)
     };
 
     fwrite(&meta, sizeof(meta), 1, f);
-    if (ferror(f))
-    {
+    if (ferror(f)) {
         fprintf(stderr, "ERROR: Could not write to file `%s`: %s\n",
-                filePath, strerror(errno));
+            filePath, strerror(errno));
         exit(1);
     }
 
     fwrite(sasm->prog.instructions, sizeof(sasm->prog.instructions[0]), sasm->prog.instruction_count, f);
-    if (ferror(f))
-    {
+    if (ferror(f)) {
         fprintf(stderr, "ERROR: Could not write to file `%s`: %s\n",
-                filePath, strerror(errno));
+            filePath, strerror(errno));
         exit(1);
     }
 
     fwrite(sasm->memory, sizeof(sasm->memory[0]), sasm->memorySize, f);
-    if (ferror(f))
-    {
+    if (ferror(f)) {
         fprintf(stderr, "ERROR: Could not write to file `%s`: %s\n",
-                filePath, strerror(errno));
+            filePath, strerror(errno));
         exit(1);
     }
 
     closeFile(f, filePath);
 }
 
-Error processLine(Sasm *sasm, String *line)
+Error processLine(Sasm* sasm, String* line)
 {
     String token = trim(splitStr(line, ' '));
 
-    if (token.length > 0 && *token.data == PREP_SYMBOL)
-    {
+    if (token.length > 0 && *token.data == PREP_SYMBOL) {
         token.length -= 1;
         token.data += 1;
         return processPreProcessorDirective(sasm, line, token);
     }
 
-    if (token.length > 0 && token.data[token.length - 1] == ':')
-    {
+    if (token.length > 0 && token.data[token.length - 1] == ':') {
         String label = {
             .length = token.length - 1,
-            .data = token.data};
+            .data = token.data
+        };
 
-        if (!bindValue(sasm, label, quadword_u64(sasm->prog.instruction_count), SASM_LABEL))
-        {
+        if (!bindValue(sasm, label, quadword_u64(sasm->prog.instruction_count), SASM_LABEL)) {
             fprintf(stderr, " ERROR: name `" str_Fmt "` is already bound to something\n", str_Arg(label));
             return ERR_ALREADY_BOUND;
         }
@@ -229,33 +254,28 @@ Error processLine(Sasm *sasm, String *line)
         token = trim(splitStr(line, ' '));
     }
 
-    if (token.length <= 0)
-    {
+    if (token.length <= 0) {
         return ERR_OK;
     }
 
     String operand;
     OpcodeDetails details;
-    if (getOpcodeDetailsFromName(token, &details))
-    {
+    if (getOpcodeDetailsFromName(token, &details)) {
         assert(sasm->prog.instruction_count < PROGRAM_CAPACITY);
-        Instruction *inst = &sasm->prog.instructions[sasm->prog.instruction_count];
+        Instruction* inst = &sasm->prog.instructions[sasm->prog.instruction_count];
         inst->type = details.type;
 
         operand = trim(splitStr(line, ','));
-        if (details.has_operand)
-        {
+        if (details.has_operand) {
             // printString(operand);
-            if (operand.length == 0)
-            {
+            if (operand.length == 0) {
                 fprintf(stderr, " ERROR: instruction `" str_Fmt "` requires an operand\n",
-                        str_Arg(token));
+                    str_Arg(token));
                 exit(1);
             }
             if (!translateLiteral(
                     sasm,
-                    operand, &inst->operand))
-            {
+                    operand, &inst->operand)) {
                 pushLabel(
                     sasm, sasm->prog.instruction_count, operand);
             }
@@ -264,36 +284,31 @@ Error processLine(Sasm *sasm, String *line)
         operand = trim(splitStr(line, ' '));
         operand.data += 1;
         operand.length -= 1;
-        if (details.has_operand2)
-        {
-            if (operand.length == 0)
-            {
+        if (details.has_operand2) {
+            if (operand.length == 0) {
                 fprintf(stderr, " ERROR: instruction `" str_Fmt "` requires 2 operands\n",
-                        str_Arg(token));
+                    str_Arg(token));
                 exit(1);
             }
             if (!translateLiteral(
                     sasm,
-                    operand, &inst->operand2))
-            {
+                    operand, &inst->operand2)) {
                 pushLabel(
                     sasm, sasm->prog.instruction_count, operand);
             }
         }
 
         sasm->prog.instruction_count += 1;
-    }
-    else
-    {
+    } else {
         fprintf(stderr, " ERROR: unknown instruction `" str_Fmt "`\n",
-                str_Arg(token));
+            str_Arg(token));
         exit(1);
     }
 
     return ERR_OK;
 }
 
-void parseAsmIntoProgram(Sasm *sasm, String inputFilePath)
+void parseAsmIntoProgram(Sasm* sasm, String inputFilePath)
 {
     String original_source;
     loadFileIntoRegionStr(&sasm->region, inputFilePath, &original_source);
@@ -301,135 +316,119 @@ void parseAsmIntoProgram(Sasm *sasm, String inputFilePath)
 
     int line_number = 0;
 
-    while (source.length > 0)
-    {
+    while (source.length > 0) {
         String line = trim(splitStr(&source, '\n'));
         line = trim(splitStr(&line, COMMENT_SYMBOL));
         // printString(line);
         line_number += 1;
-        if (line.length > 0)
-        {
-            if (processLine(sasm, &line) != ERR_OK)
-            {
+        if (line.length > 0) {
+            if (processLine(sasm, &line) != ERR_OK) {
                 displayErrorDetailsWithExit(inputFilePath, line_number);
             }
         }
     }
 
-    for (size_t i = 0; i < sasm->LabelsCount; ++i)
-    {
+    for (size_t i = 0; i < sasm->LabelsCount; ++i) {
         String name = sasm->Labels[i].name;
         InstAddr addr = sasm->Labels[i].addr;
         BindingType type;
-        if (!resolveBinding(sasm, name, &sasm->prog.instructions[addr].operand, &type))
-        {
+        if (!resolveBinding(sasm, name, &sasm->prog.instructions[addr].operand, &type)) {
             fprintf(stderr, str_Fmt ": ERROR: unknown binding `" str_Fmt "`\n",
-                    str_Arg(inputFilePath), str_Arg(name));
+                str_Arg(inputFilePath), str_Arg(name));
             exit(1);
         }
-        if (sasm->prog.instructions[addr].type == INST_CALLN && type != SASM_LABEL)
-        {
+        if (sasm->prog.instructions[addr].type == INST_CALLN && type != SASM_LABEL) {
             fprintf(stderr,
-                    str_Fmt ": ERROR: trying to call not a label. `" str_Fmt "` is %s, but the call instructions"
-                            " accepts only literals or labels.\n",
-                    str_Arg(inputFilePath),
-                    str_Arg(name),
-                    bindingTypeAsCstr(type));
+                str_Fmt ": ERROR: trying to call not a label. `" str_Fmt "` is %s, but the call instructions"
+                        " accepts only literals or labels.\n",
+                str_Arg(inputFilePath),
+                str_Arg(name),
+                bindingTypeAsCstr(type));
             exit(1);
         }
     }
 }
 
-void loadProgramIntoSasm(Sasm *sasm, const char *filePath)
+void loadProgramIntoSasm(Sasm* sasm, const char* filePath)
 {
     memset(sasm, 0, sizeof(*sasm));
 
-    FILE *f = openFile(filePath, "rb");
+    FILE* f = openFile(filePath, "rb");
 
-    Metadata meta = {0};
+    Metadata meta = { 0 };
 
     size_t n = fread(&meta, sizeof(meta), 1, f);
-    if (n < 1)
-    {
+    if (n < 1) {
         fprintf(stderr, "ERROR: Could not read meta data from file `%s`: %s\n",
-                filePath, strerror(errno));
+            filePath, strerror(errno));
         exit(1);
     }
 
-    if (meta.magic != FILE_MAGIC)
-    {
+    if (meta.magic != FILE_MAGIC) {
         fprintf(stderr,
-                "ERROR: %s does not appear to be a valid sasm file. "
-                "Unexpected magic %04X. Expected %04X.\n",
-                filePath, meta.magic, FILE_MAGIC);
+            "ERROR: %s does not appear to be a valid sasm file. "
+            "Unexpected magic %04X. Expected %04X.\n",
+            filePath, meta.magic, FILE_MAGIC);
         exit(1);
     }
 
-    if (meta.version != FILE_VERSION)
-    {
+    if (meta.version != FILE_VERSION) {
         fprintf(stderr,
-                "ERROR: %s: unsupported version of sasm file %d. Expected version %d.\n",
-                filePath, meta.version, FILE_VERSION);
+            "ERROR: %s: unsupported version of sasm file %d. Expected version %d.\n",
+            filePath, meta.version, FILE_VERSION);
         exit(1);
     }
 
-    if (meta.programSize > PROGRAM_CAPACITY)
-    {
+    if (meta.programSize > PROGRAM_CAPACITY) {
         fprintf(stderr,
-                "ERROR: %s: program section is too big. The file contains %" PRIu64 " program instruction. But the capacity is %" PRIu64 "\n",
-                filePath, meta.programSize, (uint64_t)PROGRAM_CAPACITY);
+            "ERROR: %s: program section is too big. The file contains %" PRIu64 " program instruction. But the capacity is %" PRIu64 "\n",
+            filePath, meta.programSize, (uint64_t)PROGRAM_CAPACITY);
         exit(1);
     }
 
-    if (meta.memoryCapacity > MEMORY_CAPACITY)
-    {
+    if (meta.memoryCapacity > MEMORY_CAPACITY) {
         fprintf(stderr,
-                "ERROR: %s: memory section is too big. The file wants %" PRIu64 " bytes. But the capacity is %" PRIu64 " bytes\n",
-                filePath, meta.memoryCapacity, (uint64_t)MEMORY_CAPACITY);
+            "ERROR: %s: memory section is too big. The file wants %" PRIu64 " bytes. But the capacity is %" PRIu64 " bytes\n",
+            filePath, meta.memoryCapacity, (uint64_t)MEMORY_CAPACITY);
         exit(1);
     }
 
-    if (meta.memorySize > meta.memoryCapacity)
-    {
+    if (meta.memorySize > meta.memoryCapacity) {
         fprintf(stderr,
-                "ERROR: %s: memory size %" PRIu64 " is greater than declared memory capacity %" PRIu64 "\n",
-                filePath, meta.memorySize, meta.memoryCapacity);
+            "ERROR: %s: memory size %" PRIu64 " is greater than declared memory capacity %" PRIu64 "\n",
+            filePath, meta.memorySize, meta.memoryCapacity);
         exit(1);
     }
 
-    if (meta.externalsSize > EXTERNAL_VMCALLS_CAPACITY)
-    {
+    if (meta.externalsSize > EXTERNAL_VMCALLS_CAPACITY) {
         fprintf(stderr,
-                "ERROR: %s: external names section is too big. The file contains %" PRIu64 " external names. But the capacity is %" PRIu64 " external names\n",
-                filePath, meta.externalsSize, (uint64_t)EXTERNAL_VMCALLS_CAPACITY);
+            "ERROR: %s: external names section is too big. The file contains %" PRIu64 " external names. But the capacity is %" PRIu64 " external names\n",
+            filePath, meta.externalsSize, (uint64_t)EXTERNAL_VMCALLS_CAPACITY);
         exit(1);
     }
 
     sasm->prog.instruction_count = fread(sasm->prog.instructions, sizeof(sasm->prog.instructions[0]), meta.programSize, f);
 
-    if (sasm->prog.instruction_count != meta.programSize)
-    {
+    if (sasm->prog.instruction_count != meta.programSize) {
         fprintf(stderr, "ERROR: %s: read %" PRIu64 " program instructions, but expected %" PRIu64 "\n",
-                filePath, sasm->prog.instruction_count, meta.programSize);
+            filePath, sasm->prog.instruction_count, meta.programSize);
         exit(1);
     }
 
     n = fread(sasm->memory, sizeof(sasm->memory[0]), meta.memorySize, f);
 
-    if (n != meta.memorySize)
-    {
+    if (n != meta.memorySize) {
         fprintf(stderr, "ERROR: %s: read %zd bytes of memory section, but expected %" PRIu64 " bytes.\n",
-                filePath, n, meta.memorySize);
+            filePath, n, meta.memorySize);
         exit(1);
     }
 
     closeFile(f, filePath);
 }
 
-const char *bindingTypeAsCstr(BindingType type)
+const char* bindingTypeAsCstr(BindingType type)
 {
-    switch (type)
-    {
+    switch (type) {
     case SASM_CONST:
         return "const";
     case SASM_LABEL:

@@ -40,6 +40,8 @@ typedef enum {
     INST_ANDB,
     INST_NOTB,
     INST_CPY,
+    INST_SET,
+    INST_GET,
     INST_DUP,
     INST_NOT,
     INST_EQI,
@@ -83,11 +85,6 @@ typedef enum {
 
     NUMBER_OF_INSTS
 } Opcode;
-typedef enum {
-    MEM,
-    REG,
-    IMM
-} AddrMode;
 
 /**
  * @brief Structure representing an instruction in the SASM assembly language.
@@ -96,9 +93,6 @@ typedef struct {
     Opcode type;      /**< The opcode of the instruction */
     QuadWord operand; /**< The operand of the instruction */
     QuadWord operand2;
-    // TODO : DISCARD USE OF THIS FLAG
-    AddrMode opr1Mode;
-    AddrMode opr2Mode;
 } Instruction;
 
 typedef struct {

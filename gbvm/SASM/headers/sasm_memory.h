@@ -79,7 +79,7 @@ typedef union {
         Register RF;
         Register SP;
     };
-    Register reg[18];
+    Register reg[REG_COUNT];
 
 } Registers;
 
