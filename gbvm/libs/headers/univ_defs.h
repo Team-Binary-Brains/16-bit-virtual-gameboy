@@ -49,13 +49,12 @@ typedef uint64_t DataEntry;
 typedef uint64_t InstAddr;
 typedef uint64_t MemoryAddr;
 typedef uint64_t StackAddr;
-typedef uint64_t NativeID;
 
 typedef union {
-    uint64_t as_u64;
-    int64_t as_i64;
-    double as_f64;
-    void* as_ptr;
+    uint64_t u64;
+    int64_t i64;
+    double f64;
+    void* ptr;
 } QuadWord;
 
 /**

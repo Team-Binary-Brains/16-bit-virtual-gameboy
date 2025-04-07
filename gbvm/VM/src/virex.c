@@ -1,6 +1,37 @@
 #include "virex.h"
 #include "sasm_memory.h"
 
+inline Register* getReg(RegID id, Vm* vm)
+{
+    return &vm->cpu.registers.reg[id];
+}
+
+inline void setReg(RegID id, Vm* vm, DataEntry val)
+{
+    Register* tmp = getReg(id, vm);
+    tmp->u64 = val;
+}
+
+inline uint64_t getInstCnt(Vm* vm)
+{
+    return vm->prog.instruction_count;
+}
+
+inline Instruction* getInstructionAt(Vm* vm, uint64_t index)
+{
+    return &vm->prog.instructions[index];
+}
+
+inline QuadWord* getStack(Vm* vm)
+{
+    return vm->mem.stack;
+}
+
+inline Byte* getMemory(Vm* vm)
+{
+    return vm->mem.memory;
+}
+
 void dumpStack(WINDOW* win, const Vm* vm)
 {
     wprintw(win, "\n\n   ");
@@ -54,9 +85,9 @@ void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
             "\n    1.I │ %ld"
             "\n    1.F │ %lf"
             "\n────────╯\n",
-            inst->operand.as_u64,
-            inst->operand.as_i64,
-            inst->operand.as_f64);
+            inst->operand.u64,
+            inst->operand.i64,
+            inst->operand.f64);
     }
 
     if (details->has_operand2) {
@@ -66,9 +97,9 @@ void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
             "\n    2.I │ %ld"
             "\n    2.F │ %lf"
             "\n────────╯\n",
-            inst->operand2.as_u64,
-            inst->operand2.as_i64,
-            inst->operand2.as_f64);
+            inst->operand2.u64,
+            inst->operand2.i64,
+            inst->operand2.f64);
     }
     wprintdash(win, 1);
 }
@@ -76,27 +107,24 @@ void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
 void executeProgram(Vm* vm, int debug, int lim)
 {
     CPU* cpu = &(vm->cpu);
-    Memory* mem = &(vm->mem);
-    Program* prog = &(vm->prog);
-    VmCalls* calls = &(vm->vmCalls);
-    size_t count = cpu->registers.NX.as_u64;
-    Instruction* inst = &(prog->instructions[cpu->registers.NX.as_u64]);
+    size_t count = getReg(NX, vm)->u64;
+    Instruction* inst = getInstructionAt(vm, getReg(NX, vm)->u64);
     OpcodeDetails details;
 
     Error error = 0;
     if (debug > 0) {
         WINDOW* prg = vm->disp.windows[PROGRAM];
         size_t i = (count - 2 > 0) ? count - 2 : 0;
-        count = (count + getmaxy(prg) > prog->instruction_count) ? prog->instruction_count : count + getmaxy(prg);
+        count = (count + getmaxy(prg) > getInstCnt(vm)) ? getInstCnt(vm) : count + getmaxy(prg);
         for (; i < count; i++) {
-            details = getOpcodeDetails(prog->instructions[i].type);
-            if (i == cpu->registers.NX.as_u64) {
+            details = getOpcodeDetails(getInstructionAt(vm, i)->type);
+            if (i == getReg(NX, vm)->u64) {
                 wattron(prg, A_REVERSE);
             }
 
             wprintw(prg, "\n   %ld\t│ %s ", i, details.name);
             if (details.has_operand) {
-                wprintw(prg, " %ld", prog->instructions[i].operand.as_u64);
+                wprintw(prg, " %ld", getInstructionAt(vm, i)->operand.u64);
             }
             wattroff(prg, A_REVERSE);
         }
@@ -123,7 +151,7 @@ void executeProgram(Vm* vm, int debug, int lim)
         return;
     }
 
-    error = executeInst(prog, mem, cpu, calls, vm->disp.windows[OUTPUT]);
+    error = executeInst(vm, vm->disp.windows[OUTPUT]);
 
     if (error != ERR_OK)
         executionErrorWithExit(&error);
@@ -131,46 +159,47 @@ void executeProgram(Vm* vm, int debug, int lim)
     executeProgram(vm, debug, lim - 1);
 }
 
-#define READ_OP(prog, mem, cpu, type, out)                                       \
-    {                                                                            \
-        if (cpu->registers.SP.as_u64 < 1) {                                      \
-            return ERR_STACK_UNDERFLOW;                                          \
-        }                                                                        \
-        const MemoryAddr addr = mem->stack[cpu->registers.SP.as_u64 - 1].as_u64; \
-        if (addr >= MEMORY_CAPACITY) {                                           \
-            return ERR_ILLEGAL_MEMORY_ACCESS;                                    \
-        }                                                                        \
-        type tmp;                                                                \
-        memcpy(&tmp, &mem->memory[addr], sizeof(type));                          \
-        mem->stack[cpu->registers.SP.as_u64 - 1].as_##out = tmp;                 \
-        cpu->registers.NX.as_u64 += 1;                                           \
+#define READ_OP(prog, mem, cpu, type, out)                                 \
+    {                                                                      \
+        if (getReg(SP, vm)->u64 < 1) {                                     \
+            return ERR_STACK_UNDERFLOW;                                    \
+        }                                                                  \
+        const MemoryAddr addr = getStack(vm)[getReg(SP, vm)->u64 - 1].u64; \
+        if (addr >= MEMORY_CAPACITY) {                                     \
+            return ERR_ILLEGAL_MEMORY_ACCESS;                              \
+        }                                                                  \
+        type tmp;                                                          \
+        memcpy(&tmp, &getMemory(vm)[addr], sizeof(type));                  \
+        getStack(vm)[getReg(SP, vm)->u64 - 1].out = tmp;                 \
+        getReg(NX, vm)->u64++;                                             \
     }
 
-#define BINARY_OP(prog, mem, cpu, in, out, op)                                                                                                                    \
-    {                                                                                                                                                             \
-        if (cpu->registers.SP.as_u64 < 2) {                                                                                                                       \
-            return ERR_STACK_UNDERFLOW;                                                                                                                           \
-        }                                                                                                                                                         \
-        mem->stack[cpu->registers.SP.as_u64 - 2].as_##out = mem->stack[cpu->registers.SP.as_u64 - 2].as_##in op mem->stack[cpu->registers.SP.as_u64 - 1].as_##in; \
-        cpu->registers.SP.as_u64 -= 1;                                                                                                                            \
-        cpu->registers.NX.as_u64 += 1;                                                                                                                            \
+#define BINARY_OP(prog, mem, cpu, in, out, op)                                                                                                  \
+    {                                                                                                                                           \
+        if (getReg(SP, vm)->u64 < 2) {                                                                                                          \
+            return ERR_STACK_UNDERFLOW;                                                                                                         \
+        }                                                                                                                                       \
+        getStack(vm)[getReg(SP, vm)->u64 - 2].out = getStack(vm)[getReg(SP, vm)->u64 - 2].in op getStack(vm)[getReg(SP, vm)->u64 - 1].in; \
+        getReg(SP, vm)->u64 -= 1;                                                                                                               \
+        getReg(NX, vm)->u64++;                                                                                                                  \
     }
 
-#define CAST_OP(prog, mem, cpu, src, dst, cast)                                                                     \
-    {                                                                                                               \
-        if (cpu->registers.SP.as_u64 < 1) {                                                                         \
-            return ERR_STACK_UNDERFLOW;                                                                             \
-        }                                                                                                           \
-        mem->stack[cpu->registers.SP.as_u64 - 1].as_##dst = cast mem->stack[cpu->registers.SP.as_u64 - 1].as_##src; \
-        cpu->registers.NX.as_u64 += 1;                                                                              \
+#define CAST_OP(prog, mem, cpu, src, dst, cast)                                                         \
+    {                                                                                                   \
+        if (getReg(SP, vm)->u64 < 1) {                                                                  \
+            return ERR_STACK_UNDERFLOW;                                                                 \
+        }                                                                                               \
+        getStack(vm)[getReg(SP, vm)->u64 - 1].dst = cast getStack(vm)[getReg(SP, vm)->u64 - 1].src; \
+        getReg(NX, vm)->u64++;                                                                          \
     }
-Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmCalls, WINDOW* win)
+
+Error executeInst(Vm* vm, WINDOW* win)
 {
-    if (cpu->registers.NX.as_u64 >= prog->instruction_count) {
-        printf("error %ld %ld", cpu->registers.NX.as_u64, prog->instruction_count);
+    if (getReg(NX, vm)->u64 >= getInstCnt(vm)) {
+        printf("error %ld %ld", getReg(NX, vm)->u64, getInstCnt(vm));
         return ERR_ILLEGAL_INST_ACCESS;
     }
-    Instruction inst = prog->instructions[cpu->registers.NX.as_u64];
+    Instruction inst = *getInstructionAt(vm, getReg(NX, vm)->u64);
 
     // printf("\nenter : %d %s", inst.type, OpcodeDetailsLUT[inst.type].name);
     switch (inst.type) {
@@ -178,26 +207,26 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
     case INST_SET:
     case INST_GET:
     case INST_CPY:
-        cpu->registers.NX.as_u64 += 1;
+        getReg(NX, vm)->u64++;
         break;
     case INST_DONOP:
-        cpu->registers.NX.as_u64 += 1;
+        getReg(NX, vm)->u64++;
         break;
 
     case INST_PUSH:
-        if (cpu->registers.SP.as_u64 >= STACK_CAPACITY) {
+        if (getReg(SP, vm)->u64 >= STACK_CAPACITY) {
             return ERR_STACK_OVERFLOW;
         }
-        mem->stack[cpu->registers.SP.as_u64++] = inst.operand;
-        cpu->registers.NX.as_u64 += 1;
+        getStack(vm)[getReg(SP, vm)->u64++] = inst.operand;
+        getReg(NX, vm)->u64++;
         break;
 
     case INST_DROP:
-        if (cpu->registers.SP.as_u64 < 1) {
+        if (getReg(SP, vm)->u64 < 1) {
             return ERR_STACK_UNDERFLOW;
         }
-        cpu->registers.SP.as_u64 -= 1;
-        cpu->registers.NX.as_u64 += 1;
+        getReg(SP, vm)->u64 -= 1;
+        getReg(NX, vm)->u64++;
         break;
 
     case INST_ADDI:
@@ -218,7 +247,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
 
     case INST_DIVI:
         {
-            if (mem->stack[cpu->registers.SP.as_u64 - 1].as_i64 == 0) {
+            if (getStack(vm)[getReg(SP, vm)->u64 - 1].i64 == 0) {
                 return ERR_DIV_BY_ZERO;
             }
             BINARY_OP(prog, mem, cpu, i64, i64, /);
@@ -227,7 +256,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
 
     case INST_DIVU:
         {
-            if (mem->stack[cpu->registers.SP.as_u64 - 1].as_u64 == 0) {
+            if (getStack(vm)[getReg(SP, vm)->u64 - 1].u64 == 0) {
                 return ERR_DIV_BY_ZERO;
             }
             BINARY_OP(prog, mem, cpu, u64, u64, /);
@@ -236,7 +265,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
 
     case INST_MODI:
         {
-            if (mem->stack[cpu->registers.SP.as_u64 - 1].as_i64 == 0) {
+            if (getStack(vm)[getReg(SP, vm)->u64 - 1].i64 == 0) {
                 return ERR_DIV_BY_ZERO;
             }
             BINARY_OP(prog, mem, cpu, i64, i64, %);
@@ -245,7 +274,7 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
 
     case INST_MODU:
         {
-            if (mem->stack[cpu->registers.SP.as_u64 - 1].as_u64 == 0) {
+            if (getStack(vm)[getReg(SP, vm)->u64 - 1].u64 == 0) {
                 return ERR_DIV_BY_ZERO;
             }
             BINARY_OP(prog, mem, cpu, u64, u64, %);
@@ -269,45 +298,45 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
         break;
 
     case INST_JMPU:
-        cpu->registers.NX.as_u64 = inst.operand.as_u64;
+        setReg(NX, vm, inst.operand.u64);
         break;
 
     case INST_RETRN:
-        if (cpu->registers.SP.as_u64 < 1) {
+        if (getReg(SP, vm)->u64 < 1) {
             return ERR_STACK_UNDERFLOW;
         }
 
-        cpu->registers.NX.as_u64 = mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-        cpu->registers.SP.as_u64 -= 1;
+        setReg(NX, vm, getStack(vm)[getReg(SP, vm)->u64 - 1].u64);
+        getReg(SP, vm)->u64--;
         break;
 
     case INST_CALLN:
-        if (cpu->registers.SP.as_u64 >= STACK_CAPACITY) {
+        if (getReg(SP, vm)->u64 >= STACK_CAPACITY) {
             return ERR_STACK_OVERFLOW;
         }
 
-        mem->stack[cpu->registers.SP.as_u64++].as_u64 = cpu->registers.NX.as_u64 + 1;
-        cpu->registers.NX.as_u64 = inst.operand.as_u64;
+        getStack(vm)[getReg(SP, vm)->u64++].u64 = getReg(NX, vm)->u64 + 1;
+        setReg(NX, vm, inst.operand.u64);
         break;
 
     case INST_CALLF:
-        if (inst.operand.as_u64 > vmCalls->internalVmCallsDefined) {
+        if (inst.operand.u64 > vm->vmCalls.internalVmCallsDefined) {
             return ERR_ILLEGAL_OPERAND;
         }
 
-        if (!vmCalls->VmCallI[inst.operand.as_u64]) {
+        if (!vm->vmCalls.VmCallI[inst.operand.u64]) {
             return ERR_NULL_CALL;
         }
 
-        const Error err = vmCalls->VmCallI[inst.operand.as_u64](cpu, mem, win);
+        const Error err = vm->vmCalls.VmCallI[inst.operand.u64](&vm->cpu,&vm->mem, win);
         if (err != ERR_OK) {
             return err;
         }
-        cpu->registers.NX.as_u64 += 1;
+        getReg(NX, vm)->u64++;
         break;
 
     case INST_SHUTS:
-        setFlag(HALT, cpu, 1);
+        setFlag(HALT, &vm->cpu, 1);
         break;
 
     case INST_EQF:
@@ -383,54 +412,54 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
         break;
 
     case INST_JMPC:
-        if (cpu->registers.SP.as_u64 < 1) {
+        if (getReg(SP, vm)->u64 < 1) {
             return ERR_STACK_UNDERFLOW;
         }
 
-        if (mem->stack[cpu->registers.SP.as_u64 - 1].as_u64) {
-            cpu->registers.NX.as_u64 = inst.operand.as_u64;
+        if (getStack(vm)[getReg(SP, vm)->u64 - 1].u64) {
+            setReg(NX, vm, inst.operand.u64);
         } else {
-            cpu->registers.NX.as_u64 += 1;
+            getReg(NX, vm)->u64++;
         }
 
-        cpu->registers.SP.as_u64 -= 1;
+        getReg(SP, vm)->u64 -= 1;
         break;
 
     case INST_DUP:
-        if (cpu->registers.SP.as_u64 >= STACK_CAPACITY) {
+        if (getReg(SP, vm)->u64 >= STACK_CAPACITY) {
             return ERR_STACK_OVERFLOW;
         }
 
-        if (cpu->registers.SP.as_u64 - inst.operand.as_u64 <= 0) {
+        if (getReg(SP, vm)->u64 - inst.operand.u64 <= 0) {
             return ERR_STACK_UNDERFLOW;
         }
 
-        mem->stack[cpu->registers.SP.as_u64] = mem->stack[cpu->registers.SP.as_u64 - 1 - inst.operand.as_u64];
-        cpu->registers.SP.as_u64 += 1;
-        cpu->registers.NX.as_u64 += 1;
+        getStack(vm)[getReg(SP, vm)->u64] = getStack(vm)[getReg(SP, vm)->u64 - 1 - inst.operand.u64];
+        getReg(SP, vm)->u64 += 1;
+        getReg(NX, vm)->u64++;
         break;
 
     case INST_SWAP:
-        if (inst.operand.as_u64 >= cpu->registers.SP.as_u64) {
+        if (inst.operand.u64 >= getReg(SP, vm)->u64) {
             return ERR_STACK_UNDERFLOW;
         }
 
-        const uint64_t a = cpu->registers.SP.as_u64 - 1;
-        const uint64_t b = cpu->registers.SP.as_u64 - 1 - inst.operand.as_u64;
+        const uint64_t a = getReg(SP, vm)->u64 - 1;
+        const uint64_t b = getReg(SP, vm)->u64 - 1 - inst.operand.u64;
 
-        QuadWord t = mem->stack[a];
-        mem->stack[a] = mem->stack[b];
-        mem->stack[b] = t;
-        cpu->registers.NX.as_u64 += 1;
+        QuadWord t = getStack(vm)[a];
+        getStack(vm)[a] = getStack(vm)[b];
+        getStack(vm)[b] = t;
+        getReg(NX, vm)->u64++;
         break;
 
     case INST_NOT:
-        if (cpu->registers.SP.as_u64 < 1) {
+        if (getReg(SP, vm)->u64 < 1) {
             return ERR_STACK_UNDERFLOW;
         }
 
-        mem->stack[cpu->registers.SP.as_u64 - 1].as_u64 = !mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-        cpu->registers.NX.as_u64 += 1;
+        getStack(vm)[getReg(SP, vm)->u64 - 1].u64 = !getStack(vm)[getReg(SP, vm)->u64 - 1].u64;
+        getReg(NX, vm)->u64++;
         break;
 
     case INST_ANDB:
@@ -454,12 +483,12 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
         break;
 
     case INST_NOTB:
-        if (cpu->registers.SP.as_u64 < 1) {
+        if (getReg(SP, vm)->u64 < 1) {
             return ERR_STACK_UNDERFLOW;
         }
 
-        mem->stack[cpu->registers.SP.as_u64 - 1].as_u64 = ~mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-        cpu->registers.NX.as_u64 += 1;
+        getStack(vm)[getReg(SP, vm)->u64 - 1].u64 = ~getStack(vm)[getReg(SP, vm)->u64 - 1].u64;
+        getReg(NX, vm)->u64++;
         break;
 
     case INST_READ1U:
@@ -496,64 +525,64 @@ Error executeInst(const Program* prog, Memory* mem, CPU* cpu, const VmCalls* vmC
 
     case INST_WRITE1:
         {
-            if (cpu->registers.SP.as_u64 < 2) {
+            if (getReg(SP, vm)->u64 < 2) {
                 return ERR_STACK_UNDERFLOW;
             }
-            const MemoryAddr addr = mem->stack[cpu->registers.SP.as_u64 - 2].as_u64;
+            const MemoryAddr addr = getStack(vm)[getReg(SP, vm)->u64 - 2].u64;
             if (addr >= MEMORY_CAPACITY) {
                 return ERR_ILLEGAL_MEMORY_ACCESS;
             }
-            mem->memory[addr] = (MemoryAddr)mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-            cpu->registers.SP.as_u64 -= 2;
-            cpu->registers.NX.as_u64 += 1;
+            getMemory(vm)[addr] = (MemoryAddr)getStack(vm)[getReg(SP, vm)->u64 - 1].u64;
+            getReg(SP, vm)->u64 -= 2;
+            getReg(NX, vm)->u64++;
         }
         break;
 
     case INST_WRITE2:
         {
-            if (cpu->registers.SP.as_u64 < 2) {
+            if (getReg(SP, vm)->u64 < 2) {
                 return ERR_STACK_UNDERFLOW;
             }
-            const MemoryAddr addr = mem->stack[cpu->registers.SP.as_u64 - 2].as_u64;
+            const MemoryAddr addr = getStack(vm)[getReg(SP, vm)->u64 - 2].u64;
             if (addr >= MEMORY_CAPACITY - 1) {
                 return ERR_ILLEGAL_MEMORY_ACCESS;
             }
-            Word value = (Word)mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-            memcpy(&mem->memory[addr], &value, sizeof(value));
-            cpu->registers.SP.as_u64 -= 2;
-            cpu->registers.NX.as_u64 += 1;
+            Word value = (Word)getStack(vm)[getReg(SP, vm)->u64 - 1].u64;
+            memcpy(&getMemory(vm)[addr], &value, sizeof(value));
+            getReg(SP, vm)->u64 -= 2;
+            getReg(NX, vm)->u64++;
         }
         break;
 
     case INST_WRITE4:
         {
-            if (cpu->registers.SP.as_u64 < 2) {
+            if (getReg(SP, vm)->u64 < 2) {
                 return ERR_STACK_UNDERFLOW;
             }
-            const MemoryAddr addr = mem->stack[cpu->registers.SP.as_u64 - 2].as_u64;
+            const MemoryAddr addr = getStack(vm)[getReg(SP, vm)->u64 - 2].u64;
             if (addr >= MEMORY_CAPACITY - 3) {
                 return ERR_ILLEGAL_MEMORY_ACCESS;
             }
-            DoubleWord value = (DoubleWord)mem->stack[cpu->registers.SP.as_u64 - 1].as_u64;
-            memcpy(&mem->memory[addr], &value, sizeof(value));
-            cpu->registers.SP.as_u64 -= 2;
-            cpu->registers.NX.as_u64 += 1;
+            DoubleWord value = (DoubleWord)getStack(vm)[getReg(SP, vm)->u64 - 1].u64;
+            memcpy(&getMemory(vm)[addr], &value, sizeof(value));
+            getReg(SP, vm)->u64 -= 2;
+            getReg(NX, vm)->u64++;
         }
         break;
 
     case INST_WRITE8:
         {
-            if (cpu->registers.SP.as_u64 < 2) {
+            if (getReg(SP, vm)->u64 < 2) {
                 return ERR_STACK_UNDERFLOW;
             }
-            const MemoryAddr addr = mem->stack[cpu->registers.SP.as_u64 - 2].as_u64;
+            const MemoryAddr addr = getStack(vm)[getReg(SP, vm)->u64 - 2].u64;
             if (addr >= MEMORY_CAPACITY - 7) {
                 return ERR_ILLEGAL_MEMORY_ACCESS;
             }
-            QuadWord value = mem->stack[cpu->registers.SP.as_u64 - 1];
-            memcpy(&mem->memory[addr], &value, sizeof(value));
-            cpu->registers.SP.as_u64 -= 2;
-            cpu->registers.NX.as_u64 += 1;
+            QuadWord value = getStack(vm)[getReg(SP, vm)->u64 - 1];
+            memcpy(&getMemory(vm)[addr], &value, sizeof(value));
+            getReg(SP, vm)->u64 -= 2;
+            getReg(NX, vm)->u64++;
         }
         break;
 

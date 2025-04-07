@@ -37,7 +37,7 @@ int main(int argc, char** argv)
 
         inputHandler(&vm, vm.disp.windows[INPUT], &highlight);
         wgetch(vm.disp.windows[INPUT]);
-        vm.cpu.registers.NX.as_u64 = 0;
+        setReg(NX,&vm,0);
         setFlag(HALT, &vm.cpu, 0);
 
     } while (ch);

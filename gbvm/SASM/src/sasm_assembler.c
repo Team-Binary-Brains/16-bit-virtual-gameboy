@@ -166,10 +166,10 @@ bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
     char* endptr = 0;
     QuadWord result = { 0 };
 
-    result.as_u64 = strtoull(cstr, &endptr, 10);
+    result.u64 = strtoull(cstr, &endptr, 10);
     if ((size_t)(endptr - cstr) != str.length) {
 
-        result.as_f64 = strtod(cstr, &endptr);
+        result.f64 = strtod(cstr, &endptr);
 
         if ((size_t)(endptr - cstr) != str.length)
             return false;

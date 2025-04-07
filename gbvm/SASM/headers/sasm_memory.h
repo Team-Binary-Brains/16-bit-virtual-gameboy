@@ -27,7 +27,7 @@ typedef enum {
     F7 = 1 << 7        // 128
 } Flags;
 
-enum {
+typedef enum {
     H0,
     H1,
     I0,
@@ -48,7 +48,7 @@ enum {
     RF,
     SP,
     REG_COUNT
-};
+} RegID;
 
 typedef union {
     struct

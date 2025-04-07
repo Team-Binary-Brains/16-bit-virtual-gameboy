@@ -73,22 +73,22 @@ static OpcodeDetails OpcodeDetailsLUT[NUMBER_OF_INSTS] = {
 
 QuadWord quadword_u64(uint64_t u64)
 {
-    return (QuadWord) { .as_u64 = u64 };
+    return (QuadWord) { .u64 = u64 };
 }
 
 QuadWord quadword_i64(int64_t i64)
 {
-    return (QuadWord) { .as_i64 = i64 };
+    return (QuadWord) { .i64 = i64 };
 }
 
 QuadWord quadword_f64(double f64)
 {
-    return (QuadWord) { .as_f64 = f64 };
+    return (QuadWord) { .f64 = f64 };
 }
 
 QuadWord quadword_ptr(void* ptr)
 {
-    return (QuadWord) { .as_ptr = ptr };
+    return (QuadWord) { .ptr = ptr };
 }
 
 bool getOpcodeDetailsFromName(String name, OpcodeDetails* out_ptr)

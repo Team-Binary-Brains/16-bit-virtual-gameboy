@@ -41,10 +41,10 @@ int main(int argc, char** argv)
         OpcodeDetails details = getOpcodeDetails(sasm.prog.instructions[i].type);
         fprintf(f, "%s", details.name);
         if (details.has_operand) {
-            fprintf(f, " %" PRIu64, sasm.prog.instructions[i].operand.as_u64);
+            fprintf(f, " %" PRIu64, sasm.prog.instructions[i].operand.u64);
         }
         if (details.has_operand2) {
-            fprintf(f, " %" PRIu64, sasm.prog.instructions[i].operand2.as_u64);
+            fprintf(f, " %" PRIu64, sasm.prog.instructions[i].operand2.u64);
         }
         fprintf(f, "\n");
     }

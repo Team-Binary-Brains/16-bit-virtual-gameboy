@@ -64,7 +64,7 @@ void loadProgramIntoVm(Vm* vm, const char* filePath)
         exit(1);
     }
 
-    vm->cpu.registers.NX.as_u64 = meta.entry;
+    setReg(NX,vm,meta.entry);
 
     vm->prog.instruction_count = fread(vm->prog.instructions, sizeof(vm->prog.instructions[0]), meta.programSize, f);
 
