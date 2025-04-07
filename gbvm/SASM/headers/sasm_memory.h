@@ -47,7 +47,7 @@ typedef enum {
     QT,
     RF,
     SP,
-    REG_COUNT
+    REG_COUNT,
 } RegID;
 
 typedef union {

@@ -9,7 +9,7 @@ Error bindDirective(Sasm* sasm, String name, String* line)
     *line = trim(*line);
     String value = *line;
     QuadWord word = { 0 };
-    if (!translateLiteral(sasm, value, &word)) {
+    if (!translateLiteral(sasm, value, &word, NULL)) {
         fprintf(stderr, " ERROR: `" str_Fmt "` is not a number", str_Arg(value));
         return ERR_NAN;
     }
@@ -101,7 +101,7 @@ QuadWord pushStringToMemory(Sasm* sasm, String str)
     return result;
 }
 
-bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
+bool translateLiteral(Sasm* sasm, String str, QuadWord* output,bool *inlineOut)
 {
     if (str.length >= 2 && *str.data == '[' && str.data[str.length - 1] == ']') {
         if (str.length - 2 < 2) {
@@ -147,6 +147,10 @@ bool translateLiteral(Sasm* sasm, String str, QuadWord* output)
         default:
             assert(0 && "INVALID REGISTER NAME");
         }
+        if (str.data[3] == 'v') {
+            *inlineOut = true;
+        }
+
         return true;
     }
     if (str.length >= 2 && *str.data == '\'' && str.data[str.length - 1] == '\'') {
@@ -265,7 +269,8 @@ Error processLine(Sasm* sasm, String* line)
         Instruction* inst = &sasm->prog.instructions[sasm->prog.instruction_count];
         inst->type = details.type;
 
-        operand = trim(splitStr(line, ','));
+        *line = trim(splitStr(line, '\n'));
+        operand = trim(splitStr(line, ' '));
         if (details.has_operand) {
             // printString(operand);
             if (operand.length == 0) {
@@ -275,15 +280,13 @@ Error processLine(Sasm* sasm, String* line)
             }
             if (!translateLiteral(
                     sasm,
-                    operand, &inst->operand)) {
+                    operand, &inst->operand, &inst->opr1IsInline)) {
                 pushLabel(
                     sasm, sasm->prog.instruction_count, operand);
             }
         }
 
-        operand = trim(splitStr(line, ' '));
-        operand.data += 1;
-        operand.length -= 1;
+        operand = trim(*line);
         if (details.has_operand2) {
             if (operand.length == 0) {
                 fprintf(stderr, " ERROR: instruction `" str_Fmt "` requires 2 operands\n",
@@ -292,7 +295,7 @@ Error processLine(Sasm* sasm, String* line)
             }
             if (!translateLiteral(
                     sasm,
-                    operand, &inst->operand2)) {
+                    operand, &inst->operand2, &inst->opr2IsInline)) {
                 pushLabel(
                     sasm, sasm->prog.instruction_count, operand);
             }
@@ -337,7 +340,7 @@ void parseAsmIntoProgram(Sasm* sasm, String inputFilePath)
                 str_Arg(inputFilePath), str_Arg(name));
             exit(1);
         }
-        if (sasm->prog.instructions[addr].type == INST_CALLN && type != SASM_LABEL) {
+        if (sasm->prog.instructions[addr].type == INST_CALL && type != SASM_LABEL) {
             fprintf(stderr,
                 str_Fmt ": ERROR: trying to call not a label. `" str_Fmt "` is %s, but the call instructions"
                         " accepts only literals or labels.\n",

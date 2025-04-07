@@ -66,7 +66,7 @@ bool bindValue(Sasm *, String name, QuadWord QuadWord, BindingType type);
 
 void pushLabel(Sasm *, InstAddr addr, String name);
 
-bool translateLiteral(Sasm *, String s, QuadWord *output);
+bool translateLiteral(Sasm* sasm, String str, QuadWord* output,bool *inlineOut);
 
 void assembleProgramIntoBytecode(Sasm *, const char *outputFilePath);
 

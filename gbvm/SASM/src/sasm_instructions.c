@@ -3,33 +3,39 @@
 
 static OpcodeDetails OpcodeDetailsLUT[NUMBER_OF_INSTS] = {
     [INST_DONOP] = { .type = INST_DONOP, .name = "DONOP", .has_operand = 0, .has_operand2 = 0 },
-    [INST_RETRN] = { .type = INST_RETRN, .name = "RETRN", .has_operand = 0, .has_operand2 = 0 },
-    [INST_CALLN] = { .type = INST_CALLN, .name = "CALLN", .has_operand = 1, .has_operand2 = 0 },
-    [INST_CALLF] = { .type = INST_CALLF, .name = "CALLF", .has_operand = 1, .has_operand2 = 0 },
+    [INST_INVOK] = { .type = INST_INVOK, .name = "INVOK", .has_operand = 1, .has_operand2 = 0 },
+    [INST_RETVL] = { .type = INST_RETVL, .name = "RETVL", .has_operand = 0, .has_operand2 = 0 },
+    [INST_PUSHR] = { .type = INST_PUSHR, .name = "PUSHR", .has_operand = 1, .has_operand2 = 0 },
+    [INST_SPOPR] = { .type = INST_SPOPR, .name = "SPOPR", .has_operand = 0, .has_operand2 = 0 },
     [INST_SHUTS] = { .type = INST_SHUTS, .name = "SHUTS", .has_operand = 0, .has_operand2 = 0 },
+    [INST_SETR] = { .type = INST_SETR, .name = "SETR", .has_operand = 1, .has_operand2 = 1 },
+    [INST_GETR] = { .type = INST_GETR, .name = "GETR", .has_operand = 1, .has_operand2 = 1 },
+    [INST_CALL] = { .type = INST_CALL, .name = "CALL", .has_operand = 1, .has_operand2 = 0 },
+    [INST_LOOP] = { .type = INST_LOOP, .name = "LOOP", .has_operand = 1, .has_operand2 = 1 },
     [INST_PUSH] = { .type = INST_PUSH, .name = "PUSH", .has_operand = 1, .has_operand2 = 0 },
-    [INST_DROP] = { .type = INST_DROP, .name = "DROP", .has_operand = 0, .has_operand2 = 0 },
+    [INST_SPOP] = { .type = INST_SPOP, .name = "SPOP", .has_operand = 0, .has_operand2 = 0 },
     [INST_SWAP] = { .type = INST_SWAP, .name = "SWAP", .has_operand = 1, .has_operand2 = 0 },
-    [INST_ADDI] = { .type = INST_ADDI, .name = "ADDI", .has_operand = 0, .has_operand2 = 0 },
-    [INST_SUBI] = { .type = INST_SUBI, .name = "SUBI", .has_operand = 0, .has_operand2 = 0 },
-    [INST_MULI] = { .type = INST_MULI, .name = "MULI", .has_operand = 0, .has_operand2 = 0 },
-    [INST_DIVI] = { .type = INST_DIVI, .name = "DIVI", .has_operand = 0, .has_operand2 = 0 },
-    [INST_MODI] = { .type = INST_MODI, .name = "MODI", .has_operand = 0, .has_operand2 = 0 },
-    [INST_MULU] = { .type = INST_MULU, .name = "MULU", .has_operand = 0, .has_operand2 = 0 },
-    [INST_DIVU] = { .type = INST_DIVU, .name = "DIVU", .has_operand = 0, .has_operand2 = 0 },
-    [INST_MODU] = { .type = INST_MODU, .name = "MODU", .has_operand = 0, .has_operand2 = 0 },
-    [INST_ADDF] = { .type = INST_ADDF, .name = "ADDF", .has_operand = 0, .has_operand2 = 0 },
-    [INST_SUBF] = { .type = INST_SUBF, .name = "SUBF", .has_operand = 0, .has_operand2 = 0 },
-    [INST_MULF] = { .type = INST_MULF, .name = "MULF", .has_operand = 0, .has_operand2 = 0 },
-    [INST_DIVF] = { .type = INST_DIVF, .name = "DIVF", .has_operand = 0, .has_operand2 = 0 },
+    [INST_ADDI] = { .type = INST_ADDI, .name = "ADDI", .has_operand = 1, .has_operand2 = 0 },
+    [INST_SUBI] = { .type = INST_SUBI, .name = "SUBI", .has_operand = 1, .has_operand2 = 0 },
+    [INST_MULI] = { .type = INST_MULI, .name = "MULI", .has_operand = 1, .has_operand2 = 0 },
+    [INST_DIVI] = { .type = INST_DIVI, .name = "DIVI", .has_operand = 1, .has_operand2 = 0 },
+    [INST_MODI] = { .type = INST_MODI, .name = "MODI", .has_operand = 1, .has_operand2 = 0 },
+    [INST_ADDU] = { .type = INST_ADDU, .name = "ADDU", .has_operand = 1, .has_operand2 = 0 },
+    [INST_SUBU] = { .type = INST_SUBU, .name = "SUBU", .has_operand = 1, .has_operand2 = 0 },
+    [INST_MULU] = { .type = INST_MULU, .name = "MULU", .has_operand = 1, .has_operand2 = 0 },
+    [INST_DIVU] = { .type = INST_DIVU, .name = "DIVU", .has_operand = 1, .has_operand2 = 0 },
+    [INST_MODU] = { .type = INST_MODU, .name = "MODU", .has_operand = 1, .has_operand2 = 0 },
+    [INST_ADDF] = { .type = INST_ADDF, .name = "ADDF", .has_operand = 1, .has_operand2 = 0 },
+    [INST_SUBF] = { .type = INST_SUBF, .name = "SUBF", .has_operand = 1, .has_operand2 = 0 },
+    [INST_MULF] = { .type = INST_MULF, .name = "MULF", .has_operand = 1, .has_operand2 = 0 },
+    [INST_DIVF] = { .type = INST_DIVF, .name = "DIVF", .has_operand = 1, .has_operand2 = 0 },
     [INST_JMPU] = { .type = INST_JMPU, .name = "JMPU", .has_operand = 1, .has_operand2 = 0 },
     [INST_JMPC] = { .type = INST_JMPC, .name = "JMPC", .has_operand = 1, .has_operand2 = 0 },
     [INST_ANDB] = { .type = INST_ANDB, .name = "ANDB", .has_operand = 0, .has_operand2 = 0 },
     [INST_NOTB] = { .type = INST_NOTB, .name = "NOTB", .has_operand = 0, .has_operand2 = 0 },
-    [INST_CPY] = { .type = INST_CPY, .name = "CPY", .has_operand = 1, .has_operand2 = 1 },
-    [INST_SET] = { .type = INST_SET, .name = "SET", .has_operand = 1, .has_operand2 = 1 },
-    [INST_GET] = { .type = INST_CPY, .name = "GET", .has_operand = 1, .has_operand2 = 1 },
-    [INST_DUP] = { .type = INST_DUP, .name = "DUP", .has_operand = 1, .has_operand2 = 0 },
+    [INST_COPY] = { .type = INST_COPY, .name = "COPY", .has_operand = 1, .has_operand2 = 1 },
+    [INST_DUPS] = { .type = INST_DUPS, .name = "DUPS", .has_operand = 1, .has_operand2 = 0 },
+    [INST_RET] = { .type = INST_RET, .name = "RET", .has_operand = 0, .has_operand2 = 0 },
     [INST_NOT] = { .type = INST_NOT, .name = "NOT", .has_operand = 0, .has_operand2 = 0 },
     [INST_EQI] = { .type = INST_EQI, .name = "EQI", .has_operand = 0, .has_operand2 = 0 },
     [INST_GEI] = { .type = INST_GEI, .name = "GEI", .has_operand = 0, .has_operand2 = 0 },
@@ -100,11 +106,11 @@ bool getOpcodeDetailsFromName(String name, OpcodeDetails* out_ptr)
         last = INST_SHUTS;
         break;
     case 4:
-        type = INST_PUSH;
-        last = INST_NOTB;
+        type = INST_SETR;
+        last = INST_DUPS;
         break;
     case 3:
-        type = INST_CPY;
+        type = INST_RET;
         last = INST_F2U;
         break;
     case 6:

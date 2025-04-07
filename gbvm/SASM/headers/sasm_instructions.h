@@ -16,18 +16,25 @@
 typedef enum {
 
     INST_DONOP = 0,
-    INST_RETRN,
-    INST_CALLN,
-    INST_CALLF,
+    INST_INVOK,
+    INST_RETVL,
+    INST_PUSHR,
+    INST_SPOPR,
     INST_SHUTS,
+    INST_SETR,
+    INST_GETR,
+    INST_CALL,
+    INST_LOOP,
     INST_PUSH,
-    INST_DROP,
+    INST_SPOP,
     INST_SWAP,
     INST_ADDI,
     INST_SUBI,
     INST_MULI,
     INST_DIVI,
     INST_MODI,
+    INST_ADDU,
+    INST_SUBU,
     INST_MULU,
     INST_DIVU,
     INST_MODU,
@@ -39,10 +46,9 @@ typedef enum {
     INST_JMPC,
     INST_ANDB,
     INST_NOTB,
-    INST_CPY,
-    INST_SET,
-    INST_GET,
-    INST_DUP,
+    INST_COPY,
+    INST_DUPS,
+    INST_RET,
     INST_NOT,
     INST_EQI,
     INST_GEI,
@@ -93,6 +99,8 @@ typedef struct {
     Opcode type;      /**< The opcode of the instruction */
     QuadWord operand; /**< The operand of the instruction */
     QuadWord operand2;
+    bool opr1IsInline;
+    bool opr2IsInline;
 } Instruction;
 
 typedef struct {

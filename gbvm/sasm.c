@@ -1,8 +1,9 @@
 #include "sasm_assembler.h"
-#include "univ_strings.h"
-#include "univ_malloc.h"
 #include "univ_fileops.h"
+#include "univ_malloc.h"
+#include "univ_strings.h"
 
+#pragma GCC diagnostic ignored "-Wunused-result"
 const char* inputFile = NULL;
 const char* outputFile = NULL;
 bool disassemblyMode = false;
@@ -11,6 +12,7 @@ void processFlag(const char* program, const char* flag, int* argc, char*** argv)
 
 int main(int argc, char** argv)
 {
+    freopen("logs.txt", "a", stderr);
     const char* program = getNextCmdLineArg(&argc, &argv);
 
     while (argc > 0) {

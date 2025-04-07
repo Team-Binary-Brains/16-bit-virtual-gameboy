@@ -46,16 +46,15 @@ void dumpStack(WINDOW* win, const Vm* vm)
 void dumpFlags(WINDOW* win, CPU* cpu)
 {
     wprintw(win, "\n");
-    wprintdash(win, 1);
     wattron(win, A_REVERSE);
     wprintw(win, "  FLAGS ");
     wattroff(win, A_REVERSE);
     wprintdash(win, 1);
     wprintw(win,
-        "  Halt\t: %c\t F1\t: %c\n"
-        "  F2\t: %c\t F3\t: %c\n"
-        "  F4\t: %c\t F5\t: %c\n"
-        "  F6\t: %c\t F7\t: %c\n",
+        "  HT : %c F1 : %c\t"
+        "  F2 : %c F3 : %c\n"
+        "  F4 : %c F5 : %c\t"
+        "  F6 : %c F7 : %c\n",
         getFlag(HALT, cpu) ? 'T' : 'F',
         getFlag(F1, cpu) ? 'T' : 'F',
         getFlag(F2, cpu) ? 'T' : 'F',
@@ -66,17 +65,62 @@ void dumpFlags(WINDOW* win, CPU* cpu)
         getFlag(F7, cpu) ? 'T' : 'F');
 }
 
+void dumpRegs(WINDOW* win, CPU* cpu)
+{
+    wmove(win, 2, 1);
+    wattron(win, A_REVERSE);
+    wprintw(win, "  REGISTERS ");
+    wattroff(win, A_REVERSE);
+    wprintdash(win, 1);
+    wprintw(win,
+        "  H0 : %ld\t"
+        "  H1 : %ld\n"
+        "  P0 : %ld\t"
+        "  P1 : %ld\n"
+        "  P2 : %ld\t"
+        "  P3 : %ld\n"
+        "  JS : %ld\t"
+        "  KC : %ld\n"
+        "  NX : %ld\t"
+        "  SP : %ld\n"
+        "  I0 : %ld\n"
+        "  I1 : %ld\n"
+        "  L0 : %ld\n"
+        "  L1 : %lf\n"
+        "  L2 : %ld\n"
+        "  L3 : %ld\n"
+        "  OP : %ld\n"
+        "  QT : %ld\n"
+        "  RF : %ld\n",
+        cpu->registers.H0.u64,
+        cpu->registers.H1.u64,
+        cpu->registers.P0.u64,
+        cpu->registers.P1.u64,
+        cpu->registers.P2.u64,
+        cpu->registers.P3.u64,
+        cpu->registers.JS.u64,
+        cpu->registers.KC.u64,
+        cpu->registers.NX.u64,
+        cpu->registers.SP.u64,
+        cpu->registers.I0.u64,
+        cpu->registers.I1.u64,
+        cpu->registers.L0.u64,
+        cpu->registers.L1.f64,
+        cpu->registers.L2.i64,
+        cpu->registers.L3.u64,
+        cpu->registers.OP.u64,
+        cpu->registers.QT.u64,
+        cpu->registers.RF.u64);
+}
+
 void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
 {
-    wprintdash(win, 1);
+    wprintw(win, "\n");
     wattron(win, A_REVERSE);
     wprintw(win, "  INSTRUCTION ");
     wattroff(win, A_REVERSE);
     wprintdash(win, 1);
-    wprintw(win,
-        "  NAME    %s"
-        "\n  OPCODE  %d",
-        details->name, details->type);
+    wprintw(win, "  %d\t  %s", details->type, details->name);
 
     if (details->has_operand) {
         wprintw(win,
@@ -92,7 +136,7 @@ void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
 
     if (details->has_operand2) {
         wprintw(win,
-            "\n────────╮"
+            "────────╮"
             "\n    2.U │ %ld"
             "\n    2.I │ %ld"
             "\n    2.F │ %lf"
@@ -101,7 +145,6 @@ void dumpDetails(WINDOW* win, OpcodeDetails* details, Instruction* inst)
             inst->operand2.i64,
             inst->operand2.f64);
     }
-    wprintdash(win, 1);
 }
 
 void executeProgram(Vm* vm, int debug, int lim)
@@ -118,14 +161,14 @@ void executeProgram(Vm* vm, int debug, int lim)
         count = (count + getmaxy(prg) > getInstCnt(vm)) ? getInstCnt(vm) : count + getmaxy(prg);
         for (; i < count; i++) {
             details = getOpcodeDetails(getInstructionAt(vm, i)->type);
-            if (i == getReg(NX, vm)->u64) {
+            if (i == getReg(NX, vm)->u64)
                 wattron(prg, A_REVERSE);
-            }
 
             wprintw(prg, "\n   %ld\t│ %s ", i, details.name);
-            if (details.has_operand) {
-                wprintw(prg, " %ld", getInstructionAt(vm, i)->operand.u64);
-            }
+            if (details.has_operand)
+                wprintw(prg, "\t %ld", getInstructionAt(vm, i)->operand.u64);
+            if (details.has_operand2)
+                wprintw(prg, "\t %ld", getInstructionAt(vm, i)->operand2.u64);
             wattroff(prg, A_REVERSE);
         }
 
@@ -143,6 +186,7 @@ void executeProgram(Vm* vm, int debug, int lim)
 
         details = getOpcodeDetails(inst->type);
         dumpStack(vm->disp.windows[MEMORY], vm);
+        dumpRegs(vm->disp.windows[DETAILS], cpu);
         dumpFlags(vm->disp.windows[DETAILS], cpu);
         dumpDetails(vm->disp.windows[DETAILS], &details, inst);
     }
@@ -159,7 +203,7 @@ void executeProgram(Vm* vm, int debug, int lim)
     executeProgram(vm, debug, lim - 1);
 }
 
-#define READ_OP(prog, mem, cpu, type, out)                                 \
+#define READ_OP(type, out)                                                 \
     {                                                                      \
         if (getReg(SP, vm)->u64 < 1) {                                     \
             return ERR_STACK_UNDERFLOW;                                    \
@@ -170,27 +214,30 @@ void executeProgram(Vm* vm, int debug, int lim)
         }                                                                  \
         type tmp;                                                          \
         memcpy(&tmp, &getMemory(vm)[addr], sizeof(type));                  \
-        getStack(vm)[getReg(SP, vm)->u64 - 1].out = tmp;                 \
+        getStack(vm)[getReg(SP, vm)->u64 - 1].out = tmp;                   \
         getReg(NX, vm)->u64++;                                             \
     }
 
-#define BINARY_OP(prog, mem, cpu, in, out, op)                                                                                                  \
-    {                                                                                                                                           \
-        if (getReg(SP, vm)->u64 < 2) {                                                                                                          \
-            return ERR_STACK_UNDERFLOW;                                                                                                         \
-        }                                                                                                                                       \
-        getStack(vm)[getReg(SP, vm)->u64 - 2].out = getStack(vm)[getReg(SP, vm)->u64 - 2].in op getStack(vm)[getReg(SP, vm)->u64 - 1].in; \
-        getReg(SP, vm)->u64 -= 1;                                                                                                               \
-        getReg(NX, vm)->u64++;                                                                                                                  \
+#define ARITH_OP(reg, in, op)  \
+    {                          \
+        reg = reg op in;       \
+        getReg(NX, vm)->u64++; \
     }
 
-#define CAST_OP(prog, mem, cpu, src, dst, cast)                                                         \
-    {                                                                                                   \
-        if (getReg(SP, vm)->u64 < 1) {                                                                  \
-            return ERR_STACK_UNDERFLOW;                                                                 \
-        }                                                                                               \
-        getStack(vm)[getReg(SP, vm)->u64 - 1].dst = cast getStack(vm)[getReg(SP, vm)->u64 - 1].src; \
-        getReg(NX, vm)->u64++;                                                                          \
+#define BINARY_OP(in, out, op)                                                                                                            \
+    {                                                                                                                                     \
+        if (getReg(SP, vm)->u64 < 2) {                                                                                                    \
+            return ERR_STACK_UNDERFLOW;                                                                                                   \
+        }                                                                                                                                 \
+        getStack(vm)[getReg(SP, vm)->u64 - 2].out = getStack(vm)[getReg(SP, vm)->u64 - 2].in op getStack(vm)[getReg(SP, vm)->u64 - 1].in; \
+        getReg(SP, vm)->u64 -= 1;                                                                                                         \
+        getReg(NX, vm)->u64++;                                                                                                            \
+    }
+
+#define CAST_OP(r1, r2, src, dst, cast) \
+    {                                   \
+        r1->dst = cast r2->src;         \
+        getReg(NX, vm)->u64++;          \
     }
 
 Error executeInst(Vm* vm, WINDOW* win)
@@ -200,17 +247,83 @@ Error executeInst(Vm* vm, WINDOW* win)
         return ERR_ILLEGAL_INST_ACCESS;
     }
     Instruction inst = *getInstructionAt(vm, getReg(NX, vm)->u64);
+    if (inst.opr1IsInline) {
+        inst.operand.u64 = getReg(inst.operand.u64, vm)->u64;
+    }
+    if (inst.opr2IsInline) {
+        inst.operand2.u64 = getReg(inst.operand2.u64, vm)->u64;
+    }
+    
 
     // printf("\nenter : %d %s", inst.type, OpcodeDetailsLUT[inst.type].name);
     switch (inst.type) {
 
-    case INST_SET:
-    case INST_GET:
-    case INST_CPY:
-        getReg(NX, vm)->u64++;
-        break;
     case INST_DONOP:
         getReg(NX, vm)->u64++;
+        break;
+
+    case INST_RETVL:
+
+        break;
+
+    case INST_INVOK:
+        if (inst.operand.u64 > vm->vmCalls.internalVmCallsDefined)
+            return ERR_ILLEGAL_OPERAND;
+
+        if (!vm->vmCalls.VmCallI[inst.operand.u64])
+            return ERR_NULL_CALL;
+
+        const Error err = vm->vmCalls.VmCallI[inst.operand.u64](&vm->cpu, &vm->mem, win, &vm->region);
+        if (err != ERR_OK)
+            return err;
+
+        getReg(NX, vm)->u64++;
+        break;
+    case INST_PUSHR:
+        if (getReg(SP, vm)->u64 >= STACK_CAPACITY)
+            return ERR_STACK_OVERFLOW;
+
+        getStack(vm)[getReg(SP, vm)->u64++] = *getReg(inst.operand.u64, vm);
+        getReg(NX, vm)->u64++;
+        break;
+    case INST_SPOPR:
+        if (getReg(SP, vm)->u64 < 1)
+            return ERR_STACK_UNDERFLOW;
+
+        *getReg(inst.operand.u64, vm) = getStack(vm)[getReg(SP, vm)->u64 - 1];
+        getReg(SP, vm)->u64 -= 1;
+        getReg(NX, vm)->u64++;
+        break;
+
+    case INST_SHUTS:
+        setFlag(HALT, &vm->cpu, 1);
+        break;
+
+    case INST_SETR:
+        vm->cpu.registers.reg[inst.operand2.u64].u64 = inst.operand.u64;
+        getReg(NX, vm)->u64++;
+        break;
+
+    case INST_GETR:
+        getStack(vm)[getReg(SP, vm)->u64++] = *getReg(inst.operand.u64, vm);
+        getReg(NX, vm)->u64++;
+        break;
+
+    case INST_CALL:
+        if (getReg(SP, vm)->u64 >= STACK_CAPACITY)
+            return ERR_STACK_OVERFLOW;
+
+        getStack(vm)[getReg(SP, vm)->u64++].u64 = getReg(NX, vm)->u64 + 1;
+        setReg(NX, vm, inst.operand.u64);
+        break;
+
+    case INST_LOOP:
+        if (getReg(inst.operand2.u64, vm)->u64 > 0) {
+            setReg(NX, vm, inst.operand.u64);
+        } else {
+            getReg(NX, vm)->u64++;
+        }
+        getReg(inst.operand2.u64, vm)->u64 -= 1;
         break;
 
     case INST_PUSH:
@@ -221,221 +334,12 @@ Error executeInst(Vm* vm, WINDOW* win)
         getReg(NX, vm)->u64++;
         break;
 
-    case INST_DROP:
+    case INST_SPOP:
         if (getReg(SP, vm)->u64 < 1) {
             return ERR_STACK_UNDERFLOW;
         }
+        setReg(QT, vm, getStack(vm)[getReg(SP, vm)->u64 - 1].u64);
         getReg(SP, vm)->u64 -= 1;
-        getReg(NX, vm)->u64++;
-        break;
-
-    case INST_ADDI:
-        BINARY_OP(prog, mem, cpu, u64, u64, +);
-        break;
-
-    case INST_SUBI:
-        BINARY_OP(prog, mem, cpu, u64, u64, -);
-        break;
-
-    case INST_MULI:
-        BINARY_OP(prog, mem, cpu, i64, i64, *);
-        break;
-
-    case INST_MULU:
-        BINARY_OP(prog, mem, cpu, u64, u64, *);
-        break;
-
-    case INST_DIVI:
-        {
-            if (getStack(vm)[getReg(SP, vm)->u64 - 1].i64 == 0) {
-                return ERR_DIV_BY_ZERO;
-            }
-            BINARY_OP(prog, mem, cpu, i64, i64, /);
-        }
-        break;
-
-    case INST_DIVU:
-        {
-            if (getStack(vm)[getReg(SP, vm)->u64 - 1].u64 == 0) {
-                return ERR_DIV_BY_ZERO;
-            }
-            BINARY_OP(prog, mem, cpu, u64, u64, /);
-        }
-        break;
-
-    case INST_MODI:
-        {
-            if (getStack(vm)[getReg(SP, vm)->u64 - 1].i64 == 0) {
-                return ERR_DIV_BY_ZERO;
-            }
-            BINARY_OP(prog, mem, cpu, i64, i64, %);
-        }
-        break;
-
-    case INST_MODU:
-        {
-            if (getStack(vm)[getReg(SP, vm)->u64 - 1].u64 == 0) {
-                return ERR_DIV_BY_ZERO;
-            }
-            BINARY_OP(prog, mem, cpu, u64, u64, %);
-        }
-        break;
-
-    case INST_ADDF:
-        BINARY_OP(prog, mem, cpu, f64, f64, +);
-        break;
-
-    case INST_SUBF:
-        BINARY_OP(prog, mem, cpu, f64, f64, -);
-        break;
-
-    case INST_MULF:
-        BINARY_OP(prog, mem, cpu, f64, f64, *);
-        break;
-
-    case INST_DIVF:
-        BINARY_OP(prog, mem, cpu, f64, f64, /);
-        break;
-
-    case INST_JMPU:
-        setReg(NX, vm, inst.operand.u64);
-        break;
-
-    case INST_RETRN:
-        if (getReg(SP, vm)->u64 < 1) {
-            return ERR_STACK_UNDERFLOW;
-        }
-
-        setReg(NX, vm, getStack(vm)[getReg(SP, vm)->u64 - 1].u64);
-        getReg(SP, vm)->u64--;
-        break;
-
-    case INST_CALLN:
-        if (getReg(SP, vm)->u64 >= STACK_CAPACITY) {
-            return ERR_STACK_OVERFLOW;
-        }
-
-        getStack(vm)[getReg(SP, vm)->u64++].u64 = getReg(NX, vm)->u64 + 1;
-        setReg(NX, vm, inst.operand.u64);
-        break;
-
-    case INST_CALLF:
-        if (inst.operand.u64 > vm->vmCalls.internalVmCallsDefined) {
-            return ERR_ILLEGAL_OPERAND;
-        }
-
-        if (!vm->vmCalls.VmCallI[inst.operand.u64]) {
-            return ERR_NULL_CALL;
-        }
-
-        const Error err = vm->vmCalls.VmCallI[inst.operand.u64](&vm->cpu,&vm->mem, win,&vm->region);
-        if (err != ERR_OK) {
-            return err;
-        }
-        getReg(NX, vm)->u64++;
-        break;
-
-    case INST_SHUTS:
-        setFlag(HALT, &vm->cpu, 1);
-        break;
-
-    case INST_EQF:
-        BINARY_OP(prog, mem, cpu, f64, u64, ==);
-        break;
-
-    case INST_GEF:
-        BINARY_OP(prog, mem, cpu, f64, u64, >=);
-        break;
-
-    case INST_GTF:
-        BINARY_OP(prog, mem, cpu, f64, u64, >);
-        break;
-
-    case INST_LEF:
-        BINARY_OP(prog, mem, cpu, f64, u64, <=);
-        break;
-
-    case INST_LTF:
-        BINARY_OP(prog, mem, cpu, f64, u64, <);
-        break;
-
-    case INST_NEF:
-        BINARY_OP(prog, mem, cpu, f64, u64, !=);
-        break;
-
-    case INST_EQI:
-        BINARY_OP(prog, mem, cpu, i64, u64, ==);
-        break;
-
-    case INST_GEI:
-        BINARY_OP(prog, mem, cpu, i64, u64, >=);
-        break;
-
-    case INST_GTI:
-        BINARY_OP(prog, mem, cpu, i64, u64, >);
-        break;
-
-    case INST_LEI:
-        BINARY_OP(prog, mem, cpu, i64, u64, <=);
-        break;
-
-    case INST_LTI:
-        BINARY_OP(prog, mem, cpu, i64, u64, <);
-        break;
-
-    case INST_NEI:
-        BINARY_OP(prog, mem, cpu, i64, u64, !=);
-        break;
-
-    case INST_EQU:
-        BINARY_OP(prog, mem, cpu, u64, u64, ==);
-        break;
-
-    case INST_GEU:
-        BINARY_OP(prog, mem, cpu, u64, u64, >=);
-        break;
-
-    case INST_GTU:
-        BINARY_OP(prog, mem, cpu, u64, u64, >);
-        break;
-
-    case INST_LEU:
-        BINARY_OP(prog, mem, cpu, u64, u64, <=);
-        break;
-
-    case INST_LTU:
-        BINARY_OP(prog, mem, cpu, u64, u64, <);
-        break;
-
-    case INST_NEU:
-        BINARY_OP(prog, mem, cpu, u64, u64, !=);
-        break;
-
-    case INST_JMPC:
-        if (getReg(SP, vm)->u64 < 1) {
-            return ERR_STACK_UNDERFLOW;
-        }
-
-        if (getStack(vm)[getReg(SP, vm)->u64 - 1].u64) {
-            setReg(NX, vm, inst.operand.u64);
-        } else {
-            getReg(NX, vm)->u64++;
-        }
-
-        getReg(SP, vm)->u64 -= 1;
-        break;
-
-    case INST_DUP:
-        if (getReg(SP, vm)->u64 >= STACK_CAPACITY) {
-            return ERR_STACK_OVERFLOW;
-        }
-
-        if (getReg(SP, vm)->u64 - inst.operand.u64 <= 0) {
-            return ERR_STACK_UNDERFLOW;
-        }
-
-        getStack(vm)[getReg(SP, vm)->u64] = getStack(vm)[getReg(SP, vm)->u64 - 1 - inst.operand.u64];
-        getReg(SP, vm)->u64 += 1;
         getReg(NX, vm)->u64++;
         break;
 
@@ -453,6 +357,128 @@ Error executeInst(Vm* vm, WINDOW* win)
         getReg(NX, vm)->u64++;
         break;
 
+    case INST_ADDI:
+        ARITH_OP(getReg(L2, vm)->i64, inst.operand.i64, +);
+        break;
+
+    case INST_SUBI:
+        ARITH_OP(getReg(L2, vm)->i64, inst.operand.i64, -);
+        break;
+
+    case INST_MULI:
+        ARITH_OP(getReg(L2, vm)->i64, inst.operand.i64, *);
+        break;
+
+    case INST_DIVI:
+        if (inst.operand.i64 == 0)
+            return ERR_DIV_BY_ZERO;
+        ARITH_OP(getReg(L2, vm)->i64, inst.operand.i64, /);
+        break;
+
+    case INST_MODI:
+        if (inst.operand.i64 == 0)
+            return ERR_DIV_BY_ZERO;
+        ARITH_OP(getReg(L2, vm)->i64, inst.operand.i64, %);
+        break;
+
+    case INST_ADDU:
+        ARITH_OP(getReg(L3, vm)->u64, inst.operand.u64, +);
+        break;
+
+    case INST_SUBU:
+        ARITH_OP(getReg(L3, vm)->u64, inst.operand.u64, -);
+        break;
+
+    case INST_MULU:
+        ARITH_OP(getReg(L3, vm)->u64, inst.operand.u64, +);
+        break;
+
+    case INST_DIVU:
+        if (inst.operand.u64 == 0)
+            return ERR_DIV_BY_ZERO;
+        ARITH_OP(getReg(L3, vm)->u64, inst.operand.u64, /);
+        break;
+
+    case INST_MODU:
+        if (inst.operand.u64 == 0)
+            return ERR_DIV_BY_ZERO;
+        ARITH_OP(getReg(L3, vm)->u64, inst.operand.u64, %);
+        break;
+
+    case INST_ADDF:
+        ARITH_OP(getReg(L1, vm)->f64, inst.operand.f64, +);
+        break;
+
+    case INST_SUBF:
+        ARITH_OP(getReg(L1, vm)->f64, inst.operand.f64, -);
+        break;
+
+    case INST_MULF:
+        ARITH_OP(getReg(L1, vm)->f64, inst.operand.f64, *);
+        break;
+
+    case INST_DIVF:
+        if (inst.operand.f64 == 0.0)
+            return ERR_DIV_BY_ZERO;
+        ARITH_OP(getReg(L1, vm)->f64, inst.operand.f64, /);
+        break;
+
+    case INST_JMPU:
+        setReg(NX, vm, inst.operand.u64);
+        break;
+
+    case INST_JMPC:
+        if (getReg(SP, vm)->u64 < 1)
+            return ERR_STACK_UNDERFLOW;
+
+        if (getStack(vm)[getReg(SP, vm)->u64 - 1].u64)
+            setReg(NX, vm, inst.operand.u64);
+        else
+            getReg(NX, vm)->u64++;
+
+        getReg(SP, vm)->u64 -= 1;
+        break;
+
+    case INST_ANDB:
+        BINARY_OP(u64, u64, &);
+        break;
+
+    case INST_NOTB:
+        if (getReg(SP, vm)->u64 < 1)
+            return ERR_STACK_UNDERFLOW;
+
+        getStack(vm)[getReg(SP, vm)->u64 - 1].u64 = ~getStack(vm)[getReg(SP, vm)->u64 - 1].u64;
+        getReg(NX, vm)->u64++;
+        break;
+
+    case INST_COPY:
+        setReg(inst.operand.u64, vm, getReg(inst.operand2.u64, vm)->u64);
+        getReg(NX, vm)->u64++;
+        break;
+
+    case INST_DUPS:
+        if (getReg(SP, vm)->u64 >= STACK_CAPACITY) {
+            return ERR_STACK_OVERFLOW;
+        }
+
+        if (getReg(SP, vm)->u64 - inst.operand.u64 <= 0) {
+            return ERR_STACK_UNDERFLOW;
+        }
+
+        getStack(vm)[getReg(SP, vm)->u64] = getStack(vm)[getReg(SP, vm)->u64 - 1 - inst.operand.u64];
+        getReg(SP, vm)->u64 += 1;
+        getReg(NX, vm)->u64++;
+        break;
+
+    case INST_RET:
+        if (getReg(SP, vm)->u64 < 1) {
+            return ERR_STACK_UNDERFLOW;
+        }
+
+        setReg(NX, vm, getStack(vm)[getReg(SP, vm)->u64 - 1].u64);
+        getReg(SP, vm)->u64--;
+        break;
+
     case INST_NOT:
         if (getReg(SP, vm)->u64 < 1) {
             return ERR_STACK_UNDERFLOW;
@@ -462,65 +488,140 @@ Error executeInst(Vm* vm, WINDOW* win)
         getReg(NX, vm)->u64++;
         break;
 
-    case INST_ANDB:
-        BINARY_OP(prog, mem, cpu, u64, u64, &);
+    case INST_EQI:
+        BINARY_OP(i64, u64, ==);
+        break;
+
+    case INST_GEI:
+        BINARY_OP(i64, u64, >=);
+        break;
+
+    case INST_GTI:
+        BINARY_OP(i64, u64, >);
+        break;
+
+    case INST_LEI:
+        BINARY_OP(i64, u64, <=);
+        break;
+
+    case INST_LTI:
+        BINARY_OP(i64, u64, <);
+        break;
+
+    case INST_NEI:
+        BINARY_OP(i64, u64, !=);
+        break;
+
+    case INST_EQU:
+        BINARY_OP(u64, u64, ==);
+        break;
+
+    case INST_GEU:
+        BINARY_OP(u64, u64, >=);
+        break;
+
+    case INST_GTU:
+        BINARY_OP(u64, u64, >);
+        break;
+
+    case INST_LEU:
+        BINARY_OP(u64, u64, <=);
+        break;
+
+    case INST_LTU:
+        BINARY_OP(u64, u64, <);
+        break;
+
+    case INST_NEU:
+        BINARY_OP(u64, u64, !=);
+        break;
+
+    case INST_EQF:
+        BINARY_OP(f64, u64, ==);
+        break;
+
+    case INST_GEF:
+        BINARY_OP(f64, u64, >=);
+        break;
+
+    case INST_GTF:
+        BINARY_OP(f64, u64, >);
+        break;
+
+    case INST_LEF:
+        BINARY_OP(f64, u64, <=);
+        break;
+
+    case INST_LTF:
+        BINARY_OP(f64, u64, <);
+        break;
+
+    case INST_NEF:
+        BINARY_OP(f64, u64, !=);
         break;
 
     case INST_ORB:
-        BINARY_OP(prog, mem, cpu, u64, u64, |);
+        BINARY_OP(u64, u64, |);
         break;
 
     case INST_XOR:
-        BINARY_OP(prog, mem, cpu, u64, u64, ^);
+        BINARY_OP(u64, u64, ^);
         break;
 
     case INST_SHR:
-        BINARY_OP(prog, mem, cpu, u64, u64, >>);
+        BINARY_OP(u64, u64, >>);
         break;
 
     case INST_SHL:
-        BINARY_OP(prog, mem, cpu, u64, u64, <<);
+        BINARY_OP(u64, u64, <<);
         break;
 
-    case INST_NOTB:
-        if (getReg(SP, vm)->u64 < 1) {
-            return ERR_STACK_UNDERFLOW;
-        }
+    case INST_I2F:
+        CAST_OP(getReg(L1, vm), getReg(L2, vm), i64, f64, (double));
+        break;
 
-        getStack(vm)[getReg(SP, vm)->u64 - 1].u64 = ~getStack(vm)[getReg(SP, vm)->u64 - 1].u64;
-        getReg(NX, vm)->u64++;
+    case INST_U2F:
+        CAST_OP(getReg(L1, vm), getReg(L3, vm), u64, f64, (double));
+        break;
+
+    case INST_F2I:
+        CAST_OP(getReg(L2, vm), getReg(L1, vm), f64, i64, (int64_t));
+        break;
+
+    case INST_F2U:
+        CAST_OP(getReg(L3, vm), getReg(L1, vm), f64, u64, (uint64_t)(int64_t));
         break;
 
     case INST_READ1U:
-        READ_OP(prog, mem, cpu, uint8_t, u64);
+        READ_OP(uint8_t, u64);
         break;
 
     case INST_READ2U:
-        READ_OP(prog, mem, cpu, uint16_t, u64);
+        READ_OP(uint16_t, u64);
         break;
 
     case INST_READ4U:
-        READ_OP(prog, mem, cpu, uint32_t, u64);
+        READ_OP(uint32_t, u64);
         break;
 
     case INST_READ8U:
-        READ_OP(prog, mem, cpu, uint64_t, u64);
+        READ_OP(uint64_t, u64);
         break;
 
     case INST_READ1I:
-        READ_OP(prog, mem, cpu, int8_t, i64);
+        READ_OP(int8_t, i64);
         break;
 
     case INST_READ2I:
-        READ_OP(prog, mem, cpu, int16_t, i64);
+        READ_OP(int16_t, i64);
         break;
 
     case INST_READ4I:
-        READ_OP(prog, mem, cpu, int32_t, i64);
+        READ_OP(int32_t, i64);
         break;
 
     case INST_READ8I:
-        READ_OP(prog, mem, cpu, int64_t, i64);
+        READ_OP(int64_t, i64);
         break;
 
     case INST_WRITE1:
@@ -584,22 +685,6 @@ Error executeInst(Vm* vm, WINDOW* win)
             getReg(SP, vm)->u64 -= 2;
             getReg(NX, vm)->u64++;
         }
-        break;
-
-    case INST_I2F:
-        CAST_OP(prog, mem, cpu, i64, f64, (double));
-        break;
-
-    case INST_U2F:
-        CAST_OP(prog, mem, cpu, u64, f64, (double));
-        break;
-
-    case INST_F2I:
-        CAST_OP(prog, mem, cpu, f64, i64, (int64_t));
-        break;
-
-    case INST_F2U:
-        CAST_OP(prog, mem, cpu, f64, u64, (uint64_t)(int64_t));
         break;
 
     case NUMBER_OF_INSTS:
