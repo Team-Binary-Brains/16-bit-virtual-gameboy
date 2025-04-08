@@ -3,66 +3,84 @@
 	"name": "Simulated Assembly Lang",
 	"patterns": [
 		{
-			"name": "comment.line.semicolon.sasm",
+			"name": "comment.line.sasm",
 			"match": ";.*$"
 		},
 		{
-			"name": "string.quoted.double.sasm",
+			"name": "string.double.sasm",
 			"match": "\\\".*\\\""
 		},
 		{
-			"name": "entity.name.function.sasm",
+			"name": "label.definition.sasm",
 			"match": "\\w+:"
 		},
 		{
-			"name": "keyword.control.directive.sasm",
-			"match": "%\\b(bind|include)\\b"
+			"match": "%bind\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+			"captures": {
+				"0": { "name": "keyword.directive.sasm" },
+				"1": { "name": "constant.directive.bindfile.sasm" }
+			}
 		},
 		{
-			"name": "keyword.control.flow.sasm",
-			"match": "(DONOP|INVOK|RET(VL)?|CALL|LOOP|JMP[UC]|SHUTS)"
+			"name": "keyword.directive.sasm",
+			"match": "%bind"
 		},
 		{
-			"name": "keyword.control.stack.sasm",
-			"match": "(PUSHR|PUSH|SPOP|SPOPR|DUPS|SWAP|COPY)"
+			"name": "keyword.directive.sasm",
+			"match": "%include"
 		},
 		{
-			"name": "keyword.operator.cast.sasm",
+			"match": "(INVOK|CALL|LOOP|JMP[UC])\\s+([a-zA-Z_][a-zA-Z0-9_]*)",
+			"captures": {
+				"1": { "name": "keyword.directive.sasm" },
+				"2": { "name": "label.reference.sasm" }
+			}
+		},
+		{
+			"name": "label.reference.sasm",
+			"match": "(RET(VL)?|SHUTS)"
+		},
+		{
+			"name": "keyword.stackop.sasm",
+			"match": "(DONOP|PUSHR|PUSH|SPOP|SPOPR|DUPS|SWAP|COPY)"
+		},
+		{
+			"name": "keyword.cast.sasm",
 			"match": "(I2F|U2F|F2I|F2U)"
 		},
 		{
-			"name": "support.function.io.sasm",
+			"name": "function.io.sasm",
 			"match": "(READ(1|2|4|8)[IU]|WRITE(1|2|4|8))"
 		},
 		{
-			"name": "keyword.operator.comparison.sasm",
+			"name": "keyword.compare.sasm",
 			"match": "(EQ|NE|GT|GE|LT|LE)[IUF]"
 		},
 		{
-			"name": "keyword.operator.logical.sasm",
+			"name": "keyword.logicop.sasm",
 			"match": "(ANDB|ORB|XOR|NOTB|NOT|SHL|SHR)"
 		},
 		{
-			"name": "keyword.operator.register.sasm",
+			"name": "keyword.registerop.sasm",
 			"match": "(SETR|GETR)"
 		},
 		{
-			"name": "keyword.operator.arithmetic.sasm",
+			"name": "keyword.arithop.sasm",
 			"match": "(ADD|SUB|MUL|DIV|MOD)[IUF]"
 		},
 		{
-			"name": "variable.other.register.sasm",
+			"name": "variable.register.sasm",
 			"match": "\\[(H0|H1|I0|I1|JS|KC|L0|L1|L2|L3|OP|P0|P1|P2|P3|QT|RF)[v]{0,1}\\]"
 		},
 		{
-			"name": "variable.other.sasm",
+			"name": "variable.userdefined.sasm",
 			"match": "[a-zA-Z_][a-zA-Z0-9_]*"
 		},
 		{
-			"name": "constant.numeric.integer.sasm",
-			"match": "[\\-0-9][0-9]*"
+			"name": "constant.number.integer.sasm",
+			"match": "[\\-0-9][\\.0-9]*"
 		}
 	],
-	"repository": {},
+	"repository": { },
 	"scopeName": "source.sasm"
 }

@@ -205,10 +205,9 @@
 		"breadcrumbPicker.background": "#292D3E"
 	},
 	"tokenColors": [
-/*
 		{
 			"name": "SASM Comments",
-			"scope": "comment.line.semicolon.sasm",
+			"scope": "comment.line.sasm",
 			"settings": {
 				"foreground": "#6272a4",
 				"fontStyle": "italic"
@@ -216,104 +215,80 @@
 		},
 		{
 			"name": "SASM Strings",
-			"scope": "string.quoted.double.sasm",
+			"scope": "string.double.sasm",
 			"settings": {
-				"foreground": "#f1fa8c"
+				"foreground": "#C3E88D"
 			}
 		},
 		{
 			"name": "SASM Labels",
-			"scope": "entity.name.function.sasm",
+			"scope": [
+				"label.definition.sasm",
+				"function.io.sasm"
+			],
 			"settings": {
-				"foreground": "#ffb86c",
-				"fontStyle": "bold"
+				"foreground": "#F07178"
 			}
 		},
 		{
-			"name": "SASM Directives",
-			"scope": "keyword.control.directive.sasm",
+			"name": "SASM Keywords",
+			"scope": [
+				"keyword.directive.sasm",
+				"keyword.stackop.sasm",
+				"keyword.cast.sasm",
+				"keyword.compare.sasm",
+				"keyword.logicop.sasm",
+				"keyword.registerop.sasm",
+				"keyword.arithop.sasm"
+			],
 			"settings": {
-				"foreground": "#8be9fd",
-				"fontStyle": "bold"
+				"foreground": "#C792EA"
 			}
 		},
 		{
 			"name": "SASM Flow Control",
-			"scope": "keyword.control.flow.sasm",
+			"scope": [
+				"label.reference.sasm"
+			],
 			"settings": {
-				"foreground": "#ff5555"
+				//"foreground": "#F07178"
+				"foreground": "#7986e7"
 			}
-		},
-		{
-			"name": "SASM Stack Operations",
-			"scope": "keyword.control.stack.sasm",
-			"settings": {
-				"foreground": "#bd93f9"
-			}
-		},
-		{
-			"name": "SASM Casting",
-			"scope": "keyword.operator.cast.sasm",
-			"settings": {
-				"foreground": "#50fa7b"
-			}
-		},
+		},/*
 		{
 			"name": "SASM I/O Functions",
-			"scope": "support.function.io.sasm",
+			"scope": "function.io.sasm",
 			"settings": {
-				"foreground": "#ff79c6"
+				"foreground": "#C3E88D"
+			}
+		},*/
+		{
+			"name": "SASM Registers and Numbers",
+			"scope": [
+				"variable.register.sasm",
+				"variable.userdefined.sasm"
+			],
+			"settings": {
+				"foreground": "#82aaff"
 			}
 		},
 		{
-			"name": "SASM Comparison Ops",
-			"scope": "keyword.operator.comparison.sasm",
+			"name": "SASM userdefined",
+			"scope": [
+				"constant.directive.bindfile.sasm",
+				"variable.userdefined.sasm"
+			],
 			"settings": {
-				"foreground": "#ffb86c"
-			}
-		},
-		{
-			"name": "SASM Logical Ops",
-			"scope": "keyword.operator.logical.sasm",
-			"settings": {
-				"foreground": "#8be9fd"
-			}
-		},
-		{
-			"name": "SASM Register Ops",
-			"scope": "keyword.operator.register.sasm",
-			"settings": {
-				"foreground": "#bd93f9"
-			}
-		},
-		{
-			"name": "SASM Arithmetic Ops",
-			"scope": "keyword.operator.arithmetic.sasm",
-			"settings": {
-				"foreground": "#ff79c6"
-			}
-		},
-		{
-			"name": "SASM Registers",
-			"scope": "variable.other.register.sasm",
-			"settings": {
-				"foreground": "#50fa7b"
-			}
-		},
-		{
-			"name": "SASM Variables",
-			"scope": "variable.other.sasm",
-			"settings": {
-				"foreground": "#f8f8f2"
+				"foreground": "#ffcb6b"
 			}
 		},
 		{
 			"name": "SASM Numbers",
-			"scope": "constant.numeric.integer.sasm",
+			"scope": "constant.number.integer.sasm",
 			"settings": {
-				"foreground": "#bd93f9"
+				"foreground": "#F78C6C"
 			}
-		},*/
+		},
 		{
 			"name": "Global settings",
 			"settings": {
@@ -764,13 +739,6 @@
 			],
 			"settings": {
 				"foreground": "#89DDFF"
-			}
-		},
-		{
-			"name": "Entity Name Function",
-			"scope": "entity.name.function",
-			"settings": {
-				"foreground": "#82AAFF"
 			}
 		},
 		{
