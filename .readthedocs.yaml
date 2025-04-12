@@ -4,10 +4,6 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
-
-  jobs:
-    pre_install:
-      - sudo apt update && sudo apt install -y build-essential
-    build:
-      commands:
-        - cd gbvm && make virex && cd ..
+  commands:
+    - sudo apt update && sudo apt install -y build-essential
+    - cd gbvm && make virex && cd ..
