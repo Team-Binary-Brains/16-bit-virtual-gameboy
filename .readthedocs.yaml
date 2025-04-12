@@ -6,3 +6,5 @@ build:
     python: "3.11"
   commands:
     - cd gbvm && make virex && cd ..
+    - mkdir -p $READTHEDOCS_OUTPUT/html
+    - echo "<html><body><h1>TODO:- Integrate doc builder</h1></body></html>" > $READTHEDOCS_OUTPUT/html/index.html
