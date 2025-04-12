@@ -14,4 +14,4 @@ jobs:
     steps:
     - uses: actions/checkout@v4
     - name: build
-      run: make virex
+      run: cd gbvm && make virex && cd ..
