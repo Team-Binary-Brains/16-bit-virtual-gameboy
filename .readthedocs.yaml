@@ -9,4 +9,5 @@ build:
     pre_install:
       - sudo apt update && sudo apt install -y build-essential
     build:
-      - cd gbvm && make virex && cd ..
+      commands:
+        - cd gbvm && make virex && cd ..
