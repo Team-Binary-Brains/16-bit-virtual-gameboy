@@ -6,7 +6,6 @@ build:
     python: "3.11"
   commands:
     - cd gbvm && make virex && cd ..
-    - cd Documentation && mkdocs build && cd ..
 
 mkdocs:
   configuration: Documentation/mkdocs.yml
