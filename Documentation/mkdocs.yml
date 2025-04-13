@@ -1,5 +1,6 @@
 site_name: VIREX
 docs_dir: .
+site_dir: $READTHEDOCS_OUTPUT/html
 nav:
   - Home: index.md
   - Instructions: Assembler/InstructionSet.md
