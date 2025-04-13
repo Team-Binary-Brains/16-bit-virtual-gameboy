@@ -4,8 +4,6 @@ build:
   os: ubuntu-22.04
   tools:
     python: "3.11"
-  commands:
-    - cd gbvm && make virex && cd ..
 
 mkdocs:
   configuration: Documentation/mkdocs.yml
@@ -13,3 +11,9 @@ mkdocs:
 python:
   install:
       - requirements: Documentation/requirements.txt
+
+build:
+  commands:
+    - cd gbvm && make virex && cd ..
+    - echo "Running MkDocs manually..."
+    - mkdocs build -f Documentation/mkdocs.yml
