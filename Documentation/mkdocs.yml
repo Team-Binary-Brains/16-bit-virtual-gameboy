@@ -2,6 +2,17 @@ site_name: VIREX
 
 nav:
   - Home: Assembler/InstructionSet.md
-
 theme:
   name: readthedocs
+  highlightjs: true
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+markdown_extensions:
+  - markdown_include.include:
+      base_path: .
+  - admonition
