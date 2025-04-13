@@ -5,7 +5,7 @@ nav:
   - Home: index.md
   - Instructions: Assembler/InstructionSet.md
 theme:
-  name: readthedocs
+  name: mkdocs-material
   highlightjs: true
 plugins:
   - search
