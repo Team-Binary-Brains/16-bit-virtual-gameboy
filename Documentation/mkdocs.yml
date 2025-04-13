@@ -1,8 +1,7 @@
 site_name: VIREX
-docs_dir: Assembler
 
 nav:
-  - Home: InstructionSet.md
+  - Home: Assembler/InstructionSet.md
 
 theme:
   name: readthedocs
