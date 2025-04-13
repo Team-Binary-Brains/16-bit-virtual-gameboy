@@ -7,8 +7,5 @@ build:
   commands:
     - cd gbvm && make virex && cd ..
 
-sphinx:
-  configuration: false
-
 mkdocs:
   configuration: Documentation/mkdocs.yml
