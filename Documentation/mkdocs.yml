@@ -1,5 +1,5 @@
 site_name: VIREX
-
+docs_dir: .
 nav:
   - Home: Assembler/InstructionSet.md
 theme:
