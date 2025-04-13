@@ -2,7 +2,7 @@ site_name: VIREX
 docs_dir: Assembler
 
 nav:
-  - Home: instructionSet.md
+  - Home: InstructionSet.md
 
 theme:
   name: readthedocs
