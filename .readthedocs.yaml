@@ -9,3 +9,7 @@ build:
 
 mkdocs:
   configuration: Documentation/mkdocs.yml
+
+python:
+  install:
+      - requirements: Documentation/requirements.txt
