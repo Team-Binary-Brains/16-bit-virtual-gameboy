@@ -1,0 +1,8 @@
+site_name: VIREX
+docs_dir: 
+
+nav:
+  - Home: index.md
+
+theme:
+  name: readthedocs
