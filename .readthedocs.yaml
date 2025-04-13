@@ -11,4 +11,4 @@ sphinx:
   configuration: false
 
 mkdocs:
-  configuration: docs/mkdocs.yml
+  configuration: Documentation/mkdocs.yml
