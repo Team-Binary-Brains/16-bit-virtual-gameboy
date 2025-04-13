@@ -6,14 +6,6 @@ build:
     python: "3.11"
   commands:
     - cd gbvm && make virex && cd ..
-    - echo "Installing requirements..."
     - pip install -r Documentation/requirements.txt
-    - echo "Running MkDocs manually..."
     - mkdocs build -f Documentation/mkdocs.yml
-
-mkdocs:
-  configuration: Documentation/mkdocs.yml
-
-python:
-  install:
-    - requirements: Documentation/requirements.txt
+    - mv html/* $READTHEDOCS_OUTPUT/html
