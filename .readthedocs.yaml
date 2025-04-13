@@ -8,4 +8,5 @@ build:
     - cd gbvm && make virex && cd ..
     - pip install -r Documentation/requirements.txt
     - mkdocs build -f Documentation/mkdocs.yml
+    - mkdir -p $READTHEDOCS_OUTPUT/html/
     - mv html/* $READTHEDOCS_OUTPUT/html
