@@ -1,7 +1,8 @@
 site_name: VIREX
 docs_dir: .
 nav:
-  - Home: Assembler/InstructionSet.md
+  - Home: index.md
+  - Instructions: Assembler/InstructionSet.md
 theme:
   name: readthedocs
   highlightjs: true
