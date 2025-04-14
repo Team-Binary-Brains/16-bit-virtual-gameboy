@@ -5,11 +5,11 @@ nav:
     - Home: index.md
     - Instructions: Assembler/InstructionSet.md
     - Libs:
-          -cmd: LIBS/univ_cmdutils.md
-          -defs: LIBS/univ_defs.md
-          -errors: LIBS/univ_errors.md
-          -fileops: LIBS/univ_fileops.md
-          -strings: LIBS/univ_strings.md
+          - cmd: LIBS/univ_cmdutils.md
+          - defs: LIBS/univ_defs.md
+          - errors: LIBS/univ_errors.md
+          - fileops: LIBS/univ_fileops.md
+          - strings: LIBS/univ_strings.md
 
 theme:
     name: material
