@@ -1,9 +1,9 @@
 #include <assert.h>
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
-#include "univ_malloc.h"
 #include "univ_fileops.h"
+#include "univ_malloc.h"
 
 Partition* createPartition(size_t capacity)
 {
@@ -40,9 +40,9 @@ char* insertIntoOrExpandRegion(Region* region, Partition* cur, size_t size, size
             ? worstCase
             : REGION_DEFAULT_CAPACITY);
 
+    cur = region->last;
     region->last->next = part;
     region->last = part;
-    cur = region->last;
 
     return insertIntoOrExpandRegion(region, cur->next, size, alignedAddressMask);
 }
@@ -109,31 +109,39 @@ const char* convertStrToRegionCstr(Region* region, String str)
     return cstr;
 }
 
-String concatRegionStr(Region *region, const char *a, const char *b)
+String concatRegionStr(Region* region, const char* a, const char* b)
 {
-    const size_t a_len = strlen(a);
-    const size_t b_len = strlen(b);
-    char *buf = allocateRegion(region, a_len + b_len);
-    memcpy(buf, a, a_len);
-    memcpy(buf + a_len, b, b_len);
+    const size_t aLen = strlen(a);
+    const size_t bLen = strlen(b);
+    char* buf = allocateRegion(region, aLen + bLen);
+    memcpy(buf, a, aLen);
+    memcpy(buf + aLen, b, bLen);
     return (String) {
-        .length = a_len + b_len,
+        .length = aLen + bLen,
         .data = buf
     };
 }
 
-void clearGarbage(Region* region){
-    for (Partition *part = region->first; part != NULL; part = part->next)
-    {
+void clearGarbage(Region* region)
+{
+    for (Partition* part = region->first; part != NULL; part = part->next) {
         part->size = 0;
     }
     region->last = region->first;
 }
 
-void cleanRegion(Region* region){
-    for (Partition *part = region->first,*next = NULL; part!=NULL; part = next)
-    {
+void cleanRegion(Region* region)
+{
+    for (Partition *part = region->first, *next = NULL; part != NULL; part = next) {
         next = part->next;
         free(part);
     }
+}
+
+const char* convertRegionStrtoCStr(Region* region, String sv)
+{
+    char* cstr = allocateRegion(region, sv.length + 1);
+    memcpy(cstr, sv.data, sv.length);
+    cstr[sv.length] = '\0';
+    return cstr;
 }

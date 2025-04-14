@@ -1,8 +1,8 @@
 #include "univ_errors.h"
-#include "univ_strings.h"
 #include "univ_defs.h"
+#include "univ_strings.h"
 
-const char* errorAsCstr(const Error* error)
+const char* getNameOfError(const Error* error)
 {
     switch ((*error)) {
     case ERR_OK:
@@ -28,7 +28,7 @@ const char* errorAsCstr(const Error* error)
     case ERR_ALREADY_BOUND:
         return "ERR_ALREADY_BOUND";
     default:
-        assert(0 && "univ_errors : errorAsCstr : Unreachable");
+        assert(0 && "univ_errors : getNameOfError : Unreachable");
     }
 }
 
@@ -40,7 +40,7 @@ void fileErrorDispWithExit(const char* message, const char* filePath)
 
 void executionErrorWithExit(const Error* error)
 {
-    fprintf(stderr, "Error : %s\n", errorAsCstr(error));
+    fprintf(stderr, "Error : %s\n", getNameOfError(error));
     exit(1);
 }
 
@@ -53,18 +53,19 @@ void displayMsgWithExit(const char* message)
 void displayStringMessageError(const char* msg, String str)
 {
     fprintf(stderr, "\n|   |                                                                                                                              |");
-    fprintf(stderr, "\n| W | WARNING | '%.*s' | %s", (int)str.length, str.data, msg);
+    fprintf(stderr, "\n| W | ERROR | '%.*s' | %s", (int)str.length, str.data, msg);
 
     for (size_t i = strlen(msg) + str.length; i < 110; i++)
         fprintf(stderr, " ");
 
     fprintf(stderr, "|"
                     "\n|   |                                                                                                                              |\n");
+    exit(1);
 }
 
 void debugCommentDisplay(String* s)
 {
-    String seperator = splitStr(s, ' ');
+    String seperator = splitStrByChar(s, ' ');
     fprintf(stdout, "\n| %.*s |", 1, seperator.data);
 
     if (s->length < 125)
@@ -83,8 +84,30 @@ void debugMessageDisplay(String* s)
         fprintf(stdout, " %.*s |", (int)(124), s->data);
 }
 
-void displayErrorDetailsWithExit(String filePath, int lineNo)
+void displayErrorDetailsWithExit(FileLocation location, const char* msg, String reason)
 {
-    fprintf(stderr, str_Fmt ":%d\n", str_Arg(filePath), lineNo);
+    fprintf(stderr, FLFmt ": ERROR: %s `" strFmt "`\n",
+        FLArg(location),
+        msg,
+        strArg(reason));
+    exit(1);
+}
+
+void displayErrorLocationWithExit(FileLocation location, const char* msg)
+{
+    fprintf(stderr, "%.*s : %d : ERROR: %s \n",
+        (int)location.filePath.length,
+        location.filePath.data,
+        location.lineNumber,
+        msg);
+    exit(1);
+}
+
+void displayCErrorDetailsWithExit(FileLocation location, const char* msg, const char* reason)
+{
+    fprintf(stderr, FLFmt ": ERROR: %s `%s`\n",
+        FLArg(location),
+        msg,
+        reason);
     exit(1);
 }

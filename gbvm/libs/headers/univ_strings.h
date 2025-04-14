@@ -20,13 +20,13 @@
  * @param length The length of the string.
  * @param data A pointer to the character data of the string.
  */
-typedef struct {
+struct String {
     size_t length;
     const char* data;
-} String;
+};
 
-#define str_Fmt "%.*s"
-#define str_Arg(str) (int)(str).length, (str).data
+#define strFmt "%.*s"
+#define strArg(str) (int)(str).length, (str).data
 
 /**
  * @brief Removes leading whitespace characters from a string.
@@ -81,7 +81,7 @@ String trim(String);
  *
  * @cite Tsoding Playlist specified in readme
  */
-String splitStr(String*, char);
+String splitStrByChar(String*, char);
 
 /**
  * @brief Converts a string to an integer.
@@ -105,3 +105,15 @@ void printString(String s);
 bool compareStr(String a, String b);
 
 String convertCstrToStr(const char*);
+
+bool getIndexOf(String str, char c, size_t* index);
+
+bool startsWith(String str, String prefix);
+
+String splitStrByLen(String* str, size_t n);
+
+String splitStrByCondition(String* str, bool (*predicate)(char x));
+
+String splitStrByLenReversed(String* str, size_t n);
+
+bool endsWith(String str, String expected_suffix);

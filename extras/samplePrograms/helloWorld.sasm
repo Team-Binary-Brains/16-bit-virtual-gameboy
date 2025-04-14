@@ -1,0 +1,40 @@
+%include "calls.smh"
+
+%bind     buffer    " "
+
+%bind     hello     " Hello, World"                     ; 12
+%bind     msg0      " THIS IS A SAMPLE SASM CODE"       ; 26
+
+
+%entry    main                            ; ENTRY POINT
+
+main:
+%scope
+
+    PUSH    buffer
+    PUSH    10
+    WRITE1
+    
+    SETR    msg0        [L0]
+    SETR    len(msg0)   [QT]
+    CALL    println
+
+    SETR    hello       [L0]
+    SETR    len(hello)  [QT]
+    CALL    println
+    
+%end
+SHUTS
+
+
+println:
+%scope
+    INVOK    7
+%end
+printNewLine:
+%scope
+    SETR     buffer      [L0]
+    SETR     1           [QT]
+    INVOK    7
+    RET
+%end

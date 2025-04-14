@@ -10,9 +10,6 @@
 
 #pragma once
 
-#include "sasm_assembler.h"
-#include "sasm_instructions.h"
-#include "sasm_memory.h"
 #include "univ_defs.h"
 #include "univ_errors.h"
 #include "univ_malloc.h"
@@ -71,4 +68,5 @@ void executeProgram(Vm* vm, int debug, int i);
 Error executeInst(Vm* vm, WINDOW* win);
 
 Register* getReg(RegID id, Vm* vm);
-void setReg(RegID id,Vm* vm,DataEntry val);
+
+void setReg(RegID id, Vm* vm, DataEntry val);

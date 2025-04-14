@@ -1,7 +1,7 @@
 #pragma once
+#include <stdarg.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 
 #include "univ_strings.h"
 
@@ -15,21 +15,23 @@ struct Partition {
 
 #define REGION_DEFAULT_CAPACITY 65536
 
-typedef struct {
+struct Region {
     Partition* first;
     Partition* last;
-} Region;
+};
 
 Partition* createPartition(size_t capacity);
 
 void* allocateRegion(Region* region, size_t size);
 
-int loadFileIntoRegionStr(Region* region, String file_path, String* content);
+int loadFileIntoRegionStr(Region* region, String filePath, String* content);
 
 const char* convertStrToRegionCstr(Region* region, String str);
 
-String concatRegionStr(Region *region, const char *a, const char *b);
+String concatRegionStr(Region* region, const char* a, const char* b);
 
 void clearGarbage(Region* region);
 
 void cleanRegion(Region* region);
+
+const char* convertRegionStrtoCStr(Region* arena, String sv);

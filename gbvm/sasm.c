@@ -32,13 +32,13 @@ int main(int argc, char** argv)
     }
 
     if (!disassemblyMode) {
-        parseAsmIntoProgram(&sasm, convertCstrToStr(inputFile));
-        assembleProgramIntoBytecode(&sasm, outputFile);
+        translateSasmRootFile(&sasm, convertCstrToStr(inputFile));
+        generateSmExecutable(&sasm, outputFile);
         return 0;
     }
     FILE* f = openFile(outputFile, "wb");
 
-    loadProgramIntoSasm(&sasm, inputFile);
+    loadSmExecutableIntoSasm(&sasm, inputFile);
     for (InstAddr i = 0; i < sasm.prog.instruction_count; ++i) {
         OpcodeDetails details = getOpcodeDetails(sasm.prog.instructions[i].type);
         fprintf(f, "%s", details.name);

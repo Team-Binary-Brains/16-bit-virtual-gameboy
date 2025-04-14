@@ -64,7 +64,7 @@ void loadProgramIntoVm(Vm* vm, const char* filePath)
         exit(1);
     }
 
-    setReg(NX,vm,meta.entry);
+    setReg(REG_NX, vm, meta.entry);
 
     vm->prog.instruction_count = fread(vm->prog.instructions, sizeof(vm->prog.instructions[0]), meta.programSize, f);
 
