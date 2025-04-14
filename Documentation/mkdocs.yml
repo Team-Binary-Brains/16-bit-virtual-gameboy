@@ -2,26 +2,28 @@ site_name: VIREX
 docs_dir: .
 site_dir: ../html
 nav:
-    - Home: index.md
-    - Instructions: Assembler/InstructionSet.md
-    - Libs:
-          - cmd: LIBS/univ_cmdutils.md
-          - defs: LIBS/univ_defs.md
-          - errors: LIBS/univ_errors.md
-          - fileops: LIBS/univ_fileops.md
-          - strings: LIBS/univ_strings.md
+  - Home: index.md
+  - Instructions: Assembler/InstructionSet.md
+  - Libs:
+    - cmd: LIBS/univ_cmdutils.md
+    - defs: LIBS/univ_defs.md
+    - errors: LIBS/univ_errors.md
+    - fileops: LIBS/univ_fileops.md
+    - strings: LIBS/univ_strings.md
 
 theme:
-    name: material
-    highlightjs: true
+  name: material
+  highlightjs: true
+
 plugins:
-    - search
-    - mkdocstrings:
-          handlers:
-              python:
-                  options:
-                      docstring_style: sphinx
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: sphinx
+
 markdown_extensions:
-    - markdown_include.include:
-          base_path: .
-    - admonition
+  - markdown_include.include:
+      base_path: .
+  - admonition
