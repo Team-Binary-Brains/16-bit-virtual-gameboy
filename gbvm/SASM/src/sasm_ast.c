@@ -1,4 +1,5 @@
 #include "sasm_assembler.h"
+#include "univ_fileops.h"
 
 static bool isPath(char x)
 {
