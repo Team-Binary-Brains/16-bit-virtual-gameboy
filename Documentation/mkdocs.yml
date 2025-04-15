@@ -1,19 +1,59 @@
 site_name: VIREX
-docs_dir: .
+docs_dir: docs
 site_dir: ../html
 nav:
-  - Home: index.md
-  - Instructions: Assembler/InstructionSet.md
   - Libs:
     - cmd: LIBS/univ_cmdutils.md
     - defs: LIBS/univ_defs.md
     - errors: LIBS/univ_errors.md
     - fileops: LIBS/univ_fileops.md
     - strings: LIBS/univ_strings.md
+  - OCC:
+    - CodeGen: OCC/O_codegenerator .md
+    - Lexer: OCC/O_lexer .md
+    - Parser: OCC/O_parser .md
+  - SASM:
+    - Assembler: SASM/sasm_assembler .md
+    - Flags: SASM/sasm_flags .md
+    - Instructions: SASM/sasm_instructions .md
+    - Memory: SASM/sasm_memory .md
+  - VM:
+    - gbvm: VM/gbvm .md
 
 theme:
   name: material
   highlightjs: true
+  features:
+    - navigation.footer
+    - navigation.indexes
+    - navigation.tabs
+    - navigation.top
+    - navigation.expand
+    - navigation.sections
+    - navigation.tracking
+    - navigation.instant
+    - search.highlight
+    - search.share
+    - search.suggest.autocomplete.enable
+    - header.autohide
+    - content.code.annotate
+    - content.code.highlight
+    - content.code.copy
+    - content.tabs.link
+    - announce.dismiss
+  palette:
+    - scheme: slate
+      primary: indigo
+      accent: green
+      toggle:
+        icon: material/toggle-switch
+        name: Toggle dark mode
+    - scheme: default
+      primary: black
+      accent: orange
+      toggle:
+        icon: material/toggle-switch
+        name: Toggle light mode
 
 plugins:
   - search
