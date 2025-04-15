@@ -50,19 +50,19 @@ CC = gcc
 CFLAGS = -O3 -Wall -Wextra -Werror -Wfatal-errors -Wswitch-enum -std=c2x -pedantic -lncursesw -I$(IGDIR) -I$(IADIR) -I$(ICDIR) -I$(IMDIR) 
 LIBS =
 
-sasm: 	sasm.c $(G_CODE) $(A_CODE)
+sasm: 	SASM/sasm.c $(G_CODE) $(A_CODE)
 		@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
 		@echo  ""
 		@echo  "SASM MADE SUCCESSFULLY"
 		@echo  ""
 
-occ:	occ.c  $(G_CODE) $(C_CODE) 
+occ:	O/occ.c  $(G_CODE) $(C_CODE) 
 		@$(CC) -g -o $@ $^   $(CFLAGS) $(LIBS)
 		@echo  ""
 		@echo  "COMPILER MADE SUCCESSFULLY"
 		@echo  ""
 
-virex: 	main.c $(G_CODE) $(M_CODE) $(A_CODE) $(C_CODE)
+virex: 	VM/main.c $(G_CODE) $(M_CODE) $(A_CODE) $(C_CODE)
 		@make occ
 		@make sasm
 	  	@$(CC) -o $@ $^   $(CFLAGS) $(LIBS)
