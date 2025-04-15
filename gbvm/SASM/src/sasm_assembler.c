@@ -1,196 +1,34 @@
 #include "sasm_assembler.h"
-#include "sasm_memory.h"
 #include "univ_fileops.h"
-#include "univ_malloc.h"
-#include "univ_strings.h"
 
-Error bindDirective(Sasm* sasm, String name, String* line)
+void pushScope(Sasm* sasm, Scope* scope)
 {
-    *line = trim(*line);
-    String value = *line;
-    QuadWord word = { 0 };
-    if (!translateLiteral(sasm, value, &word, NULL)) {
-        fprintf(stderr, " ERROR: `" str_Fmt "` is not a number", str_Arg(value));
-        return ERR_NAN;
-    }
-
-    if (!bindValue(sasm, name, word, SASM_CONST)) {
-        fprintf(stderr, " ERROR: name `" str_Fmt "` is already bound\n", str_Arg(name));
-        return ERR_ALREADY_BOUND;
-    }
-    return ERR_OK;
+    assert(scope->previous == NULL);
+    scope->previous = sasm->scope;
+    sasm->scope = scope;
 }
 
-Error includeDirective(Sasm* sasm, String* line)
+void createAndPushScope(Sasm* sasm)
 {
-    if (*line->data != '"' || line->data[line->length - 1] != '"') {
-        fprintf(stderr,
-            " ERROR: include file path has to be surrounded with quotation marks\n");
-        exit(1);
-    }
-
-    line->data += 1;
-    line->length -= 2;
-
-    if (sasm->includeLevel + 1 >= MAX_INCLUDE_LEVEL) {
-        fprintf(stderr, " ERROR: exceeded maximum include level\n");
-        exit(1);
-    }
-
-    sasm->includeLevel += 1;
-    parseAsmIntoProgram(sasm, *line);
-    sasm->includeLevel -= 1;
-
-    return ERR_OK;
+    Scope* scope = allocateRegion(&sasm->region, sizeof(*sasm->scope));
+    pushScope(sasm, scope);
 }
 
-Error processPreProcessorDirective(Sasm* sasm, String* line, String token)
+void popScope(Sasm* sasm)
 {
-    *line = trim(*line);
-    if (compareStr(token, convertCstrToStr("bind"))) {
-        String name = splitStr(line, ' ');
-        if (name.length <= 0) {
-            displayMsgWithExit(" ERROR: binding name is not provided\n");
-        }
-        return bindDirective(sasm, name, line);
-    }
-
-    if (compareStr(token, convertCstrToStr("include"))) {
-        if (line->length <= 0) {
-            displayMsgWithExit(" ERROR: include file path is not provided\n");
-        }
-        return includeDirective(sasm, line);
-    }
-
-    fprintf(stderr,
-        " ERROR: unknown pre-processor directive `" str_Fmt "`\n",
-        str_Arg(token));
-    exit(1);
+    assert(sasm->scope != NULL);
+    sasm->scope = sasm->scope->previous;
 }
 
-bool bindValue(Sasm* sasm, String name, QuadWord value, BindingType type)
+bool resolveIncludeFilePath(Sasm* sasm, String filePath, String* resolvedPath)
 {
-    assert(sasm->bindingCount < BINDINGS_CAPACITY);
-
-    if (resolveBinding(sasm, name, NULL, NULL)) {
-        return false;
-    }
-
-    sasm->bindings[sasm->bindingCount++] = (Binding) { .name = name, .value = value, .type = type };
-    return true;
-}
-
-void pushLabel(Sasm* sasm, InstAddr addr, String name)
-{
-    assert(sasm->LabelsCount < LABELS_CAPACITY);
-    sasm->Labels[sasm->LabelsCount++] = (Label) { .addr = addr, .name = name };
-}
-
-QuadWord pushStringToMemory(Sasm* sasm, String str)
-{
-    assert(sasm->memorySize + str.length <= MEMORY_CAPACITY);
-
-    QuadWord result = quadword_u64(sasm->memorySize);
-    memcpy(sasm->memory + sasm->memorySize, str.data, str.length);
-    sasm->memorySize += str.length;
-
-    if (sasm->memorySize > sasm->memoryCapacity) {
-        sasm->memoryCapacity = sasm->memorySize;
-    }
-
-    return result;
-}
-
-bool translateLiteral(Sasm* sasm, String str, QuadWord* output,bool *inlineOut)
-{
-    if (str.length >= 2 && *str.data == '[' && str.data[str.length - 1] == ']') {
-        if (str.length - 2 < 2) {
-            return false;
-        }
-        switch (str.data[1]) {
-        case 'H':
-            if (str.data[2] > '1')
-                return false;
-            *output = quadword_u64((uint64_t)(H0 + str.data[2] - '0'));
-            break;
-        case 'I':
-            if (str.data[2] > '1')
-                return false;
-            *output = quadword_u64((uint64_t)(I0 + str.data[2] - '0'));
-            break;
-        case 'L':
-            if (str.data[2] > '3')
-                return false;
-            *output = quadword_u64((uint64_t)(L0 + str.data[2] - '0'));
-            break;
-        case 'P':
-            if (str.data[2] > '3')
-                return false;
-            *output = quadword_u64((uint64_t)(P0 + str.data[2] - '0'));
-            break;
-        case 'J':
-            *output = quadword_u64((uint64_t)JS);
-            break;
-        case 'K':
-            *output = quadword_u64((uint64_t)KC);
-            break;
-        case 'O':
-            *output = quadword_u64((uint64_t)OP);
-            break;
-        case 'Q':
-            *output = quadword_u64((uint64_t)QT);
-            break;
-        case 'R':
-            *output = quadword_u64((uint64_t)RF);
-            break;
-
-        default:
-            assert(0 && "INVALID REGISTER NAME");
-        }
-        if (str.data[3] == 'v') {
-            *inlineOut = true;
-        }
-
-        return true;
-    }
-    if (str.length >= 2 && *str.data == '\'' && str.data[str.length - 1] == '\'') {
-        if (str.length - 2 != 1) {
-            return false;
-        }
-        *output = quadword_u64((uint64_t)str.data[1]);
-        return true;
-    } else if (str.length >= 2 && *str.data == '"' && str.data[str.length - 1] == '"') {
-        str.data += 1;
-        str.length -= 2;
-        *output = pushStringToMemory(sasm, str);
-        return true;
-    }
-
-    const char* cstr = convertStrToRegionCstr(&sasm->region, str);
-    char* endptr = 0;
-    QuadWord result = { 0 };
-
-    result.u64 = strtoull(cstr, &endptr, 10);
-    if ((size_t)(endptr - cstr) != str.length) {
-
-        result.f64 = strtod(cstr, &endptr);
-
-        if ((size_t)(endptr - cstr) != str.length)
-            return false;
-    }
-
-    *output = result;
-    return true;
-}
-
-bool resolveBinding(const Sasm* sasm, String name, QuadWord* output, BindingType* type)
-{
-    for (size_t i = 0; i < sasm->bindingCount; ++i) {
-        if (compareStr(sasm->bindings[i].name, name)) {
-            if (output)
-                *output = sasm->bindings[i].value;
-            if (type)
-                *type = sasm->bindings[i].type;
+    for (size_t i = 0; i < sasm->includePathsCnt; ++i) {
+        String path = appendToPath(&sasm->region, sasm->includePaths[i],
+            filePath);
+        if (doesFileExist(convertRegionStrtoCStr(&sasm->region, path))) {
+            if (resolvedPath) {
+                *resolvedPath = path;
+            }
             return true;
         }
     }
@@ -198,161 +36,274 @@ bool resolveBinding(const Sasm* sasm, String name, QuadWord* output, BindingType
     return false;
 }
 
-void assembleProgramIntoBytecode(Sasm* sasm, const char* filePath)
+void translateSasmEntryDirective(Sasm* sasm, EntryStmt entry, FileLocation location)
+{
+    assert(sasm->scope);
+
+    if (sasm->deferredEntry.bindingName.length > 0) {
+        fprintf(stderr,
+            FLFmt ": ERROR: entry point has been already set within the same scope!\n",
+            FLArg(location));
+        fprintf(stderr, FLFmt ": NOTE: the first entry point\n",
+            FLArg(sasm->deferredEntry.location));
+        exit(1);
+    }
+
+    if (entry.value.type != EXPR_BINDING) {
+        fprintf(stderr, FLFmt ": ERROR: only bindings are allowed to be set as entry points for now.\n",
+            FLArg(location));
+        exit(1);
+    }
+
+    String label = entry.value.value.binding;
+    sasm->deferredEntry.bindingName = label;
+    sasm->deferredEntry.location = location;
+    sasm->deferredEntry.scope = sasm->scope;
+}
+
+void translateSasmIncludeDirective(Sasm* sasm, IncludeStmt include, FileLocation location)
+{
+    String resolved_path = (String) { 0 };
+    if (resolveIncludeFilePath(sasm, include.path, &resolved_path)) {
+        include.path = resolved_path;
+    }
+
+    FileLocation prev_includeLocation = sasm->includeLocation;
+    sasm->includeLevel += 1;
+    sasm->includeLocation = location;
+    translateSasmFile(sasm, include.path);
+    sasm->includeLocation = prev_includeLocation;
+    sasm->includeLevel -= 1;
+}
+
+void translateSasmBindDirective(Sasm* sasm, ConstStmt konst, FileLocation location)
+{
+    assert(sasm->scope != NULL);
+    bindExprLocalScope(sasm->scope, konst.name, konst.value, location);
+}
+
+void translateSasmInstruction(Sasm* sasm, InstStmt inst, FileLocation location)
+{
+    assert(sasm $instructionCount < PROGRAM_CAPACITY);
+    sasm $instructions[sasm $instructionCount].type = inst.type;
+    sasm $instructions[sasm $instructionCount].operand.u64 = 0;
+    OpcodeDetails details = getOpcodeDetails(inst.type);
+    if (details.has_operand) {
+        pushUnresolvedOperand(sasm, sasm $instructionCount, inst.operand, location);
+    }
+    if (details.has_operand2) {
+        pushUnresolvedOperand(sasm, sasm $instructionCount, inst.operand2, location);
+    }
+    // printf("%s %d %d %ld %ld\n", details.name, inst.operand.type, inst.operand2.type, inst.operand.value.lit_int, inst.operand2.value.lit_int);
+
+    sasm $instructionCount += 1;
+}
+
+void translateSasmStatementChain(Sasm* sasm, StmtNode* block)
+{
+    for (StmtNode* iter = block; iter != NULL; iter = iter->next) {
+        Stmt statement = iter->statement;
+        switch (statement.kind) {
+        case STMT_LABEL:
+            bindUnresolvedLocalScope(sasm->scope, statement.value.label.name, BIND_TYPE_INST_ADDR, statement.location);
+            break;
+        case STMT_CONST:
+            translateSasmBindDirective(sasm, statement.value.constant, statement.location);
+            break;
+        case STMT_INCLUDE:
+            translateSasmIncludeDirective(sasm, statement.value.include, statement.location);
+            break;
+        case STMT_ENTRY:
+            translateSasmEntryDirective(sasm, statement.value.entry, statement.location);
+            break;
+        case STMT_BLOCK:
+            translateSasmStatementChain(sasm, statement.value.block);
+            break;
+
+        case STMT_SCOPE:
+        case STMT_INST:
+            break;
+
+        default:
+            assert(false && "translate: unreachable");
+            exit(1);
+        }
+    }
+    for (StmtNode* iter = block; iter != NULL; iter = iter->next) {
+        Stmt statement = iter->statement;
+        switch (statement.kind) {
+        case STMT_INST:
+            translateSasmInstruction(sasm, statement.value.inst, statement.location);
+            break;
+
+        case STMT_LABEL:
+            Binding* binding = resolveBinding(sasm, statement.value.label.name);
+            assert(binding != NULL);
+            assert(binding->status == BIND_STATUS_DEFERRED);
+
+            binding->status = BIND_STATUS_EVALUATED;
+            binding->value.u64 = sasm $instructionCount;
+            break;
+
+        case STMT_SCOPE:
+            createAndPushScope(sasm);
+            translateSasmStatementChain(sasm, statement.value.scope);
+            popScope(sasm);
+            break;
+
+        case STMT_BLOCK:
+        case STMT_ENTRY:
+        case STMT_INCLUDE:
+        case STMT_CONST:
+            break;
+
+        default:
+            assert(false && "translate: unreachable");
+            exit(1);
+        }
+    }
+}
+
+void resolveAllUnresolvedOperands(Sasm* sasm)
+{
+    Scope* savedScope = sasm->scope;
+
+    for (size_t i = 0; i < sasm->symbolsCount; ++i) {
+        assert(sasm->symbols[i].scope);
+        sasm->scope = sasm->symbols[i].scope;
+
+        InstAddr addr = sasm->symbols[i].addr;
+        Expr expr = sasm->symbols[i].expr;
+        FileLocation location = sasm->symbols[i].location;
+
+        EvalResult result = evaluateExpression(sasm, expr, location);
+        assert(result.status == EVAL_STATUS_OK);
+        sasm $instructions[addr].operand = result.value;
+        if (expr.type == EXPR_REG_INLINE) {
+            sasm $instructions[addr].opr1IsInline = true;
+        }
+
+        OpcodeDetails inst_def = getOpcodeDetails(sasm $instructions[addr].type);
+        assert(inst_def.has_operand);
+
+        if (inst_def.has_operand2) {
+            i++;
+            Expr expr2 = sasm->symbols[i].expr;
+            EvalResult result2 = evaluateExpression(sasm, expr2, location);
+            sasm $instructions[addr].operand2 = result2.value;
+            if (expr2.type == EXPR_REG_INLINE) {
+                sasm $instructions[addr].opr2IsInline = true;
+            }
+        }
+    }
+
+    sasm->scope = savedScope;
+}
+
+void resolveProgramEntryPoint(Sasm* sasm)
+{
+    Scope* savedScope = sasm->scope;
+    if (sasm->deferredEntry.bindingName.length > 0) {
+        assert(sasm->deferredEntry.scope);
+        sasm->scope = sasm->deferredEntry.scope;
+
+        if (sasm->hasEntry) {
+            fprintf(stderr,
+                FLFmt ": ERROR: entry point has been already set!\n",
+                FLArg(sasm->deferredEntry.location));
+            fprintf(stderr, FLFmt ": NOTE: the first entry point\n",
+                FLArg(sasm->entryLocation));
+            exit(1);
+        }
+
+        Binding* binding = resolveBinding(
+            sasm,
+            sasm->deferredEntry.bindingName);
+        if (binding == NULL) {
+            fprintf(stderr, FLFmt ": ERROR: unknown binding `" strFmt "`\n",
+                FLArg(sasm->deferredEntry.location),
+                strArg(sasm->deferredEntry.bindingName));
+            exit(1);
+        }
+
+        if (binding->type != BIND_TYPE_INST_ADDR) {
+            fprintf(stderr, FLFmt ": ERROR: Type check error. Trying to set `" strFmt "` that has the type of %s as an entry point. Entry point has to be %s.\n",
+                FLArg(sasm->deferredEntry.location),
+                strArg(binding->name),
+                getNameOfBindType(binding->type),
+                getNameOfBindType(BIND_TYPE_INST_ADDR));
+            exit(1);
+        }
+
+        EvalResult result = evaluateBinding(sasm, binding);
+        assert(result.status == EVAL_STATUS_OK);
+
+        sasm->entry = result.value.u64;
+        sasm->hasEntry = true;
+        sasm->entryLocation = sasm->deferredEntry.location;
+    }
+
+    sasm->scope = savedScope;
+}
+
+void translateSasmRootFile(Sasm* sasm, String inputFilePath)
+{
+    createAndPushScope(sasm);
+    translateSasmFile(sasm, inputFilePath);
+    popScope(sasm);
+
+    resolveAllUnresolvedOperands(sasm);
+    resolveProgramEntryPoint(sasm);
+}
+
+void generateSmExecutable(Sasm* sasm, const char* filePath)
 {
     FILE* f = openFile(filePath, "wb");
 
     Metadata meta = {
         .magic = FILE_MAGIC,
         .version = FILE_VERSION,
-        .programSize = sasm->prog.instruction_count,
+        .entry = sasm->entry,
+        .programSize = sasm $instructionCount,
         .memorySize = sasm->memorySize,
         .memoryCapacity = sasm->memoryCapacity,
     };
 
     fwrite(&meta, sizeof(meta), 1, f);
     if (ferror(f)) {
-        fprintf(stderr, "ERROR: Could not write to file `%s`: %s\n",
-            filePath, strerror(errno));
-        exit(1);
+        fileErrorDispWithExit("Could not write to file", filePath);
     }
 
-    fwrite(sasm->prog.instructions, sizeof(sasm->prog.instructions[0]), sasm->prog.instruction_count, f);
+    fwrite(sasm $instructions, sizeof(sasm $instructions[0]), sasm $instructionCount, f);
     if (ferror(f)) {
-        fprintf(stderr, "ERROR: Could not write to file `%s`: %s\n",
-            filePath, strerror(errno));
-        exit(1);
+        fileErrorDispWithExit("Could not write to file", filePath);
     }
 
     fwrite(sasm->memory, sizeof(sasm->memory[0]), sasm->memorySize, f);
     if (ferror(f)) {
-        fprintf(stderr, "ERROR: Could not write to file `%s`: %s\n",
-            filePath, strerror(errno));
-        exit(1);
+        fileErrorDispWithExit("Could not write to file", filePath);
     }
 
     closeFile(f, filePath);
 }
 
-Error processLine(Sasm* sasm, String* line)
+void translateSasmFile(Sasm* sasm, String inputFilePath)
 {
-    String token = trim(splitStr(line, ' '));
+    SasmLexer SasmLexer = { 0 };
 
-    if (token.length > 0 && *token.data == PREP_SYMBOL) {
-        token.length -= 1;
-        token.data += 1;
-        return processPreProcessorDirective(sasm, line, token);
+    if (!loadSasmFileIntoSasmLexer(&SasmLexer, &sasm->region, inputFilePath)) {
+
+        if (sasm->includeLevel > 0)
+            fprintf(stderr, FLFmt, FLArg(sasm->includeLocation));
+
+        fileErrorDispWithExit("Could not read file", inputFilePath.data);
     }
-
-    if (token.length > 0 && token.data[token.length - 1] == ':') {
-        String label = {
-            .length = token.length - 1,
-            .data = token.data
-        };
-
-        if (!bindValue(sasm, label, quadword_u64(sasm->prog.instruction_count), SASM_LABEL)) {
-            fprintf(stderr, " ERROR: name `" str_Fmt "` is already bound to something\n", str_Arg(label));
-            return ERR_ALREADY_BOUND;
-        }
-
-        token = trim(splitStr(line, ' '));
-    }
-
-    if (token.length <= 0) {
-        return ERR_OK;
-    }
-
-    String operand;
-    OpcodeDetails details;
-    if (getOpcodeDetailsFromName(token, &details)) {
-        assert(sasm->prog.instruction_count < PROGRAM_CAPACITY);
-        Instruction* inst = &sasm->prog.instructions[sasm->prog.instruction_count];
-        inst->type = details.type;
-
-        *line = trim(splitStr(line, '\n'));
-        operand = trim(splitStr(line, ' '));
-        if (details.has_operand) {
-            // printString(operand);
-            if (operand.length == 0) {
-                fprintf(stderr, " ERROR: instruction `" str_Fmt "` requires an operand\n",
-                    str_Arg(token));
-                exit(1);
-            }
-            if (!translateLiteral(
-                    sasm,
-                    operand, &inst->operand, &inst->opr1IsInline)) {
-                pushLabel(
-                    sasm, sasm->prog.instruction_count, operand);
-            }
-        }
-
-        operand = trim(*line);
-        if (details.has_operand2) {
-            if (operand.length == 0) {
-                fprintf(stderr, " ERROR: instruction `" str_Fmt "` requires 2 operands\n",
-                    str_Arg(token));
-                exit(1);
-            }
-            if (!translateLiteral(
-                    sasm,
-                    operand, &inst->operand2, &inst->opr2IsInline)) {
-                pushLabel(
-                    sasm, sasm->prog.instruction_count, operand);
-            }
-        }
-
-        sasm->prog.instruction_count += 1;
-    } else {
-        fprintf(stderr, " ERROR: unknown instruction `" str_Fmt "`\n",
-            str_Arg(token));
-        exit(1);
-    }
-
-    return ERR_OK;
+    CodeBlock inputFileBlock = getCodeBlockFromLines(&sasm->region, &SasmLexer);
+    translateSasmStatementChain(sasm, inputFileBlock.begin);
+    generateASTPng(inputFilePath, inputFileBlock.begin);
 }
 
-void parseAsmIntoProgram(Sasm* sasm, String inputFilePath)
-{
-    String original_source;
-    loadFileIntoRegionStr(&sasm->region, inputFilePath, &original_source);
-    String source = original_source;
-
-    int line_number = 0;
-
-    while (source.length > 0) {
-        String line = trim(splitStr(&source, '\n'));
-        line = trim(splitStr(&line, COMMENT_SYMBOL));
-        // printString(line);
-        line_number += 1;
-        if (line.length > 0) {
-            if (processLine(sasm, &line) != ERR_OK) {
-                displayErrorDetailsWithExit(inputFilePath, line_number);
-            }
-        }
-    }
-
-    for (size_t i = 0; i < sasm->LabelsCount; ++i) {
-        String name = sasm->Labels[i].name;
-        InstAddr addr = sasm->Labels[i].addr;
-        BindingType type;
-        if (!resolveBinding(sasm, name, &sasm->prog.instructions[addr].operand, &type)) {
-            fprintf(stderr, str_Fmt ": ERROR: unknown binding `" str_Fmt "`\n",
-                str_Arg(inputFilePath), str_Arg(name));
-            exit(1);
-        }
-        if (sasm->prog.instructions[addr].type == INST_CALL && type != SASM_LABEL) {
-            fprintf(stderr,
-                str_Fmt ": ERROR: trying to call not a label. `" str_Fmt "` is %s, but the call instructions"
-                        " accepts only literals or labels.\n",
-                str_Arg(inputFilePath),
-                str_Arg(name),
-                bindingTypeAsCstr(type));
-            exit(1);
-        }
-    }
-}
-
-void loadProgramIntoSasm(Sasm* sasm, const char* filePath)
+void loadSmExecutableIntoSasm(Sasm* sasm, const char* filePath)
 {
     memset(sasm, 0, sizeof(*sasm));
 
@@ -362,38 +313,31 @@ void loadProgramIntoSasm(Sasm* sasm, const char* filePath)
 
     size_t n = fread(&meta, sizeof(meta), 1, f);
     if (n < 1) {
-        fprintf(stderr, "ERROR: Could not read meta data from file `%s`: %s\n",
-            filePath, strerror(errno));
-        exit(1);
+        fileErrorDispWithExit("Could not read meta data from file", filePath);
     }
 
     if (meta.magic != FILE_MAGIC) {
-        fprintf(stderr,
-            "ERROR: %s does not appear to be a valid sasm file. "
-            "Unexpected magic %04X. Expected %04X.\n",
-            filePath, meta.magic, FILE_MAGIC);
-        exit(1);
+        fprintf(stderr, "Unexpected magic %04X. Expected %04X.\n", meta.magic, FILE_MAGIC);
+        fileErrorDispWithExit("Not a valid SASM File ", filePath);
     }
 
     if (meta.version != FILE_VERSION) {
-        fprintf(stderr,
-            "ERROR: %s: unsupported version of sasm file %d. Expected version %d.\n",
-            filePath, meta.version, FILE_VERSION);
-        exit(1);
+        fprintf(stderr, "Encountered version %d. Expected version %d.\n", meta.version, FILE_VERSION);
+        fileErrorDispWithExit("unsupported version of SASM File ", filePath);
     }
 
     if (meta.programSize > PROGRAM_CAPACITY) {
         fprintf(stderr,
-            "ERROR: %s: program section is too big. The file contains %" PRIu64 " program instruction. But the capacity is %" PRIu64 "\n",
-            filePath, meta.programSize, (uint64_t)PROGRAM_CAPACITY);
-        exit(1);
+            "The file contains %" PRIu64 " program instruction. But the capacity is %" PRIu64 "\n",
+            meta.programSize, (uint64_t)PROGRAM_CAPACITY);
+        fileErrorDispWithExit("program section is too big ", filePath);
     }
 
     if (meta.memoryCapacity > MEMORY_CAPACITY) {
         fprintf(stderr,
-            "ERROR: %s: memory section is too big. The file wants %" PRIu64 " bytes. But the capacity is %" PRIu64 " bytes\n",
-            filePath, meta.memoryCapacity, (uint64_t)MEMORY_CAPACITY);
-        exit(1);
+            "The file wants %" PRIu64 " bytes. But the capacity is %" PRIu64 " bytes\n",
+            meta.memoryCapacity, (uint64_t)MEMORY_CAPACITY);
+        fileErrorDispWithExit(" memory section is too big ", filePath);
     }
 
     if (meta.memorySize > meta.memoryCapacity) {
@@ -410,11 +354,11 @@ void loadProgramIntoSasm(Sasm* sasm, const char* filePath)
         exit(1);
     }
 
-    sasm->prog.instruction_count = fread(sasm->prog.instructions, sizeof(sasm->prog.instructions[0]), meta.programSize, f);
+    sasm $instructionCount = fread(sasm $instructions, sizeof(sasm $instructions[0]), meta.programSize, f);
 
-    if (sasm->prog.instruction_count != meta.programSize) {
+    if (sasm $instructionCount != meta.programSize) {
         fprintf(stderr, "ERROR: %s: read %" PRIu64 " program instructions, but expected %" PRIu64 "\n",
-            filePath, sasm->prog.instruction_count, meta.programSize);
+            filePath, sasm $instructionCount, meta.programSize);
         exit(1);
     }
 
@@ -427,16 +371,4 @@ void loadProgramIntoSasm(Sasm* sasm, const char* filePath)
     }
 
     closeFile(f, filePath);
-}
-
-const char* bindingTypeAsCstr(BindingType type)
-{
-    switch (type) {
-    case SASM_CONST:
-        return "const";
-    case SASM_LABEL:
-        return "label";
-    default:
-        assert(false && "bindingTypeAsCstr: unreachable");
-    }
 }

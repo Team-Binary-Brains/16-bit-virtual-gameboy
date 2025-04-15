@@ -1,7 +1,4 @@
-#include "virex.h"
 #include "virex_assembler.h"
-#include "univ_malloc.h"
-#include "virex_tui.h"
 
 void processFlag(const char* program, const char* flag, int* argc, char*** argv);
 void __exec_sm(Vm* vm, WINDOW* win);
@@ -37,8 +34,8 @@ int main(int argc, char** argv)
 
         inputHandler(&vm, vm.disp.windows[INPUT], &highlight);
         wgetch(vm.disp.windows[INPUT]);
-        setReg(NX,&vm,0);
-        setFlag(HALT, &vm.cpu, 0);
+        setReg(REG_NX, &vm, 0);
+        setFlag(META_HALT, &vm.cpu, 0);
 
     } while (ch);
     return 0;

@@ -1,4 +1,5 @@
 #include "sasm_instructions.h"
+#include "univ_strings.h"
 #include "univ_errors.h"
 
 static OpcodeDetails OpcodeDetailsLUT[NUMBER_OF_INSTS] = {
@@ -9,7 +10,7 @@ static OpcodeDetails OpcodeDetailsLUT[NUMBER_OF_INSTS] = {
     [INST_SPOPR] = { .type = INST_SPOPR, .name = "SPOPR", .has_operand = 0, .has_operand2 = 0 },
     [INST_SHUTS] = { .type = INST_SHUTS, .name = "SHUTS", .has_operand = 0, .has_operand2 = 0 },
     [INST_SETR] = { .type = INST_SETR, .name = "SETR", .has_operand = 1, .has_operand2 = 1 },
-    [INST_GETR] = { .type = INST_GETR, .name = "GETR", .has_operand = 1, .has_operand2 = 1 },
+    [INST_GETR] = { .type = INST_GETR, .name = "GETR", .has_operand = 1, .has_operand2 = 0 },
     [INST_CALL] = { .type = INST_CALL, .name = "CALL", .has_operand = 1, .has_operand2 = 0 },
     [INST_LOOP] = { .type = INST_LOOP, .name = "LOOP", .has_operand = 1, .has_operand2 = 1 },
     [INST_PUSH] = { .type = INST_PUSH, .name = "PUSH", .has_operand = 1, .has_operand2 = 0 },
@@ -77,26 +78,6 @@ static OpcodeDetails OpcodeDetailsLUT[NUMBER_OF_INSTS] = {
     [INST_WRITE8] = { .type = INST_WRITE8, .name = "WRITE8", .has_operand = 0, .has_operand2 = 0 },
 };
 
-QuadWord quadword_u64(uint64_t u64)
-{
-    return (QuadWord) { .u64 = u64 };
-}
-
-QuadWord quadword_i64(int64_t i64)
-{
-    return (QuadWord) { .i64 = i64 };
-}
-
-QuadWord quadword_f64(double f64)
-{
-    return (QuadWord) { .f64 = f64 };
-}
-
-QuadWord quadword_ptr(void* ptr)
-{
-    return (QuadWord) { .ptr = ptr };
-}
-
 bool getOpcodeDetailsFromName(String name, OpcodeDetails* out_ptr)
 {
     Opcode type = 0, last = NUMBER_OF_INSTS;
@@ -130,7 +111,7 @@ bool getOpcodeDetailsFromName(String name, OpcodeDetails* out_ptr)
         type += 1;
     }
 
-    displayStringMessageError("Unknown instruction detected and was ignored", name);
+    displayStringMessageError("Unknown instruction detected!", name);
     return 0;
 }
 
@@ -138,4 +119,14 @@ OpcodeDetails getOpcodeDetails(Opcode type)
 {
     assert(type < NUMBER_OF_INSTS);
     return OpcodeDetailsLUT[type];
+}
+
+inline void setFlag(Meta f, CPU* cpu, bool state)
+{
+    cpu->flags = state ? cpu->flags | f : cpu->flags & ~(f);
+}
+
+inline bool getFlag(Meta f, const CPU* cpu)
+{
+    return cpu->flags & f;
 }

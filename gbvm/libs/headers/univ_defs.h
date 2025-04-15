@@ -38,6 +38,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 #include <ncurses.h>
 #include <locale.h>
 
@@ -69,3 +72,18 @@ typedef union {
  * @return The next command line argument.
  */
 char* getNextCmdLineArg(int* argc, char*** argv);
+
+typedef struct String String;
+typedef struct Region Region;
+
+String appendToPath(Region* arena, String base, String filePath);
+
+bool doesFileExist(const char* filePath);
+
+QuadWord quadwordFromU64(uint64_t u64);
+
+QuadWord quadwordFromI64(int64_t i64);
+
+QuadWord quadwordFromF64(double f64);
+
+QuadWord quadwordFromPtr(void* ptr);

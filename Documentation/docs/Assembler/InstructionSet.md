@@ -1,4 +1,3 @@
-This is legacy documentation, please don't refer this
 
 - [1. Program Documentation](#1-program-documentation)
     - [1.1. Data Types](#11-data-types)

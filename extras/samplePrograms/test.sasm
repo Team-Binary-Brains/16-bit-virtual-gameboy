@@ -1,185 +1,205 @@
-%include "./calls.smh"
+%include "calls.smh"
 
-%bind 	buffer " "
+%bind     buffer    " "
 
-%bind 	hello 	" Hello, World"                     ; 12
-%bind 	msg0  	" THIS IS A SAMPLE SASM CODE"       ; 26
-%bind	msg1  	" ADDING FLOATS"                    ; 13
-%bind 	msg2  	" ADDING INTS"                      ; 11
-%bind 	msg3  	" ALLOCATE AND DEALLOCATE MEMORY"   ; 30
-%bind 	msg4  	" BITS OF NUMBER 30"                ; 17
-%bind 	msg5  	" TYPECASTING"                      ; 11
-%bind	msg6  	" FIBONACCI SEQUENCE, 30 NUMBERS"   ; 30
-%bind 	msg7  	" SERIES 1 TO N"                    ; 13
+%bind     hello     " Hello, World"                     ; 12
+%bind     msg0      " THIS IS A SAMPLE SASM CODE"       ; 26
+%bind     msg1      " ADDING FLOATS"                    ; 13
+%bind     msg2      " ADDING INTS"                      ; 11
+%bind     msg3      " ALLOCATE AND DEALLOCATE MEMORY"   ; 30
+%bind     msg4      " BITS OF NUMBER 30"                ; 17
+%bind     msg5      " TYPECASTING"                      ; 11
+%bind     msg6      " FIBONACCI SEQUENCE, 30 NUMBERS"   ; 30
+%bind     msg7      " SERIES 1 TO N"                    ; 13
 
-%bind 	MEMORY_SIZE   1600
-%bind 	N             30
-%bind 	M             256
+%bind     MEMORY_SIZE   1600
+%bind     N             30
+%bind     M             256
 
-JMPU 	main							; ENTRY POINT
-
-main:
-
-    PUSH 	buffer
-    PUSH    10
-    WRITE1
-    
-    SETR    msg0    	[L0]
-    SETR    27      	[QT]
-    CALL    println
-
-    SETR    hello   	[L0]            ; fetch memory address of string
-    SETR    14      	[QT]            ; new length
-    CALL    println                 	; print 14 characters
-	CALL 	f123
-SHUTS
+%entry    main                            ; ENTRY POINT
 
 f123:
-    CALL 	printNewLine
-    SETR 	msg1    	[L0]
-    SETR 	15      	[QT]
-    CALL 	println
+%scope
+    CALL    printNewLine
+    SETR    msg1        [L0]
+    SETR    len(msg1)   [QT]
+    CALL    println
 
-    ADDF 	1.0
-    ADDF 	2.0
-    ADDF 	3.0
-    INVOK 	print_f64
+    ADDF    1.0
+    ADDF    2.0
+    ADDF    3.0
+    INVOK   print_f64
 RET
+%end
 
 i123:
-    CALL 	printNewLine
-    SETR 	msg2    	[L0]
-    SETR 	13      	[QT]
-    CALL 	println
+%scope
+    CALL    printNewLine
+    SETR    msg2        [L0]
+    SETR    len(msg2)   [QT]
+    CALL    println
 
-    ADDI 	1
-    ADDI 	2
-    ADDI 	3
-    INVOK 	print_i64
+    ADDI    1
+    ADDI    2
+    ADDI    3
+    INVOK   print_i64
 RET
+%end
 
 allocation:
-    CALL 	printNewLine
-    SETR 	msg3    	[L0]
-    SETR 	32      	[QT]
-    CALL 	println
+%scope
+    CALL    printNewLine
+    SETR    msg3        [L0]
+    SETR    len(msg3)   [QT]
+    CALL    println
 
-    SETR 	MEMORY_SIZE [QT]
-    INVOK 	alloc
-    INVOK 	print_ptr
-    INVOK 	free
+    SETR    MEMORY_SIZE [QT]
+    INVOK   alloc
+    INVOK   print_ptr
+    INVOK   free
 RET
+%end
 
 bits:
-    CALL 	printNewLine
-    SETR 	msg4    	[L0]
-    SETR 	19      	[QT]
-    CALL 	println
+%scope
+    CALL   printNewLine
+    SETR   msg4        [L0]
+    SETR   len(msg4)   [QT]
+    CALL   println
 
-    PUSH 	N
+    PUSH   N
     loop:
 
-        DUPS 	0
-        PUSH 	1
+        DUPS     0
+        PUSH     1
         ANDB
         SPOP
-        COPY 	[L3] 	[QT]
-        INVOK 	print_u64
+        COPY     [L3]      [QT]
+        INVOK    print_u64
 
-        PUSH 	1
+        PUSH     1
         SHR
 
-        DUPS 	0
-        PUSH 	0
+        DUPS     0
+        PUSH     0
         EQI
         NOT
 
     JMPC loop
 
 RET
+%end
 
 cast:
-    CALL 	printNewLine
-    SETR 	msg5    	[L0]
-    SETR 	13      	[QT]
-    CALL 	println
+%scope
+    CALL   printNewLine
+    SETR   msg5        [L0]
+    SETR   len(msg5)   [QT]
+    CALL   println
 
-    SETR 	3.1415  	[L1]
+    SETR   3.1415      [L1]
     F2I
-    INVOK 	print_i64
+    INVOK  print_i64
 
-    SETR 	3.1415  	[L1]
+    SETR   3.1415      [L1]
     F2U
-    INVOK 	print_u64
+    INVOK  print_u64
 
-    SETR 	-1.0    	[L1]
+    SETR   -1.0        [L1]
     F2I
-    INVOK 	print_i64
+    INVOK  print_i64
 
-    SETR 	-1.0    	[L1]
+    SETR   -1.0        [L1]
     F2U
-    INVOK 	print_u64
+    INVOK  print_u64
 
-    SETR 	2       	[L2]
+    SETR   2           [L2]
     I2F
-    INVOK 	print_f64
+    INVOK  print_f64
 
-    SETR 	-1      	[L2]
+    SETR   -1          [L2]
     I2F
-    INVOK 	print_f64
+    INVOK   print_f64
 
-    SETR 	48      	[L3]
+    SETR   48          [L3]
     U2F
-    INVOK 	print_f64
+    INVOK   print_f64
 
 RET
+%end
 
 fibo:
-	CALL 	printNewLine
-	SETR 	msg6    	[L0]
-	SETR 	32      	[QT]
-	CALL 	println
-	SETR 	0       	[P1]            ; a
-	SETR 	1       	[P2]            ; b
-	SETR 	N       	[P0]
+%scope
+    CALL     printNewLine
+    SETR     msg6        [L0]
+    SETR     len(msg6)   [QT]
+    CALL     println
+    SETR     0           [P1]            ; a
+    SETR     1           [P2]            ; b
+    SETR     N           [P0]
 
-	loopfib:
+    loopfib:
 
-		COPY 	[L2] 		[P1]
-		INVOK 	print_i64
-		ADDI 	[P2v]
-		COPY 	[P1] 		[P2]
-		COPY 	[P2] 		[L2]
+        COPY     [L2]         [P1]
+        INVOK    print_i64
+        ADDI     [P2v]
+        COPY     [P1]         [P2]
+        COPY     [P2]         [L2]
 
-	LOOP 	loopfib 	[P0]
+    LOOP     loopfib     [P0]
 
 RET
+%end
 
 memtest:
-	CALL 	printNewLine
-	SETR 	msg7    	[L0]
-	SETR 	14      	[QT]
-	CALL 	println
+%scope
+    CALL     printNewLine
+    SETR     msg7        [L0]
+    SETR     len(msg7)   [QT]
+    CALL     println
 
-	SETR 	M        	[L2] ; i
+    SETR     M            [L2] ; i
 
-	loopmem:
+    loopmem:
 
-		PUSHR 	[L2]
-		PUSHR 	[L2]
-		WRITE1
+        PUSHR     [L2]
+        PUSHR     [L2]
+        WRITE1
 
-	LOOP 	loopmem 	[L2]
+    LOOP     loopmem     [L2]
 
-	SETR 	0       	[L0]
-	SETR 	M       	[QT]
-	INVOK 	dump_memory
+    SETR     0           [L0]
+    SETR     M           [QT]
+    INVOK    dump_memory
 RET
+%end
 
 println:
-	INVOK 	write
+%scope
+    INVOK    7
+%end
 printNewLine:
-	SETR 	buffer  	[L0]
-	SETR 	1       	[QT]
-	INVOK 	write
+%scope
+    SETR     buffer      [L0]
+    SETR     1           [QT]
+    INVOK    7
 RET
+%end
+
+main:
+%scope
+
+    PUSH    buffer
+    PUSH    10
+    WRITE1
+    
+    SETR    msg0        [L0]
+    SETR    len(msg0)   [QT]
+    CALL    println
+
+    SETR    hello       [L0]
+    SETR    len(hello)  [QT]
+    CALL    println
+    CALL    fibo
+SHUTS
+%end

@@ -1,18 +1,16 @@
-/**
- * @file sasm_instructions.h
- * @brief This file contains the declarations of functions and data structures related to the execution of instructions in the SASM assembly language.
- *
- * @author Soham Metha
- * @date January 2025
- */
-
-#pragma once
-
 #include "univ_defs.h"
-#include "univ_strings.h"
-/**
- * @brief Enumeration of opcodes for SASM instructions.
- */
+
+typedef enum {
+    META_HALT = 1 << 0,
+    META_F1 = 1 << 1,
+    META_F2 = 1 << 2,
+    META_F3 = 1 << 3,
+    META_F4 = 1 << 4,
+    META_F5 = 1 << 5,
+    META_F6 = 1 << 6,
+    META_F7 = 1 << 7
+} Meta;
+
 typedef enum {
 
     INST_DONOP = 0,
@@ -88,43 +86,106 @@ typedef enum {
     INST_WRITE2,
     INST_WRITE4,
     INST_WRITE8,
-
     NUMBER_OF_INSTS
 } Opcode;
 
-/**
- * @brief Structure representing an instruction in the SASM assembly language.
- */
-typedef struct {
-    Opcode type;      /**< The opcode of the instruction */
-    QuadWord operand; /**< The operand of the instruction */
+typedef QuadWord Register;
+typedef struct Instruction Instruction;
+typedef struct OpcodeDetails OpcodeDetails;
+typedef struct Program Program;
+typedef struct CPU CPU;
+typedef struct Memory Memory;
+typedef union Registers Registers;
+
+typedef enum {
+    REG_H0,
+    REG_H1,
+    REG_I0,
+    REG_I1,
+    REG_JS,
+    REG_KC,
+    REG_L0,
+    REG_L1,
+    REG_L2,
+    REG_L3,
+    REG_NX,
+    REG_OP,
+    REG_P0,
+    REG_P1,
+    REG_P2,
+    REG_P3,
+    REG_QT,
+    REG_RF,
+    REG_SP,
+    REG_COUNT,
+} RegID;
+
+struct Instruction {
+    Opcode type;
+    QuadWord operand;
     QuadWord operand2;
     bool opr1IsInline;
     bool opr2IsInline;
-} Instruction;
+};
 
-typedef struct {
+struct OpcodeDetails {
     Opcode type;
     const char* name;
     bool has_operand;
     bool has_operand2;
-} OpcodeDetails;
+};
 
-/**
- * @brief Structure representing a program in the SASM assembly language.
- */
-typedef struct Program {
+struct Program {
     Instruction instructions[PROGRAM_CAPACITY]; /**< The array of instructions */
     DataEntry instruction_count;                /**< The number of instructions in the program */
     DataEntry instruction_size;                 /**< The size of each instruction in bytes */
-} Program;
+};
 
-// TYPE CASTING
-QuadWord quadword_u64(uint64_t u64);
-QuadWord quadword_i64(int64_t i64);
-QuadWord quadword_f64(double f64);
-QuadWord quadword_ptr(void* ptr);
+union Registers {
+    struct
+    {
+        Register H0;
+        Register H1;
 
+        Register I0;
+        Register I1;
+
+        Register JS;
+        Register KC;
+
+        Register L0;
+        Register L1;
+        Register L2;
+        Register L3;
+
+        Register NX;
+        Register OP;
+
+        Register P0;
+        Register P1;
+        Register P2;
+        Register P3;
+
+        Register QT;
+        Register RF;
+        Register SP;
+    };
+    Register reg[REG_COUNT];
+};
+
+struct CPU {
+    Registers registers;
+    volatile short flags;
+};
+
+struct Memory {
+    QuadWord stack[STACK_CAPACITY];
+    Byte memory[MEMORY_CAPACITY];
+};
 bool getOpcodeDetailsFromName(String name, OpcodeDetails* outPtr);
 
 OpcodeDetails getOpcodeDetails(Opcode type);
+
+void setFlag(Meta f, CPU* cpu, bool state);
+
+bool getFlag(Meta f, const CPU* cpu);

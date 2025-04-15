@@ -37,7 +37,7 @@ String trim(String s)
     return rtrim(ltrim(s));
 }
 
-String splitStr(String* s, char c)
+String splitStrByChar(String* s, char c)
 {
     size_t i = 0;
     while (i < s->length && s->data[i] != c) {
@@ -86,26 +86,85 @@ bool compareStr(String a, String b)
     }
 }
 
-// TODO: add ability to process hex inputs
-
-bool parseStrHex(String str, uint64_t* output)
+bool getIndexOf(String str, char c, size_t* index)
 {
-    uint64_t result = 0;
-
-    for (size_t i = 0; i < str.length; ++i) {
-        const char x = str.data[i];
-        result = result * 0x10;
-
-        if ('0' <= x && x <= '9')
-            result = result + (uint64_t)(x - '0');
-        else if ('A' <= x && x <= 'F')
-            result = result + (uint64_t)(x + 10 - 'A');
-        else
-            return false;
+    size_t i = 0;
+    while (i < str.length && str.data[i] != c) {
+        i += 1;
     }
 
-    if (output)
-        *output = result;
+    if (i < str.length) {
+        *index = i;
+        return true;
+    }
+    return false;
+}
 
-    return true;
+bool startsWith(String str, String prefix)
+{
+    if (prefix.length <= str.length) {
+        for (size_t i = 0; i < prefix.length; ++i) {
+            if (prefix.data[i] != str.data[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
+String splitStrByLen(String* str, size_t n)
+{
+    if (n > str->length) {
+        n = str->length;
+    }
+
+    String result = {
+        .data = str->data,
+        .length = n,
+    };
+
+    str->data += n;
+    str->length -= n;
+
+    return result;
+}
+
+String splitStrByCondition(String* str, bool (*predicate)(char x))
+{
+    size_t i = 0;
+    while (i < str->length && predicate(str->data[i])) {
+        i += 1;
+    }
+    return splitStrByLen(str, i);
+}
+
+String splitStrByLenReversed(String* str, size_t n)
+{
+    if (n > str->length) {
+        n = str->length;
+    }
+
+    String result = {
+        .data = str->data + str->length - n,
+        .length = n
+    };
+
+    str->length -= n;
+
+    return result;
+}
+
+bool endsWith(String str, String expectedSuffix)
+{
+    if (expectedSuffix.length <= str.length) {
+        String actualSuffix = {
+            .data = str.data + str.length - expectedSuffix.length,
+            .length = expectedSuffix.length
+        };
+
+        return compareStr(expectedSuffix, actualSuffix);
+    }
+
+    return false;
 }

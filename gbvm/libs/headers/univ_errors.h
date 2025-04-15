@@ -28,19 +28,27 @@ typedef enum {
     ERR_ALREADY_BOUND
 } Error;
 
+typedef struct {
+    String filePath;
+    int lineNumber;
+} FileLocation;
+
+#define FLFmt strFmt ":%d"
+#define FLArg(location) strArg(location.filePath), location.lineNumber
+
 /**
  * @brief Retrieve C-style string representation of an Error enum value.
  *
  * This function converts an Error enum value to a C-style string representation.
  * If the Error enum value is not recognized, the executable crashes.
- * The crash message will be: 'univ_errors : errorAsCstr : Unreachable'
+ * The crash message will be: 'univ_errors : getNameOfError : Unreachable'
  *
  * @param error The Error enum value to convert.
  * @return The C-style string representation of the error.
  *
  * @cite Tsoding Playlist specified in readme
  */
-const char* errorAsCstr(const Error*);
+const char* getNameOfError(const Error*);
 
 /**
  * @brief Displays an error message along with the file path.
@@ -97,4 +105,8 @@ void debugCommentDisplay(String*);
 
 void debugMessageDisplay(String* s);
 
-void displayErrorDetailsWithExit(String filePath, int lineNo);
+void displayErrorDetailsWithExit(FileLocation location, const char* msg, String reason);
+
+void displayErrorLocationWithExit(FileLocation location, const char* msg);
+
+void displayCErrorDetailsWithExit(FileLocation location, const char* msg, const char* reason);

@@ -1,5 +1,4 @@
 #include "virex_tui.h"
-#include <stdlib.h>
 
 static String WindowNames[MAX_WINDOW_COUNT] = {
     [OUTPUT] = { .data = "OUTPUT", .length = 6 },
@@ -23,14 +22,14 @@ static String Inputs[] = {
 void initColors()
 {
     start_color();
-    init_color(COLOR_BLACK,102,106,149);
-    init_color(COLOR_RED,999,0,333);
-    init_color(COLOR_GREEN,278,921,705);
-    init_color(COLOR_YELLOW,999,795,419);
-    //init_color(COLOR_BLUE,);
-    init_color(COLOR_MAGENTA,615,431,995);
-    init_color(COLOR_CYAN,537,866,999);
-    init_color(COLOR_WHITE,815,815,815);
+    init_color(COLOR_BLACK, 102, 106, 149);
+    init_color(COLOR_RED, 999, 0, 333);
+    init_color(COLOR_GREEN, 278, 921, 705);
+    init_color(COLOR_YELLOW, 999, 795, 419);
+    // init_color(COLOR_BLUE,);
+    init_color(COLOR_MAGENTA, 615, 431, 995);
+    init_color(COLOR_CYAN, 537, 866, 999);
+    init_color(COLOR_WHITE, 815, 815, 815);
     init_pair(1, COLOR_WHITE, COLOR_BLACK);
     init_pair(2, COLOR_MAGENTA, COLOR_BLACK);
     init_pair(3, COLOR_CYAN, COLOR_BLACK);
@@ -69,12 +68,12 @@ display CreateWindows()
     disp.windowCount = 0;
     int xmin = 0, ymin = 0;
     int xmax = getmaxx(stdscr), ymax = getmaxy(stdscr);
-    if (xmax < 238 ){
+    /*if (xmax < 238 ){
         fprintf(stderr,"PLEASE DECREASE YOUR TERMINAL FONT SIZE");
         getch();
         exitTUIMode(&disp);
         exit(1);
-    }
+    }*/
 
     int xsta = LERP(xmin, xmax, 0.85);
     int xmid = LERP(xsta, xmax, 0.50);
@@ -239,9 +238,9 @@ void wprintdash(WINDOW* win, int col)
 {
     wattron(win, COLOR_PAIR(col));
     int tmp = getmaxx(win) - 1;
-    int i,j;
-    getyx(win,j,i);
-    wmove(win,j,i);
+    int i, j;
+    getyx(win, j, i);
+    wmove(win, j, i);
     for (; i < tmp; i++) {
         wprintw(win, "─");
     }
