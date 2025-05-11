@@ -13,7 +13,6 @@
         -   [27.01.25 - 02.02.25](#270125---020225)
 -   [Team Members](#team-members)
 -   [References](#references)
--   [Placeholders](#placeholders)
 
 # **Project Initialization and Requirement Gathering**
 
@@ -36,14 +35,22 @@
 # **System Design and Architecture**
 
 ![Image](extras/ActionPlan.jpeg)
-
+![Image](extras/virex_arch.png)
+![Image](extras/sasm_arch.png)
+![Image](extras/sasm_components_1.png)
+![Image](extras/sasm_components_2.png)
 ---
+# **Examples**
 
+![Image](extras/samplePrograms/helloWorld.png)
+![Image](extras/gui.png)
+![Image](extras/vs_theme.png)
 # **Technology Stack**
 
 -   **Programming Language:** C
 -   **Version Control:** Git
 -   **Make System:** GNU Make
+-   **AST VISUALIZER:** Graphviz
 
 ---
 
