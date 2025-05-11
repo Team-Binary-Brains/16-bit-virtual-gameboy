@@ -1,3 +1,5 @@
+#### NOTE: check Team-Binary-Brains/virex-core for latest code.
+
 # Virtual Execution Console
 
 -   [**Project Initialization and Requirement Gathering**](#project-initialization-and-requirement-gathering)
@@ -41,9 +43,11 @@
 ![Image](extras/sasm_components_2.png)
 ---
 # **Examples**
-
+## AST:
 ![Image](extras/samplePrograms/helloWorld.png)
+## GUI:
 ![Image](extras/gui.png)
+## Syntax Highlighting:
 ![Image](extras/vs_theme.png)
 # **Technology Stack**
 
