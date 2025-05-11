@@ -1,4 +1,4 @@
-# 16-bit Virtual Console
+# Virtual Execution Console
 
 -   [**Project Initialization and Requirement Gathering**](#project-initialization-and-requirement-gathering)
 -   [**System Design and Architecture**](#system-design-and-architecture)
@@ -139,8 +139,6 @@
 
 | Roll No. | Name                 | Working on                     |
 | -------- | -------------------- | ------------------------------ |
-| 21445    | Diksha Madhe         | the research paper             |
-| 21447    | Swarupanand Deshmukh | frontend for pathway generator |
 | 21448    | Soham Metha          | assembler and vm               |
 | 21454    | Omkar Jagtap         | Programming language           |
 
@@ -150,61 +148,3 @@
 -   [Dr Birch](https://www.youtube.com/@dr-Jonas-Birch)
 -   [Low Byte Productions](https://www.youtube.com/playlist?list=PLP29wDx6QmW5DdwpdwHCRJsEubS5NrQ9b)
 -   [Cobb Coding](https://www.youtube.com/playlist?list=PLRnI_2_ZWhtCxHQ_3zDfW0-RgiWo8ftyj)
-
-# Placeholders
-
-## February
-
-### 03.02.25 - 09.02.25
-
--   **Target:** *(To be updated)*
--   **Achieved:** *(To be updated)*
-
-### 10.02.25 - 16.02.25
-
--   **Target:** *(To be updated)*
--   **Achieved:** *(To be updated)*
-
-### 17.02.25 - 23.02.25
-
--   **Target:** *(To be updated)*
--   **Achieved:** *(To be updated)*
-
-## March
-
-### 24.02.25 - 01.03.25
-
--   **Target:** *(To be updated)*
--   **Achieved:** *(To be updated)*
-
-### 02.03.25 - 08.03.25
-
--   **Target:** *(To be updated)*
--   **Achieved:** *(To be updated)*
-
-### 09.03.25 - 15.03.25
-
--   **Target:** *(To be updated)*
--   **Achieved:** *(To be updated)*
-
-### 16.03.25 - 22.03.25
-
--   **Target:** *(To be updated)*
--   **Achieved:** *(To be updated)*
-
-### 23.03.25 - 29.03.25
-
--   **Target:** *(To be updated)*
--   **Achieved:** *(To be updated)*
-
-## April
-
-### 30.03.25 - 05.04.25
-
--   **Target:** *(To be updated)*
--   **Achieved:** *(To be updated)*
-
-### 06.04.25 - 12.04.25
-
--   **Target:** *(To be updated)*
--   **Achieved:** *(To be updated)*
