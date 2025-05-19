@@ -12,9 +12,10 @@ static String WindowNames[MAX_WINDOW_COUNT] = {
 
 static String Inputs[] = {
     [EXEC_SM] = { .data = "Execute the Simulated Machine Code", .length = 34 },
-    [DISASSEMBLE_SM] = { .data = "Disassemble the Simulated Machine Code", .length = 38 },
-    [ASSEMBLE_SASM] = { .data = "Assemble the Simulated Assembly Code into SM", .length = 44 },
+    [CUSTOM_CMD] = { .data = "Execute a sasm/orin command with custom flags", .length = 45 },
     [ASSEMBLE_EXEC_SASM] = { .data = "Assemble and Execute the Simulated Assembly Code", .length = 48 },
+    [ASSEMBLE_SASM] = { .data = "Assemble the Simulated Assembly Code into SM", .length = 44 },
+    [DISASSEMBLE_SM] = { .data = "Disassemble the Simulated Machine Code", .length = 38 },
     [COMPILE_ORIN] = { .data = "Compile the ORIN Code into SASM", .length = 33 },
     [EXIT_VM] = { .data = "Exit the Virtual Machine", .length = 24 }
 };
@@ -79,7 +80,7 @@ display CreateWindows()
     int xmid = LERP(xsta, xmax, 0.50);
     int xmi2 = LERP(xmin, xmax, 0.68);
     int xen2 = LERP(xmin, xmax, 0.18);
-    int ybot = LERP(ymin, ymax, 0.26);
+    int ybot = LERP(ymin, ymax, 0.28);
     int ymid = LERP(ymin, ybot, 0.68);
 
     createWindow(&disp, xsta, ymin, xmid, ybot, WindowNames[OUTPUT], 1);

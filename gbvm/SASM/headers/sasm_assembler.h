@@ -67,7 +67,6 @@ enum ExprType {
     EXPR_LIT_STR,
     EXPR_FUNCALL,
     EXPR_REG,
-    EXPR_REG_INLINE
 };
 
 enum BindingType {
@@ -325,6 +324,7 @@ void translateSasmFile(Sasm* sasm, String inputFilePath);
 void loadSmExecutableIntoSasm(Sasm* sasm, const char* filePath);
 
 void pushUnresolvedOperand(Sasm* sasm, InstAddr addr, Expr expr, FileLocation location);
+void pushIncludePath(Sasm* sasm, const char* path);
 void bindUnresolvedLocalScope(Scope* scope, String name, BindingType type, FileLocation location);
 void bindExprLocalScope(Scope* scope, String name, Expr expr, FileLocation location);
 Binding* resolveBinding(Sasm* sasm, String name);
@@ -351,6 +351,6 @@ FuncallArg* parseFuncallArgs(Region* region, Tokenizer* tokenizer, FileLocation 
 EvalResult evaluateExpression(Sasm* sasm, Expr expr, FileLocation location);
 
 int dumpExprAsAST(FILE* stream, Expr expr, int* counter);
-int dumpStmtNodeAsAST(FILE* stream, StmtNode* block, int* counter);
-int dumpStatementAsAST(FILE* stream, Stmt statement, int* counter);
+int dumpStmtNodeAsAST(FILE* stream, StmtNode* stmtNode, int* counter, int* blockNo);
+int dumpStatementAsAST(FILE* stream, Stmt statement, int* counter, int* blockNo);
 void generateASTPng(String inputFilePath, StmtNode* start);

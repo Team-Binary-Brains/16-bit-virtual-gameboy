@@ -323,9 +323,6 @@ Expr parsePrimaryOfSasmTokens(Region* region, Tokenizer* tokenizer, FileLocation
 
         result.type = EXPR_REG;
 
-        if (str.data[2] == 'v') {
-            result.type = EXPR_REG_INLINE;
-        }
         break;
     case TOKEN_TYPE_COMMA:
     case TOKEN_TYPE_CLOSING_PAREN:

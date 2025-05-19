@@ -49,9 +49,10 @@ enum WindowID {
 
 enum Inputs {
     EXEC_SM,
-    DISASSEMBLE_SM,
-    ASSEMBLE_SASM,
     ASSEMBLE_EXEC_SASM,
+    CUSTOM_CMD,
+    ASSEMBLE_SASM,
+    DISASSEMBLE_SM,
     COMPILE_ORIN,
     EXIT_VM,
     MAX_INPUTS

@@ -90,7 +90,7 @@ typedef enum {
 } Opcode;
 
 typedef QuadWord Register;
-typedef struct Instruction Instruction;
+typedef struct __attribute__((__packed__)) Instruction Instruction;
 typedef struct OpcodeDetails OpcodeDetails;
 typedef struct Program Program;
 typedef struct CPU CPU;
@@ -124,8 +124,8 @@ struct Instruction {
     Opcode type;
     QuadWord operand;
     QuadWord operand2;
-    bool opr1IsInline;
-    bool opr2IsInline;
+    bool opr1IsReg;
+    bool opr2IsReg;
 };
 
 struct OpcodeDetails {

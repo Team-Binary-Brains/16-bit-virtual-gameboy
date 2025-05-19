@@ -179,8 +179,8 @@ void resolveAllUnresolvedOperands(Sasm* sasm)
         EvalResult result = evaluateExpression(sasm, expr, location);
         assert(result.status == EVAL_STATUS_OK);
         sasm $instructions[addr].operand = result.value;
-        if (expr.type == EXPR_REG_INLINE) {
-            sasm $instructions[addr].opr1IsInline = true;
+        if (expr.type == EXPR_FUNCALL && expr.value.funcall->args->value.type == EXPR_REG) {
+            sasm $instructions[addr].opr1IsReg = true;
         }
 
         OpcodeDetails inst_def = getOpcodeDetails(sasm $instructions[addr].type);
@@ -191,8 +191,8 @@ void resolveAllUnresolvedOperands(Sasm* sasm)
             Expr expr2 = sasm->symbols[i].expr;
             EvalResult result2 = evaluateExpression(sasm, expr2, location);
             sasm $instructions[addr].operand2 = result2.value;
-            if (expr2.type == EXPR_REG_INLINE) {
-                sasm $instructions[addr].opr2IsInline = true;
+            if (expr.type == EXPR_FUNCALL && expr.value.funcall->args->value.type == EXPR_REG) {
+                sasm $instructions[addr].opr2IsReg = true;
             }
         }
     }

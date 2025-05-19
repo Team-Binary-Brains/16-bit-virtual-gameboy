@@ -1,20 +1,25 @@
-#### NOTE: check Team-Binary-Brains/virex-core for latest code.
-
 # Virtual Execution Console
 
--   [**Project Initialization and Requirement Gathering**](#project-initialization-and-requirement-gathering)
--   [**System Design and Architecture**](#system-design-and-architecture)
--   [**Technology Stack**](#technology-stack)
--   [Weekly Progress Report](#weekly-progress-report)
-    -   [January](#january)
-        -   [30.12.24 - 05.01.25](#301224---050125)
-        -   [06.01.25 - 12.01.25](#060125---120125)
-        -   [13.01.25 - 19.01.25](#130125---190125)
-        -   [20.01.25 - 26.01.25](#200125---260125)
-    -   [February](#february)
-        -   [27.01.25 - 02.02.25](#270125---020225)
--   [Team Members](#team-members)
--   [References](#references)
+- [Virtual Execution Console](#virtual-execution-console)
+- [**Project Initialization and Requirement Gathering**](#project-initialization-and-requirement-gathering)
+- [**System Design and Architecture**](#system-design-and-architecture)
+- [**Examples**](#examples)
+    - [Syntax Highlighting:](#syntax-highlighting)
+    - [AST:](#ast)
+        - [Note: Each Code Block represents a Scope, Block 0 being global scope.](#note-each-code-block-represents-a-scope-block-0-being-global-scope)
+    - [Binary Executable:](#binary-executable)
+    - [GUI:](#gui)
+- [**Technology Stack**](#technology-stack)
+- [Weekly Progress Report](#weekly-progress-report)
+    - [January](#january)
+        - [30.12.24 - 05.01.25](#301224---050125)
+        - [06.01.25 - 12.01.25](#060125---120125)
+        - [13.01.25 - 19.01.25](#130125---190125)
+        - [20.01.25 - 26.01.25](#200125---260125)
+    - [February](#february)
+        - [27.01.25 - 02.02.25](#270125---020225)
+- [Team Members](#team-members)
+- [References](#references)
 
 # **Project Initialization and Requirement Gathering**
 
@@ -41,14 +46,29 @@
 ![Image](extras/sasm_arch.png)
 ![Image](extras/sasm_components_1.png)
 ![Image](extras/sasm_components_2.png)
+
 ---
+
 # **Examples**
-## AST:
-![Image](extras/samplePrograms/helloWorld.png)
-## GUI:
-![Image](extras/gui.png)
+
 ## Syntax Highlighting:
+
 ![Image](extras/vs_theme.png)
+
+## AST:
+
+![Image](extras/samplePrograms/helloWorld.png)
+
+### Note: Each Code Block represents a Scope, Block 0 being global scope.
+
+## Binary Executable:
+
+![Image](extras/helloWorld_SM.png)
+
+## GUI:
+
+![Image](extras/gui.png)
+
 # **Technology Stack**
 
 -   **Programming Language:** C
@@ -148,10 +168,10 @@
 
 # Team Members
 
-| Roll No. | Name                 | Working on                     |
-| -------- | -------------------- | ------------------------------ |
-| 21448    | Soham Metha          | assembler and vm               |
-| 21454    | Omkar Jagtap         | Programming language           |
+| Roll No. | Name         | Working on           |
+| -------- | ------------ | -------------------- |
+| 21448    | Soham Metha  | assembler and vm     |
+| 21454    | Omkar Jagtap | Programming language |
 
 # References
 

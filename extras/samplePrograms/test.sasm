@@ -142,7 +142,7 @@ fibo:
 
         COPY     [L2]         [P1]
         INVOK    print_i64
-        ADDI     [P2v]
+        ADDI     val([P2])
         COPY     [P1]         [P2]
         COPY     [P2]         [L2]
 
@@ -201,5 +201,10 @@ main:
     SETR    len(hello)  [QT]
     CALL    println
     CALL    fibo
+    CALL    f123
+    CALL    i123
+    CALL    bits
+    CALL    cast
+    CALL    memtest
 SHUTS
 %end

@@ -7,7 +7,7 @@ static OpcodeDetails OpcodeDetailsLUT[NUMBER_OF_INSTS] = {
     [INST_INVOK] = { .type = INST_INVOK, .name = "INVOK", .has_operand = 1, .has_operand2 = 0 },
     [INST_RETVL] = { .type = INST_RETVL, .name = "RETVL", .has_operand = 0, .has_operand2 = 0 },
     [INST_PUSHR] = { .type = INST_PUSHR, .name = "PUSHR", .has_operand = 1, .has_operand2 = 0 },
-    [INST_SPOPR] = { .type = INST_SPOPR, .name = "SPOPR", .has_operand = 0, .has_operand2 = 0 },
+    [INST_SPOPR] = { .type = INST_SPOPR, .name = "SPOPR", .has_operand = 1, .has_operand2 = 0 },
     [INST_SHUTS] = { .type = INST_SHUTS, .name = "SHUTS", .has_operand = 0, .has_operand2 = 0 },
     [INST_SETR] = { .type = INST_SETR, .name = "SETR", .has_operand = 1, .has_operand2 = 1 },
     [INST_GETR] = { .type = INST_GETR, .name = "GETR", .has_operand = 1, .has_operand2 = 0 },

@@ -1,11 +1,11 @@
 #include "virex_assembler.h"
 
 void processFlag(const char* program, const char* flag, int* argc, char*** argv);
+void inputHandler(Vm* vm, WINDOW* win, int* highlight);
 void __exec_sm(Vm* vm, WINDOW* win);
 void __assemble_sasm(WINDOW* win);
 void __disassemble_sm(WINDOW* win);
 
-void inputHandler(Vm* vm, WINDOW* win, int* highlight);
 const char* inputFile = NULL;
 const char* outputFile = NULL;
 char buffer[256];
@@ -34,6 +34,7 @@ int main(int argc, char** argv)
 
         inputHandler(&vm, vm.disp.windows[INPUT], &highlight);
         wgetch(vm.disp.windows[INPUT]);
+        refreshWindow(vm.disp.windows[DETAILS], getNameForWindow(DETAILS), 1, 1, 1);
         setReg(REG_NX, &vm, 0);
         setFlag(META_HALT, &vm.cpu, 0);
 
@@ -60,15 +61,41 @@ void inputHandler(Vm* vm, WINDOW* win, int* highlight)
     refreshWindow(win, getNameForWindow(INPUT), 5, 5, 3);
     wmove(win, 2, 4);
     switch (*highlight) {
+    case EXEC_SM:
+        readFilePath(win, "Enter the name of the SM file : ", &inputFile);
+        __exec_sm(vm, win);
+        break;
+    case CUSTOM_CMD:
+        readFilePath(win, "Enter command : ", &outputFile);
+        wprintw(win, "\n     (S) SASM build"
+                     "\n     (O) ORIN build"
+                     "\n     (A) SASM build and exec"
+                     "\n     (C) ORIN Build and exec"
+                     "\n         Default: (A)"
+                     "\n         Your choice? : ");
+        refreshWindow(win, getNameForWindow(INPUT), 5, 5, 3);
+        char ch = wgetch(win);
+        if (ch == 'o' || ch == 'O' || ch == 'c' || ch == 'C') {
+            // snprintf(buffer, sizeof(buffer), "./occ %s", outputFile);
+        } else {
+            snprintf(buffer, sizeof(buffer), "./sasm %s", outputFile);
+        }
+        if (system(buffer) != 0) {
+            displayMsgWithExit("Assembly Failed");
+        }
+        if (ch != 'o' && ch != 'O' && ch != 'c' && ch != 'C' && ch != 'S' && ch != 'C') {
+            wclear(win);
+            wrefresh(win);
+            wmove(win, 2, 4);
+            readFilePath(win, "Enter the name of the SM file : ", &inputFile);
+            __exec_sm(vm, win);
+        }
+        break;
+
     case ASSEMBLE_EXEC_SASM:
         __assemble_sasm(win);
         wmove(win, 4, 4);
         inputFile = outputFile;
-        __exec_sm(vm, win);
-        break;
-
-    case EXEC_SM:
-        readFilePath(win, "Enter the name of the SM file : ", &inputFile);
         __exec_sm(vm, win);
         break;
 

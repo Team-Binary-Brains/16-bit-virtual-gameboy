@@ -8,19 +8,18 @@ const char* inputFile = NULL;
 const char* outputFile = NULL;
 bool disassemblyMode = false;
 
-void processFlag(const char* program, const char* flag, int* argc, char*** argv);
+void processFlag(Sasm* sasm, const char* program, const char* flag, int* argc, char*** argv);
 
 int main(int argc, char** argv)
 {
     freopen("logs.txt", "a", stderr);
+    static Sasm sasm = { 0 };
     const char* program = getNextCmdLineArg(&argc, &argv);
 
     while (argc > 0) {
         const char* flag = getNextCmdLineArg(&argc, &argv);
-        processFlag(program, flag, &argc, &argv);
+        processFlag(&sasm, program, flag, &argc, &argv);
     }
-
-    static Sasm sasm = { 0 };
 
     if (!inputFile || !outputFile) {
         displayMsgWithExit("Missing Files\n"
@@ -54,7 +53,7 @@ int main(int argc, char** argv)
     return 0;
 }
 
-void processFlag(const char* program, const char* flag, int* argc, char*** argv)
+void processFlag(Sasm* sasm, const char* program, const char* flag, int* argc, char*** argv)
 {
     switch (flag[1]) {
     case 'i':
@@ -62,6 +61,9 @@ void processFlag(const char* program, const char* flag, int* argc, char*** argv)
         return;
     case 'o':
         outputFile = getNextCmdLineArg(argc, argv);
+        return;
+    case 'I':
+        pushIncludePath(sasm, getNextCmdLineArg(argc, argv));
         return;
     case 'd':
         disassemblyMode = true;

@@ -22,6 +22,12 @@ void pushUnresolvedOperand(Sasm* sasm, InstAddr addr, Expr expr, FileLocation lo
     };
 }
 
+void pushIncludePath(Sasm* sasm, const char* path)
+{
+    assert(sasm->includePathsCnt < INCLUDE_PATHS_CAPACITY);
+    sasm->includePaths[sasm->includePathsCnt++] = convertCstrToStr(path);
+}
+
 void bindUnresolvedLocalScope(Scope* scope, String name, BindingType type, FileLocation location)
 {
     assert(scope->bindingsCnt < BINDINGS_CAPACITY);

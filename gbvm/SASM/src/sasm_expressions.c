@@ -113,16 +113,14 @@ EvalResult resolveFuncall(Sasm* sasm, Expr expr, FileLocation location)
         checkFuncArgs(expr.value.funcall, 1, location);
 
         QuadWord addr = { 0 };
-        {
-            EvalResult result = evaluateExpression(
-                sasm,
-                expr.value.funcall->args->value,
-                location);
-            if (result.status == EVAL_STATUS_DEFERRED) {
-                return result;
-            }
-            addr = result.value;
+        EvalResult result = evaluateExpression(
+            sasm,
+            expr.value.funcall->args->value,
+            location);
+        if (result.status == EVAL_STATUS_DEFERRED) {
+            return result;
         }
+        addr = result.value;
         QuadWord length = { 0 };
         if (!getStrLenByAddr(sasm, addr.u64, &length)) {
             fprintf(stderr, FLFmt ": ERROR: Could not compute the length of string at address %" PRIu64 "\n", FLArg(location), addr.u64);
@@ -130,6 +128,58 @@ EvalResult resolveFuncall(Sasm* sasm, Expr expr, FileLocation location)
         }
 
         return resultOK(length, BIND_TYPE_UINT);
+    }
+    if (compareStr(expr.value.funcall->name, convertCstrToStr("res"))) {
+        checkFuncArgs(expr.value.funcall, 1, location);
+
+        QuadWord addr = { 0 };
+        EvalResult result = evaluateExpression(
+            sasm,
+            expr.value.funcall->args->value,
+            location);
+
+        assert(sasm->memorySize + result.value.u64 <= MEMORY_CAPACITY);
+
+        addr = quadwordFromU64(sasm->memorySize);
+        sasm->memorySize += result.value.u64;
+
+        if (sasm->memorySize > sasm->memoryCapacity) {
+            sasm->memoryCapacity = sasm->memorySize;
+        }
+
+        return resultOK(addr, BIND_TYPE_UINT);
+    }
+    if (compareStr(expr.value.funcall->name, convertCstrToStr("ref"))) {
+        checkFuncArgs(expr.value.funcall, 1, location);
+
+        if (expr.value.funcall->args->value.type != EXPR_REG) {
+            fprintf(stderr, FLFmt ": ERROR: ref expects a register ", FLArg(location));
+        }
+
+        EvalResult result = evaluateExpression(
+            sasm,
+            expr.value.funcall->args->value,
+            location);
+        return result;
+    }
+    if (compareStr(expr.value.funcall->name, convertCstrToStr("val"))) {
+        checkFuncArgs(expr.value.funcall, 1, location);
+
+        if (expr.value.funcall->args->value.type != EXPR_REG) {
+            fprintf(stderr, FLFmt ": ERROR: val expects a register ", FLArg(location));
+        }
+
+        EvalResult result = evaluateExpression(
+            sasm,
+            expr.value.funcall->args->value,
+            location);
+
+        if (result.status == EVAL_STATUS_DEFERRED) {
+            return result;
+        }
+        uint64_t val = result.value.u64 + REG_COUNT;
+        return resultOK(
+            quadwordFromU64(val), BIND_TYPE_UINT);
     }
     displayErrorDetailsWithExit(location, "Unknown translation time function", expr.value.funcall->name);
     exit(1);
@@ -191,7 +241,6 @@ EvalResult evaluateExpression(Sasm* sasm, Expr expr, FileLocation location)
         return evaluateBinding(sasm, binding);
 
     case EXPR_REG:
-    case EXPR_REG_INLINE:
         return resultOK(
             quadwordFromU64(expr.value.reg_id),
             BIND_TYPE_UINT);

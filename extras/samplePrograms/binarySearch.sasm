@@ -1,0 +1,146 @@
+%include "calls.smh"
+
+%bind     buffer    " "
+
+%bind     msg0      "Binary Searching for 5"
+%bind     msg1      "Found at : "
+%bind     msg2      "Not Found! "
+%bind     arrMsg    "Used array : "
+
+%bind     M             0xF
+%bind     ARR           res(M)
+%bind     T             5
+
+%entry    main                            ; ENTRY POINT
+
+binarySearch:
+%scope
+    SETR    0           ref([P0]) ; i
+    SETR    M           ref([P1]) ; j
+
+    loop:
+    %scope
+        getMidVal:
+        %scope
+            SETR    0       ref([L2])   ; [L2] = 0
+            ADDI    val([P0])           ; [L2] += [P0]
+            ADDI    val([P1])           ; [L2] += [P1]
+            DIVI    2                   ; [L2] /= 2
+
+            getMidElem:
+            %scope
+                ADDI    ARR                 ; [L2] += array offset
+                PUSHR   ref([L2])           
+                READ1I                      ; read 1 byte int data from [L2]
+                SPOPR   ref([QT])           ; transfer read byte into [QT]
+                SUBI    ARR                 ; [L2] -= array offset , gives us back the index
+            %end
+        %end
+
+        isMidEqualToTarget:
+        %scope
+            PUSHR   ref([QT])
+            PUSH    T
+            EQI
+            JMPC    found
+        %end
+
+        isMidLessOrGreaterThanTarget:
+        %scope
+            PUSHR   ref([QT])
+            PUSH    T
+            GEI
+            JMPC    isGreater
+            isLesser:
+            %scope
+                ADDI    1                           ; [L2] += 1
+                SETR    val([L2])   ref([P0])       ; [P0] = [L2]
+                JMPU    endIf
+            %end
+            isGreater:
+            %scope
+                SUBI    1                           ; [L2] -= 1
+                SETR    val([L2])   ref([P1])       ; [P1] = [L2]
+            %end
+        %end
+
+        endIf:
+        %scope
+            PUSHR ref([P0])
+            PUSHR ref([P1])
+            LEI                 ; (i Less or equal j) ?
+            JMPC loop
+        %end
+    %end
+
+    notFound:
+    %scope
+        SETR    msg2        ref([L0])
+        SETR    len(msg2)   ref([QT])
+        CALL    println
+        RET
+    %end
+
+    found:
+    %scope
+        SETR    msg1        ref([L0])
+        SETR    len(msg1)   ref([QT])
+        CALL    println
+        INVOK   print_i64
+        RET
+    %end
+%end
+
+memtest:
+%scope
+
+    SETR     M    ref([L2]) ; i
+    SUBI     1
+
+    loop:
+        ADDI      ARR
+        PUSHR     ref([L2])
+        SUBI      ARR
+        PUSHR     ref([L2])
+        WRITE1
+
+    LOOP     loop        ref([L2])
+
+    SETR     ARR           ref([L0])
+    SETR     ARR           ref([L2])
+    ADDI     M
+    SETR     val([L2])     ref([QT])
+    INVOK    dump_memory
+RET
+%end
+
+println:
+%scope
+    INVOK    7
+    SETR     buffer      ref([L0])
+    SETR     1           ref([QT])
+    INVOK    7
+RET
+%end
+
+main:
+%scope
+
+    PUSH    buffer
+    PUSH    10
+    WRITE1
+    
+    SETR    msg0        ref([L0])
+    SETR    len(msg0)   ref([QT])
+    CALL    println
+
+    SETR    arrMsg        ref([L0])
+    SETR    len(arrMsg)   ref([QT])
+    CALL    println
+
+    CALL    memtest
+    
+    CALL    binarySearch
+
+SHUTS
+%end
